@@ -1,0 +1,11 @@
+Codes Swipp
+
+Firebase : https://console.firebase.google.com/u/3/project/swipp-b74be/overview
+swipp@flucity.fr
+4Fqeq942jM3BNb
+
+Expo : https://expo.dev/accounts/swipp
+swipp@flucity.fr
+4Fqeq942jM3BNb
+
+github : https://github.com/Matlavv/swipp

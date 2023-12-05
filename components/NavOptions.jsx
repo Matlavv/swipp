@@ -4,7 +4,7 @@ import tw from 'twrnc';
 import { Icon } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
 
-
+// data des boutons
 const data = [
   {
     id: "123",

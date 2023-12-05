@@ -4,6 +4,7 @@ import tw from 'twrnc';
 import { Icon } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
 
+// data des boutons
 const data = [
   {
     id: "123",
@@ -34,6 +35,7 @@ const data2 = [
   },
 ];
 
+
 const NavOptions = () => {
   const navigation = useNavigation();
 
@@ -48,7 +50,7 @@ const NavOptions = () => {
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => navigation.navigate(item.screen)}
-              style={tw`flex-1 p-2 pl-6 pb-8 pt-4 bg-gray-200 m-2`}
+              style={tw`p-3 pl-6 pb-8 pt-4 bg-gray-200 m-3 mt-10 rounded-lg`}
             >
               <View>
                 <Image
@@ -77,7 +79,7 @@ const NavOptions = () => {
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => navigation.navigate(item.screen)}
-              style={tw`p-2 pl-6 pb-8 pt-4 bg-gray-200 m-2`}
+              style={tw`p-3 pl-6 pb-8 pt-4 bg-gray-200 m-3 mt-4 rounded-lg`}
             >
               <View>
                 <Image
@@ -96,7 +98,7 @@ const NavOptions = () => {
           )}
         />
       </View>
-    </View>
+    </View>  
   );
 };
 

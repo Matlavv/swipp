@@ -1,40 +1,63 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import { Provider } from 'react-redux';
-
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { store } from './store';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './screens/HomeScreen';
+import HistoryScreen from './screens/HistoryScreen';
+import ServiceScreen from './screens/ServiceScreen';
+import ProfileStack from './components/ProfileStack'; 
 
+const Tab = createBottomTabNavigator();
 
+const App = () => {
+ return (
+   <NavigationContainer>
+     <Tab.Navigator
+       screenOptions={{
+         tabBarActiveTintColor: 'black',
+         tabBarInactiveTintColor: 'gray',
+         headerShown: false,
+       }}
+     >
+       <Tab.Screen
+         name="Accueil"
+         component={HomeScreen}
+         options={{
+           tabBarIcon: ({ color, size }) => (
+             <Ionicons name="home" size={size} color={color} />
+           ),
+         }}
+       />
+       <Tab.Screen
+         name="Services"
+         component={ServiceScreen}
+         options={{
+           tabBarIcon: ({ color, size }) => (
+             <Ionicons name="apps" size={size} color={color} />
+           ),
+         }}
+       />
+       <Tab.Screen
+         name="Historique"
+         component={HistoryScreen}
+         options={{
+           tabBarIcon: ({ color, size }) => (
+             <Ionicons name="archive-outline" size={size} color={color} />
+           ),
+         }}
+       />
+       <Tab.Screen
+         name="Profil"
+         component={ProfileStack} 
+         options={{
+           tabBarIcon: ({ color, size }) => (
+             <Ionicons name="person" size={size} color={color} />
+           ),
+         }}
+       />
+     </Tab.Navigator>
+   </NavigationContainer>
+ );
+};
 
-export default function App() {
-  const Stack = createNativeStackNavigator();
-
-  return (
-
-    <Provider store={store}>
-      <NavigationContainer>
-        <SafeAreaProvider>
-          <Stack.Navigator>
-            <Stack.Screen name='HomeScreen' component={HomeScreen} options={{
-                headerShown: false,
-              }}
-            />
-          </Stack.Navigator>
-        </SafeAreaProvider>
-      </NavigationContainer>
-    </Provider>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;

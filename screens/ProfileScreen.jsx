@@ -68,7 +68,15 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </View>     
         <View style={tw`bg-gray-200 h-1 w-full m-4`} />
-        <SettingsList />  
+           <SettingsList iconName="person" text="Gérer mon compte" />
+        <View style={tw`bg-gray-950 h-0.3 w-1/2 m-4`} />
+           <SettingsList iconName="home" text="Mes adresses" />
+        <View style={tw`bg-gray-950 h-0.3 w-1/2 m-4`} />
+           <SettingsList iconName="car" text="Mes voitures" />
+        <View style={tw`bg-gray-950 h-0.3 w-1/2 m-4`} />
+           <SettingsList iconName="bookmark" text="Mentions légales" />
+        <View style={tw`bg-gray-950 h-0.3 w-1/2 m-4`} />
+           <SettingsList iconName="information-circle-sharp" text="A propos de Swipp" />
       </ScrollView>      
     </SafeAreaView>
   );

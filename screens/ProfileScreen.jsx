@@ -17,6 +17,26 @@ const ProfileScreen = () => {
     navigation.navigate('Historique');
   };
 
+  const navigateToUserScreen = () => {
+    navigation.navigate('UserScreen');
+  };
+
+  const navigateToAdressScreen = () => {
+    navigation.navigate('AdressScreen');
+  };
+
+  const navigateToCarScreen = () => {
+    navigation.navigate('CarScreen');
+  };
+
+  const navigateToLegalScreen = () => {
+    navigation.navigate('LegalScreen');
+  };
+
+  const navigateToAboutScreen = () => {
+    navigation.navigate('AboutScreen');
+  };
+
   return (
     <SafeAreaView style={tw`flex-1`}>
       <ScrollView contentContainerStyle={tw`flex-1 items-center`}>
@@ -68,15 +88,15 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </View>     
         <View style={tw`bg-gray-200 h-1 w-full m-4`} />
-           <SettingsList iconName="person" text="Gérer mon compte" />
+           <SettingsList onPress={navigateToUserScreen} iconName="person" text="Gérer mon compte" />
         <View style={tw`bg-gray-950 h-0.3 w-1/2 m-4`} />
-           <SettingsList iconName="home" text="Mes adresses" />
+           <SettingsList onPress={navigateToAdressScreen} iconName="home" text="Mes adresses" />
         <View style={tw`bg-gray-950 h-0.3 w-1/2 m-4`} />
-           <SettingsList iconName="car" text="Mes voitures" />
+           <SettingsList onPress={navigateToCarScreen} iconName="car" text="Mes voitures" />
         <View style={tw`bg-gray-950 h-0.3 w-1/2 m-4`} />
-           <SettingsList iconName="bookmark" text="Mentions légales" />
+           <SettingsList onPress={navigateToLegalScreen} iconName="bookmark" text="Mentions légales" />
         <View style={tw`bg-gray-950 h-0.3 w-1/2 m-4`} />
-           <SettingsList iconName="information-circle-sharp" text="A propos de Swipp" />
+           <SettingsList onPress={navigateToAboutScreen} iconName="information-circle-sharp" text="A propos de Swipp" />
       </ScrollView>      
     </SafeAreaView>
   );

@@ -53,17 +53,17 @@ const ProfileScreen = () => {
           >
             <View>
               <Ionicons
-                style={tw`ml-9`}
+                style={tw`ml-7`}
                 name="apps"
-                size={20}
+                size={40}
               />
-              <Text style={tw`mt-3 ml-2 text-lg font-medium`}>Services</Text>
-              <Icon
+              <Text style={tw`mt-3 ml-2 pt-1 text-lg font-bold`}>Services</Text>
+              {/* <Icon
                 style={tw`p-2 bg-black rounded-full w-10 mt-4 ml-7`}
                 name="arrowright"
                 type="antdesign"
                 color="white"
-              />
+              /> */}
             </View>
           </TouchableOpacity>
           {/* second button */}
@@ -74,16 +74,16 @@ const ProfileScreen = () => {
             <View>
               <Ionicons
                 name="archive-outline"
-                style={tw`ml-8`}
-                size={20}
+                style={tw`ml-6`}
+                size={40}
               />
-              <Text style={tw`mt-3 ml-3 text-lg font-medium`}>Activité</Text>
-              <Icon
+              <Text style={tw`mt-3 ml-3 pt-1 text-lg font-bold`}>Activité</Text>
+              {/* <Icon
                 style={tw`p-2 bg-black rounded-full w-10 mt-4 ml-6`}
                 name="arrowright"
                 type="antdesign"
                 color="white"
-              />
+              /> */}
             </View>
           </TouchableOpacity>
         </View>     

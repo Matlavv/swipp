@@ -3,7 +3,6 @@ import React from 'react';
 import tw from 'twrnc';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { Icon } from '@rneui/themed';
 import SettingsList from '../components/SettingsList';
 
 const ProfileScreen = () => {
@@ -58,12 +57,6 @@ const ProfileScreen = () => {
                 size={40}
               />
               <Text style={tw`mt-3 ml-2 pt-1 text-lg font-bold`}>Services</Text>
-              {/* <Icon
-                style={tw`p-2 bg-black rounded-full w-10 mt-4 ml-7`}
-                name="arrowright"
-                type="antdesign"
-                color="white"
-              /> */}
             </View>
           </TouchableOpacity>
           {/* second button */}
@@ -78,12 +71,6 @@ const ProfileScreen = () => {
                 size={40}
               />
               <Text style={tw`mt-3 ml-3 pt-1 text-lg font-bold`}>Activité</Text>
-              {/* <Icon
-                style={tw`p-2 bg-black rounded-full w-10 mt-4 ml-6`}
-                name="arrowright"
-                type="antdesign"
-                color="white"
-              /> */}
             </View>
           </TouchableOpacity>
         </View>     

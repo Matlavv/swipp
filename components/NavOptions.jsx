@@ -11,7 +11,7 @@ const NavOptions = () => {
   <View style={tw`flex flex-row`}>
   {/* first button */}
   <TouchableOpacity
-    style={tw`p-10 pl-6 pb-8 pt-4 bg-gray-200 m-3 rounded-lg justify-center items-center`}
+    style={tw`p-10 pl-6 pb-8 pt-4 bg-[#F0F8FF] m-3 rounded-lg justify-center items-center`}
   >
     <View>
       <Icon
@@ -24,7 +24,7 @@ const NavOptions = () => {
   </TouchableOpacity>
   {/* second button */}
   <TouchableOpacity
-    style={tw`p-10 pl-6 pb-8 pt-4 bg-gray-200 m-3 rounded-lg justify-center items-center`}
+    style={tw`p-10 pl-6 pb-8 pt-4 bg-[#F0F8FF] m-3 rounded-lg justify-center items-center`}
   >
     <View>
       <Icon

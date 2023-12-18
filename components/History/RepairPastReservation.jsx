@@ -46,7 +46,7 @@ const reservations = [
      {reservations.map((reservation, index) => (
        <TouchableOpacity key={index} style={tw`flex-row justify-between items-center bg-white p-4 rounded-lg mx-4 mt-4`}>
          <View style={tw`w-12 h-12 rounded-full bg-gray-200 items-center justify-center`}>
-           <Icon name="car-repair" size={24} color="black" />
+           <Icon name="car-repair" size={24} color="#103783" />
          </View>
          <View style={tw`flex-1 ml-10`}>
            <Text style={tw`text-xl font-bold text-black`}>{reservation.address}</Text>

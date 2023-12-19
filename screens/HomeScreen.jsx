@@ -39,7 +39,7 @@ const HomeScreen = () => {
         <View>
           <DisplayAdress />
         </View>
-        <View style={tw`flex ml-7`}>
+        <View style={tw`flex`}>
           <NavOptions />
         </View>
         {/* Suggestions section */}

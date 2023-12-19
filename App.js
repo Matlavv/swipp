@@ -9,6 +9,7 @@ import HistoryScreen from './screens/HistoryScreen';
 import ServiceScreen from './screens/ServiceScreen';
 import ProfileStack from './components/ProfileStack'; 
 import { Keyboard } from 'react-native';
+import EmergencyScreen from './screens/EmergencyScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -18,7 +19,7 @@ const CustomTabBarButton = ({ children, onPress }) => (
       top: -20,
       justifyContent: 'center',
       alignItems: 'center',
-      ...tw`shadow-lg`, // Add shadow (if needed)
+      ...tw`shadow-lg`,
     }}
     onPress={onPress}
   >
@@ -26,7 +27,7 @@ const CustomTabBarButton = ({ children, onPress }) => (
       width: 70,
       height: 70,
       borderRadius: 35,
-      backgroundColor: '#B9D9EB', // Customize your button color
+      backgroundColor: '#468FEA', // Button color
     }}>
       {children}
     </View>
@@ -94,13 +95,13 @@ const App = () => {
        />
         <Tab.Screen
          name="Urgence"
-         component={ServiceScreen}
+         component={EmergencyScreen}
          options={{
            tabBarIcon: ({ focused }) => (
              <Ionicons
                name="warning"
                size={30}
-               color={focused ? 'white' : 'grey'}
+               color={focused ? 'white' : 'black'}
              />
            ),
            tabBarButton: (props) => (

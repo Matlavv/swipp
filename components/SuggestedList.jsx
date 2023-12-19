@@ -1,64 +1,34 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, FlatList, Image } from 'react-native';
+import { View, TouchableOpacity, Text, FlatList } from 'react-native';
 import tw from 'twrnc';
-import { entretien } from '../assets';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-
-const data = [
-  {
-    id: "1",
-    title: "Pare-brise",
-    image: entretien,
-    screen: "energyScreen",
-  },
-  {
-    id: "2",
-    title: "Pneus",
-    image: entretien,
-    screen: "maintenanceScreen",
-  },
-  {
-    id: "3",
-    title: "Rétroviseurs",
-    image: entretien,
-    screen: "maintenanceScreen",
-  },
-  {
-    id: "4",
-    title: "Révision",
-    image: entretien,
-    screen: "maintenanceScreen",
-  },
-  {
-    id: "5",
-    title: "C.technique",
-    image: entretien,
-    screen: "maintenanceScreen",
-  },
+const services = [
+  { id: '1', name: 'Pare brise', icon: 'car-windshield' },
+  { id: '2', name: 'Pneu', icon: 'car-tire-alert' },
+  { id: '3', name: 'Carrosserie', icon: 'car-cog' },
+  { id: '4',name: 'Carrosserie', icon: 'car-cog' }, 
+  { id: '5', name: 'Carrosserie', icon: 'car-cog' },
 ];
 
 const SuggestedList = () => {
   const renderItem = ({ item }) => (
-    <View>
-      <TouchableOpacity
-        style={tw`p-2 m-2 items-center bg-gray-200 rounded-xl`}
-        onPress={() => console.log(`Navigate to ${item.screen}`)} 
-      >
-        <Image
-          source={item.image}
-          style={tw`w-15 h-15`}
-        /> 
-      </TouchableOpacity>
-      <Text style={tw`m-1 mb-2 text-sm font-semibold text-center`}>{item.title}</Text>
-    </View>
+    <TouchableOpacity
+      style={tw`w-24 items-center p-2 bg-white border border-gray-200 rounded-lg m-1`}
+    >
+      <MaterialCommunityIcons name={item.icon} size={38} color="#103783" />
+      <Text style={tw`mt-2 text-xs text-gray-700 font-semibold`}>{item.name}</Text>
+    </TouchableOpacity>
   );
 
   return (
     <FlatList
       horizontal
-      data={data}
+      data={services}
       renderItem={renderItem}
       keyExtractor={item => item.id}
+      showsHorizontalScrollIndicator={false} // Hide horizontal bar
+      contentContainerStyle={tw`p-2`}
     />
   );
 };

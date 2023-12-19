@@ -6,6 +6,9 @@ import AdressScreen from '../screens/settings/AdressScreen';
 import CarScreen from '../screens/settings/CarScreen';
 import AboutScreen from '../screens/settings/AboutScreen';
 import LegalScreen from '../screens/settings/LegalScreen';
+import UserProfileScreen from '../screens/settings/UserProfileScreen';
+import LoginScreen from '../screens/Forms/LoginScreen';
+import SignUpScreen from '../screens/Forms/SignUpScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +23,11 @@ const ProfileStack = () => {
      <Stack.Screen
        name="UserScreen"
        component={UserScreen}
+       options={{ headerShown: false }}
+     />
+     <Stack.Screen
+       name="UserProfileScreen"
+       component={UserProfileScreen}
        options={{ headerShown: false }}
      />
      <Stack.Screen
@@ -42,6 +50,16 @@ const ProfileStack = () => {
        component={AboutScreen}
        options={{ headerShown: false }}
      />
+     <Stack.Screen 
+      name="LoginScreen" 
+      component={LoginScreen} 
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen 
+       name="SignUpScreen" 
+       component={SignUpScreen} 
+       options={{ headerShown: false }}
+    />
    </Stack.Navigator>
  );
 };

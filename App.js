@@ -10,6 +10,7 @@ import ServiceScreen from './screens/ServiceScreen';
 import ProfileStack from './components/ProfileStack'; 
 import { Keyboard } from 'react-native';
 import EmergencyScreen from './screens/EmergencyScreen';
+import LoginScreen from './screens/Forms/LoginScreen';
 
 const Tab = createBottomTabNavigator();
 

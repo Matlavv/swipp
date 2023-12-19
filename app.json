@@ -18,10 +18,12 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.flucity.swipp", 
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "googleServicesFile": "./google-services.json" 
     },
     "web": {
       "favicon": "./assets/favicon.png"

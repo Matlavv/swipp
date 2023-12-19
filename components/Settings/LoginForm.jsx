@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text } from 'react-native';
+import { View, TextInput, Button, Text, Alert } from 'react-native';
 import tw from 'twrnc';
-import { auth } from '../../firebaseConfig';
+import { auth } from '../../firebaseConfig'; // Assurez-vous que le chemin est correct
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 const LoginForm = ({ onSignUpPress }) => {
   const [email, setEmail] = useState('');
@@ -9,11 +10,11 @@ const LoginForm = ({ onSignUpPress }) => {
 
   const handleLogin = async () => {
     try {
-      await auth.signInWithEmailAndPassword(email, password);
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log("Connexion reussie");
       // Connexion réussie
     } catch (error) {
-      console.error(error);
-      // Gérer les erreurs ici
+      Alert.alert("Login Failed", error.message);
     }
   };
 
@@ -33,7 +34,9 @@ const LoginForm = ({ onSignUpPress }) => {
         style={tw`border p-2 rounded mb-2`}
       />
       <Button title="Login" onPress={handleLogin} />
-      <Text style={tw`mt-4 text-center`} onPress={onSignUpPress}>Don't have an account? Sign Up</Text>
+      <Text style={tw`mt-4 text-center`} onPress={onSignUpPress}>
+        Don't have an account? Sign Up
+      </Text>
     </View>
   );
 };

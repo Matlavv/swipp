@@ -29,7 +29,7 @@ const UserScreen = () => {
   };
 
   const navigateToCarScreen = () => {
-    navigation.navigate('CarScreen');
+    navigation.navigate('VehicleScreen');
   };
 
   const navigateToLegalScreen = () => {

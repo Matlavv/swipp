@@ -6,11 +6,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import tw from 'twrnc';
 import HomeScreen from './screens/HomeScreen';
 import HistoryScreen from './screens/HistoryScreen';
-import ServiceScreen from './screens/ServiceScreen';
 import ProfileStack from './components/ProfileStack'; 
+import ServicesStack from './components/ServicesStack';
 import { Keyboard } from 'react-native';
 import EmergencyScreen from './screens/EmergencyScreen';
-import LoginScreen from './screens/Forms/LoginScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -87,7 +86,7 @@ const App = () => {
        />
        <Tab.Screen
          name="Services"
-         component={ServiceScreen}
+         component={ServicesStack}
          options={{
            tabBarIcon: ({ color, size }) => (
              <Ionicons name="apps" size={size} color={color} />

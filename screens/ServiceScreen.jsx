@@ -6,8 +6,23 @@ import { Icon } from '@rneui/themed';
 import { swippLogo } from '../assets';
 import { carRefuel } from '../assets';
 import ServicesButtonList from '../components/Services/ServicesButtonList';
+import { useNavigation } from '@react-navigation/native';
 
 const ServiceScreen = () => {
+
+ const navigation = useNavigation();
+
+ const navigateToRefuelForm = () => {
+  navigation.navigate('RefuelForm');
+ };
+ const navigateToRepairForm = () => {
+  navigation.navigate('RepairForm');
+ };
+
+ const navigateToEmergencyScreen = () => {
+  navigation.navigate('EmergencyScreen');
+ };
+ 
  return (
   <SafeAreaView style={tw`flex bg-white h-full`}>
       <ScrollView style={tw`flex-1`}>
@@ -23,6 +38,7 @@ const ServiceScreen = () => {
        <View style={tw`flex justify-center items-center`}>
           <TouchableOpacity
             style={tw`flex-row justify-start items-center w-5/6 h-33 mt-4 bg-white border-2 border-blue-500 rounded-lg`}
+            onPress={navigateToRefuelForm}
           >
             <View style={tw`ml-4`}>
               <Text style={tw`text-xl font-bold justify-start mb-2`}>Energies</Text>
@@ -46,6 +62,7 @@ const ServiceScreen = () => {
           >
             <TouchableOpacity
               style={tw`p-10 pl-6 pb-6 pt-3 m-2 justify-center items-center`}
+              onPress={navigateToRepairForm}
             >
               <View>
                 <Icon
@@ -68,6 +85,7 @@ const ServiceScreen = () => {
           >
             <TouchableOpacity
               style={tw`p-10 pl-6 pb-6 pt-3 m-2`}
+              onPress={navigateToEmergencyScreen}
             >
               <View>
                 <Icon

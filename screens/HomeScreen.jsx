@@ -25,7 +25,7 @@ const HomeScreen = () => {
             style={tw`w-35 h-20`}
             source={swippLogo}
           />
-          <Text style={tw`text-2xl font-bold m-9`}>Bonjour, Mathis !</Text>
+          <Text style={tw`text-2xl font-bold m-9`}>Bonjour !</Text>
         </View>
         {/* Location bar */}
         <View style={tw`flex items-center ml-9 flex-row bg-gray-200 h-10 w-5/6 rounded-full`}>

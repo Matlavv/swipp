@@ -1,62 +1,51 @@
-import React from 'react';
-import { Text, View, SafeAreaView, Image, TextInput, ScrollView, TouchableOpacity } from 'react-native';
-import tw from 'twrnc';
-import { Ionicons } from '@expo/vector-icons';
-import { Icon } from '@rneui/themed';
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
+import React from "react";
+import {
+  Image,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import tw from "twrnc";
+import { gas, services } from "../assets/index";
 
 const NavOptions = () => {
+  return (
+    <SafeAreaView>
+      <View style={tw`flex-row justify-around items-center`}>
+        {/* Our Services Button */}
+        <LinearGradient
+          colors={["#FFFFFF", "#FFFFFF"]}
+          style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
+        >
+          <TouchableOpacity style={tw`justify-center items-center`}>
+            <Image
+              source={services}
+              resizeMode="contain"
+              style={tw`w-20 h-20`}
+            />
+            <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
+              Our Services
+            </Text>
+          </TouchableOpacity>
+        </LinearGradient>
 
- return (
-  <SafeAreaView>
-    {/* Two buttons */}
-    <View style={tw`flex flex-row justify-center`}>
-    {/* first button */}
-    <LinearGradient
-      colors={['#9bafd9', '#103783']} 
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 0 }}
-      style={tw`m-3 rounded-lg justify-center items-center`}
-    >
-      <TouchableOpacity
-        style={tw`p-10 pl-6 pb-6 pt-3 m-2 justify-center items-center`}
-      >
-        <View>
-          <Icon
-            style={tw`ml-5`}
-            name="local-car-wash"
-            size={40}
-            color="#fff"
-          />
-          <Text style={tw`mt-3 ml-2 pt-1 text-lg font-bold text-white`}>Entretiens</Text>
-        </View>
-      </TouchableOpacity>
-    </LinearGradient>
-    
-    {/* second button */}
-    <LinearGradient
-      colors={['#103783','#9bafd9']} 
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 0 }}
-      style={tw`m-3 rounded-lg justify-center items-center`}
-    >
-      <TouchableOpacity
-        style={tw`p-10 pl-6 pb-6 pt-3 m-2`}
-      >
-        <View>
-          <Icon
-            name="warning"  
-            style={tw`ml-5`}
-            size={40}
-            color="#fff" 
-          />
-          <Text style={tw`ml-2 mt-3 pt-1 text-lg font-bold text-white`}>Urgences</Text>
-        </View>
-      </TouchableOpacity>
-    </LinearGradient>
-    </View> 
-  </SafeAreaView>
- );
+        {/* Refuel Now Button */}
+        <LinearGradient
+          colors={["#FFFFFF", "#FFFFFF"]}
+          style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
+        >
+          <TouchableOpacity style={tw`justify-center items-center`}>
+            <Image source={gas} resizeMode="contain" style={tw`w-20 h-20`} />
+            <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
+              Refuel Now
+            </Text>
+          </TouchableOpacity>
+        </LinearGradient>
+      </View>
+    </SafeAreaView>
+  );
 };
 
 export default NavOptions;

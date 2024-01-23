@@ -5,6 +5,7 @@ import AppointmentDateForm from './Forms/AppointmentDateForm';
 import RefuelForm from '../components/Forms/RefuelForm';
 import RepairForm from '../components/Forms/RepairForm';
 import EmergencyScreen from '../screens/EmergencyScreen';
+import MaintenanceForm from './Forms/MaintenanceForm';
 
 const Stack = createNativeStackNavigator();
 
@@ -34,6 +35,11 @@ const ServicesStack = () => {
         <Stack.Screen 
             name="EmergencyScreen" 
             component={EmergencyScreen} 
+            options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+            name="MaintenanceForm" 
+            component={MaintenanceForm} 
             options={{ headerShown: false }}
         />
     </Stack.Navigator>

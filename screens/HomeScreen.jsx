@@ -1,55 +1,70 @@
-import React from 'react';
-import { Text, View, SafeAreaView, Image, TextInput, ScrollView, TouchableOpacity } from 'react-native';
-import tw from 'twrnc';
-import NavOptions from '../components/NavOptions';
-import DisplayAdress from '../components/DisplayAdress';
-import { swippLogo } from '../assets';
-import { Ionicons } from '@expo/vector-icons';
-import SuggestedList from '../components/SuggestedList';
-import { Icon } from '@rneui/themed';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
+import { doc, getDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import {
+  Image,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import tw from "twrnc";
+import { swippLogo } from "../assets";
+import DisplayAdress from "../components/DisplayAdress";
+import NavOptions from "../components/NavOptions";
+import SuggestedList from "../components/SuggestedList";
+import { auth, db } from "../firebaseConfig";
 
 const HomeScreen = () => {
+  const [username, setUsername] = useState("");
   const navigation = useNavigation();
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setUsername(docSnap.data().username);
+        } else {
+          console.log("No such document!");
+        }
+      }
+    };
+    fetchUserData();
+  }, []);
+
   const navigateToServiceScreen = () => {
-    navigation.navigate('Services');
+    navigation.navigate("Services");
   };
 
   return (
-    <SafeAreaView style={tw`flex bg-white h-full`}>
+    <SafeAreaView style={tw`flex h-full`}>
       <ScrollView style={tw`flex-1`}>
         {/* Logo */}
-        <View style={tw`flex p-5 mt-3 justify-start items-start flex flex-row`}>
-          <Image
-            style={tw`w-35 h-20`}
-            source={swippLogo}
-          />
-          <Text style={tw`text-2xl font-bold m-9`}>Bonjour !</Text>
+        <View style={tw`flex p-5 mt-5 justify-start items-start flex flex-row`}>
+          <Image style={tw`w-25 h-15`} source={swippLogo} />
         </View>
-        {/* Location bar */}
-        <View style={tw`flex items-center ml-9 flex-row bg-gray-200 h-10 w-5/6 rounded-full`}>
-          <Ionicons name="search" style={tw`p-2`} size={15} />
-          <TextInput
-            placeholder="Ou souhaitez-vous recevoir votre plein ?"
-            style={tw`flex-1 px-2`}
-          />
-        </View>
-        {/* My adresses */}
-        <View>
-          <DisplayAdress />
-        </View>
+        <Text style={tw`text-2xl font-bold m-5`}>
+          Bonjour {username || "!"}
+        </Text>
         <View style={tw`flex`}>
           <NavOptions />
         </View>
         {/* Suggestions section */}
-        <View style={tw`flex flex-row justify-between items-center p-2`}>
-          <Text style={tw`text-xl font-semibold`}>Suggestions</Text>
+        <View style={tw`flex flex-row justify-between items-center p-2 mt-5`}>
+          <Text style={tw`text-2xl font-semibold`}>Suggestions</Text>
           <TouchableOpacity onPress={navigateToServiceScreen}>
             <Text style={tw`font-semibold`}>Tout afficher</Text>
           </TouchableOpacity>
         </View>
         <SuggestedList />
+        {/* My adresses */}
+        <View>
+          <DisplayAdress />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

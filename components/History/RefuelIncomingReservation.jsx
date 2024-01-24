@@ -1,14 +1,14 @@
 import React from "react";
 import { SafeAreaView, Text, View } from "react-native";
 
-const RefuelPastReservation = () => {
+const RefuelIncomingReservation = () => {
   return (
     <SafeAreaView>
       <View>
-        <Text>Past</Text>
+        <Text>Incoming</Text>
       </View>
     </SafeAreaView>
   );
 };
 
-export default RefuelPastReservation;
+export default RefuelIncomingReservation;

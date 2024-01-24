@@ -22,7 +22,7 @@ const DisplayAdress = () => {
   const [adresses] = React.useState(adressesTemporaires);
 
   return (
-    <ScrollView style={tw`flex-1 mb-10`}>
+    <ScrollView style={tw`flex-1 mb-10 mt-3`}>
       {adresses.map((adresse, index) => (
         <TouchableOpacity
           key={adresse.id}

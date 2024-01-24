@@ -26,7 +26,7 @@ const NavOptions = () => {
               style={tw`w-20 h-20`}
             />
             <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
-              Our Services
+              Nos Services
             </Text>
           </TouchableOpacity>
         </LinearGradient>
@@ -39,7 +39,7 @@ const NavOptions = () => {
           <TouchableOpacity style={tw`justify-center items-center`}>
             <Image source={gas} resizeMode="contain" style={tw`w-20 h-20`} />
             <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
-              Refuel Now
+              Livraison carburant
             </Text>
           </TouchableOpacity>
         </LinearGradient>

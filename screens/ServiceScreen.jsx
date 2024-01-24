@@ -1,5 +1,4 @@
 import { useNavigation } from "@react-navigation/native";
-import { Icon } from "@rneui/themed";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
@@ -11,8 +10,8 @@ import {
   View,
 } from "react-native";
 import tw from "twrnc";
-import { carRefuel, swippLogo } from "../assets";
-import ServicesButtonList from "../components/Services/ServicesButtonList";
+import { gas, maintenance, reparation, services, swippLogo } from "../assets";
+import SuggestedRepair from "../components/Services/SuggestedRepairs";
 
 const ServiceScreen = () => {
   const navigation = useNavigation();
@@ -30,82 +29,85 @@ const ServiceScreen = () => {
 
   return (
     <SafeAreaView style={tw`flex h-full`}>
-      <ScrollView style={tw`flex-1`}>
+      <ScrollView style={tw`flex-1 mb-10`}>
         {/* Logo */}
-        <View style={tw`flex p-5 mt-3 justify-start items-start flex flex-row`}>
-          <Image style={tw`w-35 h-20`} source={swippLogo} />
-          <Text style={tw`text-2xl font-bold m-9`}>Bonjour, Mathis !</Text>
+        <View style={tw`flex p-5 mt-5 justify-start items-start flex flex-row`}>
+          <Image style={tw`w-25 h-15`} source={swippLogo} />
         </View>
-        {/* Refuel button */}
-        <View style={tw`flex justify-center items-center`}>
-          <TouchableOpacity
-            style={tw`flex-row justify-start items-center w-5/6 h-33 mt-4 bg-white border-2 border-blue-500 rounded-lg`}
-            onPress={navigateToRefuelForm}
-          >
-            <View style={tw`ml-4`}>
-              <Text style={tw`text-xl font-bold justify-start mb-2`}>
-                Energies
-              </Text>
-              <Text style={tw`text-gray-500 w-50 text-sm font-semibold`}>
-                Faites vous livrer votre carburant où vous le souhaitez
-              </Text>
-            </View>
-            <Image style={tw`w-25 h-25 ml-3`} source={carRefuel} />
-          </TouchableOpacity>
-        </View>
-        <Text style={tw`font-bold text-xl m-3 mt-5`}>
-          Découvrez nos autres services
-        </Text>
-        {/* Two buttons */}
-        <View style={tw`flex flex-row justify-center`}>
+        <Text style={tw`text-2xl font-bold m-5`}>Nos Services</Text>
+        {/* Four buttons */}
+        <View style={tw`flex-row justify-around items-center`}>
           {/* first button */}
           <LinearGradient
-            colors={["#9bafd9", "#103783"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={tw`m-3 rounded-lg justify-center items-center`}
+            colors={["#FFFFFF", "#FFFFFF"]}
+            style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
           >
-            <TouchableOpacity
-              style={tw`p-10 pl-6 pb-6 pt-3 m-2 justify-center items-center`}
-              onPress={navigateToMaintenanceForm}
-            >
-              <View>
-                <Icon
-                  style={tw`ml-5`}
-                  name="local-car-wash"
-                  size={40}
-                  color="#fff"
-                />
-                <Text style={tw`mt-3 ml-2 pt-1 text-lg font-bold text-white`}>
-                  Entretiens
-                </Text>
-              </View>
+            <TouchableOpacity style={tw`justify-center items-center`}>
+              <Image
+                source={reparation}
+                resizeMode="contain"
+                style={tw`w-20 h-20`}
+              />
+              <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
+                Réparation véhicules
+              </Text>
             </TouchableOpacity>
           </LinearGradient>
 
           {/* second button */}
           <LinearGradient
-            colors={["#103783", "#9bafd9"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={tw`m-3 rounded-lg justify-center items-center`}
+            colors={["#FFFFFF", "#FFFFFF"]}
+            style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
           >
-            <TouchableOpacity
-              style={tw`p-10 pl-6 pb-6 pt-3 m-2`}
-              onPress={navigateToEmergencyScreen}
-            >
-              <View>
-                <Icon name="warning" style={tw`ml-5`} size={40} color="#fff" />
-                <Text style={tw`ml-2 mt-3 pt-1 text-lg font-bold text-white`}>
-                  Urgences
-                </Text>
-              </View>
+            <TouchableOpacity style={tw`justify-center items-center`}>
+              <Image source={gas} resizeMode="contain" style={tw`w-20 h-20`} />
+              <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
+                Livraison carbuant
+              </Text>
             </TouchableOpacity>
           </LinearGradient>
         </View>
-        <View>
-          <ServicesButtonList />
+        {/* Second row */}
+        <View style={tw`flex-row justify-around items-center mt-6`}>
+          {/* first button */}
+          <LinearGradient
+            colors={["#FFFFFF", "#FFFFFF"]}
+            style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
+          >
+            <TouchableOpacity style={tw`justify-center items-center`}>
+              <Image
+                source={maintenance}
+                resizeMode="contain"
+                style={tw`w-20 h-20`}
+              />
+              <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
+                Entretien
+              </Text>
+            </TouchableOpacity>
+          </LinearGradient>
+
+          {/* second button */}
+          <LinearGradient
+            colors={["#FFFFFF", "#FFFFFF"]}
+            style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
+          >
+            <TouchableOpacity style={tw`justify-center items-center`}>
+              <Image
+                source={services}
+                resizeMode="contain"
+                style={tw`w-20 h-20`}
+              />
+              <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
+                Contrôle technique
+              </Text>
+            </TouchableOpacity>
+          </LinearGradient>
         </View>
+        {/* Suggestions */}
+        <View style={tw`flex flex-row justify-between items-center p-2 mt-5`}>
+          <Text style={tw`text-2xl font-semibold`}>Suggestions</Text>
+        </View>
+        <SuggestedRepair />
       </ScrollView>
     </SafeAreaView>
   );

@@ -59,7 +59,10 @@ const ServiceScreen = () => {
             colors={["#FFFFFF", "#FFFFFF"]}
             style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
           >
-            <TouchableOpacity style={tw`justify-center items-center`}>
+            <TouchableOpacity
+              style={tw`justify-center items-center`}
+              onPress={navigateToRefuelForm}
+            >
               <Image source={gas} resizeMode="contain" style={tw`w-20 h-20`} />
               <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
                 Livraison carbuant

@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import { Icon } from "@rneui/themed";
 import React from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -20,6 +21,7 @@ const DisplayAdress = () => {
   ];
 
   const [adresses] = React.useState(adressesTemporaires);
+  const navigation = useNavigation();
 
   return (
     <ScrollView style={tw`flex-1 mb-10 mt-3`}>
@@ -27,6 +29,11 @@ const DisplayAdress = () => {
         <TouchableOpacity
           key={adresse.id}
           style={tw`flex-row items-center bg-white px-4 py-2 rounded-lg mx-2 my-2`}
+          onPress={() => {
+            navigation.navigate("RefuelForm", {
+              address: `${adresse.adresse}, ${adresse.ville}`,
+            });
+          }}
         >
           <View
             style={tw`w-12 h-12 rounded-full bg-[#E6E6E6] items-center justify-center mr-4`}

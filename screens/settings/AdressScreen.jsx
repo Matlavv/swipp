@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, Text, SafeAreaView, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import tw from 'twrnc';
+import { Icon } from '@rneui/themed';
 import { db, auth } from '../../firebaseConfig';
 import { doc, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
@@ -81,7 +82,7 @@ const AdressScreen = () => {
                 <Text style={tw`text-sm text-gray-500`}>{adresse.adresse}, {adresse.ville}</Text>
               </View>
               <View style={tw`w-12 h-12 rounded-full bg-gray-200 items-center justify-center`}>
-                {/* Icone personnalisé selon le type d'adresse */}
+                <Icon name={adresse.label === 'Domicile' ? "home" : "work"} size={24} color="black" />
               </View>
             </TouchableOpacity>
             <Button title="Modifier" onPress={() => navigateToEditAdress(adresse.id)} />
@@ -117,7 +118,7 @@ const AdressScreen = () => {
       />
       <TextInput
         style={tw`border w-80 p-2 mb-4`}
-        placeholder="Label de l'adresse"
+        placeholder="Label, ex : Domicile/Travail"
         value={label}
         onChangeText={setLabel}
       />

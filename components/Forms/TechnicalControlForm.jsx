@@ -17,7 +17,7 @@ import { swippLogo } from "../../assets";
 
 Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
 
-const RepairForm = ({ route, navigation }) => {
+const TechnicalControlForm = ({ route, navigation }) => {
   const [selectedValue, setSelectedValue] = useState("SP98");
   const [volume, setVolume] = useState("");
   const [address, setAddress] = useState("");
@@ -58,48 +58,9 @@ const RepairForm = ({ route, navigation }) => {
           >
             <Ionicons name="arrow-back-circle-outline" size={30} color="gray" />
           </TouchableOpacity>
-          <Text style={tw`text-2xl font-bold m-5`}>Réparation du véhicule</Text>
-        </View>
-        {/* Choose reparation */}
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>
-            Sélectionnez votre besoin
+          <Text style={tw`text-2xl font-bold m-5`}>
+            Controle technique du véhicule
           </Text>
-          <View style={tw`bg-white rounded-md`}>
-            <Picker
-              selectedValue={selectedValue}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedValue(itemValue)
-              }
-              style={tw``}
-            >
-              <Picker.Item
-                color="#34469C"
-                label="Réparation du moteur"
-                value="moteur"
-              />
-              <Picker.Item
-                color="#34469C"
-                label="Réparation de la transmission"
-                value="transmission"
-              />
-              <Picker.Item
-                color="#34469C"
-                label="Réparation de la direction"
-                value="direction"
-              />
-              <Picker.Item
-                color="#34469C"
-                label="Réparation de la carrosserie"
-                value="carrosserie"
-              />
-              <Picker.Item
-                color="#34469C"
-                label="Réparation du système d'échappement"
-                value="echappement"
-              />
-            </Picker>
-          </View>
         </View>
         {/* Choose vehicle */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
@@ -151,4 +112,4 @@ const RepairForm = ({ route, navigation }) => {
   );
 };
 
-export default RepairForm;
+export default TechnicalControlForm;

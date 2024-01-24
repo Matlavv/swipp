@@ -17,6 +17,11 @@ const NavOptions = () => {
   const navigateToRefuelForm = () => {
     navigation.navigate("RefuelForm");
   };
+
+  const navigateToServiceScreen = () => {
+    navigation.navigate("Services");
+  };
+
   return (
     <SafeAreaView>
       <View style={tw`flex-row justify-around items-center`}>
@@ -25,7 +30,10 @@ const NavOptions = () => {
           colors={["#FFFFFF", "#FFFFFF"]}
           style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
         >
-          <TouchableOpacity style={tw`justify-center items-center`}>
+          <TouchableOpacity
+            style={tw`justify-center items-center`}
+            onPress={navigateToServiceScreen}
+          >
             <Image
               source={services}
               resizeMode="contain"

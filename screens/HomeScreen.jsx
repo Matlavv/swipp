@@ -55,7 +55,7 @@ const HomeScreen = () => {
         </View>
         {/* Suggestions section */}
         <View style={tw`flex flex-row justify-between items-center p-2 mt-5`}>
-          <Text style={tw`text-2xl font-semibold`}>Suggestions</Text>
+          <Text style={tw`text-2xl font-semibold`}>Populaire</Text>
           <TouchableOpacity onPress={navigateToServiceScreen}>
             <Text style={tw`font-light`}>Tout afficher</Text>
           </TouchableOpacity>

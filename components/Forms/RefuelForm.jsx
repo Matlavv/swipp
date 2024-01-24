@@ -14,6 +14,7 @@ import {
 import Geocoder from "react-native-geocoding";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
+import DateTimePickerModal from "./DateTimePickerModal";
 
 Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
 
@@ -21,6 +22,7 @@ const RefuelForm = ({ route, navigation }) => {
   const [selectedValue, setSelectedValue] = useState("SP98");
   const [volume, setVolume] = useState("");
   const [address, setAddress] = useState("");
+  const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
 
   useEffect(() => {
     if (route.params?.address) {
@@ -28,12 +30,7 @@ const RefuelForm = ({ route, navigation }) => {
     }
   }, [route.params?.address]);
 
-  const handleSubmit = async () => {
-    if (!fuelType || !volume || !carNumber || !address) {
-      Alert.alert("Erreur", "Tous les champs sont obligatoires");
-      return;
-    }
-  };
+  const handleSubmit = async () => {};
 
   const handleLocatePress = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -50,6 +47,13 @@ const RefuelForm = ({ route, navigation }) => {
       })
       .catch((error) => console.warn(error));
   };
+
+  const handleDateConfirm = (date) => {
+    // Ici vous pouvez ajouter la date à l'état si vous souhaitez l'afficher ou la sauvegarder
+    console.log("Date sélectionnée:", date);
+    // Logic pour sauvegarder la date en base de données
+  };
+
   return (
     <SafeAreaView style={tw`flex h-full`}>
       <ScrollView style={tw`flex-1`}>
@@ -133,10 +137,14 @@ const RefuelForm = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
         </View>
-        {/* Submit button */}
+        <DateTimePickerModal
+          isVisible={isDateTimePickerVisible}
+          onClose={() => setDateTimePickerVisible(false)}
+          onConfirm={handleDateConfirm}
+        />
         <View style={tw`mb-4 mt-3 flex items-center`}>
           <TouchableOpacity
-            onPress={handleSubmit}
+            onPress={() => setDateTimePickerVisible(true)}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
           >
             <Text style={tw`text-white font-semibold text-base`}>

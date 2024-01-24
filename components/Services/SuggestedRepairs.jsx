@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import tw from "twrnc";
-import { maintenance, oil_change, reparation } from "../assets";
+import { maintenance, oil_change, reparation } from "../../assets";
 
 const services = [
   {
@@ -25,7 +25,7 @@ const services = [
   },
 ];
 
-const SuggestedList = () => {
+const SuggestedRepair = () => {
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={tw`w-70 h-45 p-2 bg-white border border-gray-200 rounded-2xl m-1 mr-4 shadow-md`}
@@ -66,4 +66,4 @@ const SuggestedList = () => {
   );
 };
 
-export default SuggestedList;
+export default SuggestedRepair;

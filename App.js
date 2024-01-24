@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { DefaultTheme, NavigationContainer, getFocusedRouteNameFromRoute } from "@react-navigation/native";
+import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { Keyboard, Text } from "react-native";
 import tw from "twrnc";
@@ -9,7 +9,6 @@ import ServicesStack from "./components/ServicesStack";
 import EmergencyScreen from "./screens/EmergencyScreen";
 import HistoryScreen from "./screens/HistoryScreen";
 import HomeScreen from "./screens/HomeScreen";
-// import { home } from ".icons";
 
 const Tab = createBottomTabNavigator();
 
@@ -22,10 +21,10 @@ const MyTheme = {
 };
 const CustomTabLabel = ({ route, focused }) => {
   const labelText = route?.name;
+  const labelStyle = focused ? tw`text-white` : tw`text-gray-400`;
 
-  return focused ? <Text>{labelText}</Text> : null;
+  return focused ? <Text style={tw`text-white`}>{labelText}</Text> : null;
 };
-
 
 const App = () => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -83,7 +82,7 @@ const App = () => {
             }),
             ...tw`bg-white`,
           },
-          tabBarLabel: ({ focused, route }) => (
+          tabBarLabel: ({ focused }) => (
             <CustomTabLabel route={route} focused={focused} />
           ),
         })}

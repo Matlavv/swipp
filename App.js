@@ -1,14 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
+import { DefaultTheme, NavigationContainer, getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
-import { Keyboard, TouchableOpacity, View } from "react-native";
+import { Keyboard, Text } from "react-native";
 import tw from "twrnc";
 import ProfileStack from "./components/ProfileStack";
 import ServicesStack from "./components/ServicesStack";
 import EmergencyScreen from "./screens/EmergencyScreen";
 import HistoryScreen from "./screens/HistoryScreen";
 import HomeScreen from "./screens/HomeScreen";
+// import { home } from ".icons";
 
 const Tab = createBottomTabNavigator();
 
@@ -19,29 +20,12 @@ const MyTheme = {
     background: "#F5F5F5",
   },
 };
+const CustomTabLabel = ({ route, focused }) => {
+  const labelText = route?.name;
 
-const CustomTabBarButton = ({ children, onPress }) => (
-  <TouchableOpacity
-    style={{
-      top: -20,
-      justifyContent: "center",
-      alignItems: "center",
-      ...tw`shadow-lg`,
-    }}
-    onPress={onPress}
-  >
-    <View
-      style={{
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        backgroundColor: "#468FEA", // Button color
-      }}
-    >
-      {children}
-    </View>
-  </TouchableOpacity>
-);
+  return focused ? <Text>{labelText}</Text> : null;
+};
+
 
 const App = () => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -65,76 +49,50 @@ const App = () => {
       keyboardDidShowListener.remove();
     };
   }, []);
+
   return (
     <NavigationContainer theme={MyTheme}>
       <Tab.Navigator
-        screenOptions={{
-          tabBarActiveTintColor: "black",
-          tabBarInactiveTintColor: "gray",
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+            if (route?.name === "Accueil") {
+              iconName = focused ? "home" : "home-outline";
+            } else if (route?.name === "Services") {
+              iconName = focused ? "apps" : "apps-outline";
+            } else if (route?.name === "Urgence") {
+              iconName = focused ? "warning" : "warning-outline";
+            } else if (route?.name === "Historique") {
+              iconName = focused ? "time" : "time-outline";
+            } else if (route?.name === "Profil") {
+              iconName = focused ? "person" : "person-outline";
+            }
+            return <Ionicons name={iconName} size={25} color={color} />;
+          },
+          tabBarActiveTintColor: "white",
+          tabBarInactiveTintColor: "#5E80BF",
+          tabBarActiveBackgroundColor: "#34469C",
+          tabBarInactiveBackgroundColor: "#34469C",
           headerShown: false,
           tabBarStyle: {
             ...(!keyboardVisible && {
               display: "flex",
-              height: 50, // Adjust the height of tab bar
-              paddingBottom: 0, // Adjust the padding bottom of tab bar
-              paddingTop: 0, // Adjust the padding top of tab bar
+              height: 70, // Adjust the height of the tab bar
+              paddingBottom: 0, // Adjust the padding bottom of the tab bar
+              paddingTop: 0, // Adjust the padding top of the tab bar
             }),
             ...tw`bg-white`,
           },
-          tabBarShowLabel: true, // Set this to false to hide the label
-        }}
+          tabBarLabel: ({ focused, route }) => (
+            <CustomTabLabel route={route} focused={focused} />
+          ),
+        })}
       >
-        <Tab.Screen
-          name="Accueil"
-          component={HomeScreen}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="home" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Services"
-          component={ServicesStack}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="apps" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Urgence"
-          component={EmergencyScreen}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <Ionicons
-                name="warning"
-                size={30}
-                color={focused ? "white" : "black"}
-              />
-            ),
-            tabBarButton: (props) => <CustomTabBarButton {...props} />,
-            tabBarLabel: () => null,
-          }}
-        />
-        <Tab.Screen
-          name="Historique"
-          component={HistoryScreen}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="archive-outline" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Profil"
-          component={ProfileStack}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="person" size={size} color={color} />
-            ),
-          }}
-        />
+        <Tab.Screen name="Accueil" component={HomeScreen} />
+        <Tab.Screen name="Services" component={ServicesStack} />
+        <Tab.Screen name="Urgence" component={EmergencyScreen} />
+        <Tab.Screen name="Historique" component={HistoryScreen} />
+        <Tab.Screen name="Profil" component={ProfileStack} />
       </Tab.Navigator>
     </NavigationContainer>
   );

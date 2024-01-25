@@ -45,6 +45,11 @@ const RepairForm = ({ route, navigation }) => {
       })
       .catch((error) => console.warn(error));
   };
+
+  const navigateToChooseGarageForm = () => {
+    navigation.navigate("ChooseGarageForm");
+  };
+
   return (
     <SafeAreaView style={tw`flex h-full`}>
       <ScrollView style={tw`flex-1`}>
@@ -138,7 +143,7 @@ const RepairForm = ({ route, navigation }) => {
         {/* Submit button */}
         <View style={tw`mb-4 mt-3 flex items-center`}>
           <TouchableOpacity
-            onPress={handleSubmit}
+            onPress={navigateToChooseGarageForm}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
           >
             <Text style={tw`text-white font-semibold text-base`}>

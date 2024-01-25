@@ -3,6 +3,7 @@ import carRefuel from "./img/car-refuel.png";
 import crash from "./img/crash.png";
 import emergency from "./img/emergency.png";
 import entretien from "./img/entretien.png";
+import garage1 from "./img/garage1.png";
 import gas from "./img/gas.png";
 import maintenance from "./img/maintenance.png";
 import oil_change from "./img/oil_change.png";
@@ -16,6 +17,7 @@ export {
   crash,
   emergency,
   entretien,
+  garage1,
   gas,
   maintenance,
   oil_change,

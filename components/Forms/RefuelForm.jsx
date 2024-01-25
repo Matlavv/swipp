@@ -3,6 +3,7 @@ import { Picker } from "@react-native-picker/picker";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Image,
   SafeAreaView,
   ScrollView,
@@ -23,14 +24,13 @@ const RefuelForm = ({ route, navigation }) => {
   const [volume, setVolume] = useState("");
   const [address, setAddress] = useState("");
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
+  const [price, setPrice] = useState(0);
 
   useEffect(() => {
     if (route.params?.address) {
       setAddress(route.params.address);
     }
   }, [route.params?.address]);
-
-  const handleSubmit = async () => {};
 
   const handleLocatePress = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -54,6 +54,46 @@ const RefuelForm = ({ route, navigation }) => {
     // Logic pour sauvegarder la date en base de données
   };
 
+  const handleChooseAppointmentPress = () => {
+    // Vérifiez que toutes les entrées sont remplies
+    if (!selectedValue || !volume || !address) {
+      Alert.alert(
+        "Erreur",
+        "Veuillez remplir tous les champs avant de choisir un rendez-vous."
+      );
+      return;
+    }
+    calculatePrice();
+
+    // Si tout est rempli, affichez la modale pour choisir l'heure
+    setDateTimePickerVisible(true);
+  };
+
+  const calculatePrice = (selectedFuel, currentAddress) => {
+    let basePrice;
+    switch (selectedFuel) {
+      case "SP98":
+        basePrice = 1.95;
+        break;
+      case "SP95":
+        basePrice = 1.82;
+        break;
+      case "Gasoil":
+        basePrice = 1.72;
+        break;
+      case "E85":
+        basePrice = 1.65;
+        break;
+      default:
+        basePrice = 0;
+    }
+    setPrice(basePrice);
+  };
+
+  useEffect(() => {
+    calculatePrice(selectedValue, address);
+  }, [selectedValue, address]);
+
   return (
     <SafeAreaView style={tw`flex h-full`}>
       <ScrollView style={tw`flex-1`}>
@@ -70,6 +110,24 @@ const RefuelForm = ({ route, navigation }) => {
           <Text style={tw`text-2xl font-bold m-5`}>
             Réservez votre carburant
           </Text>
+        </View>
+        {/* Location */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+          <Text style={tw`text-xl font-bold mb-4`}>
+            Indiquez le point de rendez-vous
+          </Text>
+          <View style={tw`rounded-md`}>
+            <TextInput
+              style={tw`border-b-2 border-[#34469C] font-bold text-base`}
+              value={address}
+              onChangeText={setAddress}
+            />
+            <TouchableOpacity onPress={handleLocatePress}>
+              <Text style={tw`text-blue-900 m-2 font-semibold`}>
+                Me géolocaliser
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
         {/* Choose carburant */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 my-3`}>
@@ -90,6 +148,10 @@ const RefuelForm = ({ route, navigation }) => {
               <Picker.Item color="#34469C" label="E85" value="E85" />
             </Picker>
           </View>
+          {/* Afficher le prix calculé sous le choix de carburant */}
+          <Text style={tw`text-lg font-semibold mt-4`}>
+            Prix: {price.toFixed(2)}€
+          </Text>
         </View>
         {/* Choose litter */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
@@ -119,24 +181,7 @@ const RefuelForm = ({ route, navigation }) => {
             </Picker>
           </View>
         </View>
-        {/* Location */}
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>
-            Indiquez le point de rendez-vous
-          </Text>
-          <View style={tw`rounded-md`}>
-            <TextInput
-              style={tw`border-b-2 border-[#34469C] font-bold text-base`}
-              value={address}
-              onChangeText={setAddress}
-            />
-            <TouchableOpacity onPress={handleLocatePress}>
-              <Text style={tw`text-blue-900 m-2 font-semibold`}>
-                Me géolocaliser
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+
         <DateTimePickerModal
           isVisible={isDateTimePickerVisible}
           onClose={() => setDateTimePickerVisible(false)}
@@ -144,7 +189,7 @@ const RefuelForm = ({ route, navigation }) => {
         />
         <View style={tw`mb-4 mt-3 flex items-center`}>
           <TouchableOpacity
-            onPress={() => setDateTimePickerVisible(true)}
+            onPress={handleChooseAppointmentPress}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
           >
             <Text style={tw`text-white font-semibold text-base`}>

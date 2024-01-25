@@ -1,63 +1,68 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import tw from "twrnc";
 import { garage1 } from "../../assets";
 
-function GarageList() {
-  const services = [
+const GarageList = () => {
+  const garages = [
     {
-      id: "1",
-      name: "Changement d'huile",
+      name: "ChrisFix Garage",
+      description: "Peinture & carrosserie",
+      workerCount: "50",
       image: garage1,
-      price: "A partir de 60 €",
     },
     {
-      id: "2",
-      name: "Révision générales",
+      name: "Garage 2",
+      description: "Pneu et jantes",
+      workerCount: "20",
       image: garage1,
-      price: "A partir de 50 €",
     },
     {
-      id: "3",
-      name: "Contrôle technique",
+      name: "Garage 3",
+      description: "Peinture",
+      workerCount: "20",
       image: garage1,
-      price: "A partir de 40 €",
     },
   ];
 
-  const renderItem = ({ item }) => (
-    <View
-      style={tw`w-full p-2 bg-white border border-gray-200 rounded-2xl m-1 shadow-md`}
-    >
-      <View style={tw`flex-row justify-between`}>
-        <View style={tw`flex-1 justify-between`}>
-          <Text style={tw`text-gray-700 font-black text-xl mt-5`}>
-            {item.name}
-          </Text>
-          <Text style={tw`text-gray-700 font-light text-xs mt-1`}>
-            {item.price}
-          </Text>
-          <TouchableOpacity
-            style={tw`bg-[#34469C] px-4 py-1 rounded-full self-end flex-row mt-7 items-center`}
-          >
-            <Text style={tw`text-white text-sm`}>Réserver</Text>
-            <Ionicons name="arrow-forward" size={20} color="white" />
-          </TouchableOpacity>
-        </View>
-        <Image source={item.image} style={tw`w-20 h-20 mt-5`} />
-      </View>
-    </View>
-  );
   return (
-    <FlatList
-      data={services}
-      renderItem={renderItem}
-      keyExtractor={(item) => item.id}
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={tw`p-2`}
-    />
+    <ScrollView>
+      {garages.map((garage, index) => (
+        <View key={index} style={tw`flex w-95 ml-4`}>
+          <View
+            style={tw`flex mb-4 bg-white rounded-xl border border-gray-200 shadow-xl`}
+          >
+            <Image source={garage.image} style={tw`h-32 w-full rounded-t-xl`} />
+            <View style={tw`px-4 py-2 bg-white rounded-b-xl`}>
+              <Text style={tw`text-lg font-bold`}>{garage.name}</Text>
+              <View style={tw`flex-row justify-between pt-2`}>
+                <Text
+                  style={tw`text-sm text-black border-2 rounded-full px-3 py-1 border-slate-400`}
+                >
+                  {garage.description}
+                </Text>
+                <Text
+                  style={tw`text-sm text-black border-2 rounded-full px-3 py-1 border-slate-400`}
+                >
+                  {garage.workerCount} Workers
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    console.log("Booking garage:", garage.name);
+                  }}
+                  style={tw`bg-[#34469C] px-4 py-1 rounded-full flex-row`}
+                >
+                  <Text style={tw`text-white text-sm mr-1`}>Book</Text>
+                  <Ionicons name="arrow-forward" size={20} color="white" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      ))}
+    </ScrollView>
   );
-}
+};
 
 export default GarageList;

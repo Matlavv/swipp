@@ -18,19 +18,6 @@ const SettingsList = ({ iconName, text, onPress }) => {
       </View>
       <Icon name="chevron-right" size={20} color="#34469C" />
     </TouchableOpacity>
-    // <TouchableOpacity
-    //   onPress={onPress}
-    //   style={tw`flex-row rounded-xl p-3 px-4 bg-gray-200`}
-    // >
-    //   <Ionicons style={tw``} name={iconName} color={"#34469C"} size={20} />
-    //   <Text style={tw`ml-10 font-semibold text-base flex`}>{text}</Text>
-    //   <Ionicons
-    //     style={tw`ml-10`}
-    //     name="chevron-forward-outline"
-    //     color={"#34469C"}
-    //     size={20}
-    //   />
-    // </TouchableOpacity>
   );
 };
 export default SettingsList;

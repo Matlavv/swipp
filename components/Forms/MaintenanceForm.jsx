@@ -28,7 +28,9 @@ const MaintenanceForm = ({ route, navigation }) => {
     }
   }, [route.params?.address]);
 
-  const handleSubmit = async () => {};
+  const navigateToChooseGarageForm = () => {
+    navigation.navigate("ChooseGarageForm");
+  };
 
   const handleLocatePress = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -138,7 +140,7 @@ const MaintenanceForm = ({ route, navigation }) => {
         {/* Submit button */}
         <View style={tw`mb-4 mt-3 flex items-center`}>
           <TouchableOpacity
-            onPress={handleSubmit}
+            onPress={navigateToChooseGarageForm}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
           >
             <Text style={tw`text-white font-semibold text-base`}>

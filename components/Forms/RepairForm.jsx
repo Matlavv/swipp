@@ -28,8 +28,6 @@ const RepairForm = ({ route, navigation }) => {
     }
   }, [route.params?.address]);
 
-  const handleSubmit = async () => {};
-
   const handleLocatePress = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {

@@ -1,56 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import tw from 'twrnc';
-import { Ionicons } from '@expo/vector-icons';
-import SettingsList from '../../components/SettingsList';
-import { useNavigation } from '@react-navigation/native';
-import { db, auth } from '../../firebaseConfig'; 
-import { doc, getDoc } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
-
+import { useNavigation } from "@react-navigation/native";
+import { doc, getDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { Image, SafeAreaView, ScrollView, Text, View } from "react-native";
+import tw from "twrnc";
+import { background1, background3, profilePic } from "../../assets";
+import SettingsList from "../../components/SettingsList";
+import { auth, db } from "../../firebaseConfig";
 
 const UserScreen = () => {
   const navigation = useNavigation();
 
-  const navigateToServiceScreen = () => {
-    navigation.navigate('Services');
-  };
-
-  const navigateToHistoryScreen = () => {
-    navigation.navigate('Historique');
-  };
-
   const navigateToUserScreen = () => {
-    navigation.navigate('UserProfileScreen');
+    navigation.navigate("UserProfileScreen");
   };
 
   const navigateToAdressScreen = () => {
-    navigation.navigate('AdressScreen');
+    navigation.navigate("AdressScreen");
   };
 
   const navigateToCarScreen = () => {
-    navigation.navigate('VehicleScreen');
+    navigation.navigate("VehicleScreen");
   };
 
   const navigateToLegalScreen = () => {
-    navigation.navigate('LegalScreen');
+    navigation.navigate("LegalScreen");
   };
 
   const navigateToAboutScreen = () => {
-    navigation.navigate('AboutScreen');
+    navigation.navigate("AboutScreen");
   };
 
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
   const user = auth.currentUser;
 
   useEffect(() => {
     const fetchUserData = async () => {
       if (user) {
-        const docRef = doc(db, 'users', user.uid); 
+        const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
-  
+
         if (docSnap.exists()) {
-          setUsername(docSnap.data().username); 
+          setUsername(docSnap.data().username);
         } else {
           console.log("No such document!");
         }
@@ -58,67 +48,69 @@ const UserScreen = () => {
     };
     fetchUserData();
   }, [user]);
-  
 
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error('Erreur lors de la déconnexion', error);
-    }
-  };
-  
   return (
     <SafeAreaView style={tw`flex-1`}>
       <ScrollView contentContainerStyle={tw`flex-1 items-center`}>
-        
-      <View style={tw`mt-10 p-10`}>
-        <Text style={tw`text-2xl font-bold`}>{username || 'Username'}</Text>
-      </View>
+        {/* Zone de profil avec image de fond */}
+        <View style={tw`w-full`}>
+          <Image
+            source={background1}
+            style={[tw`w-full mt-5 absolute`, { height: 310 }]}
+            resizeMode="stretch"
+          />
+          <Image
+            source={background3}
+            style={[tw`w-5/6 absolute`, { marginTop: 100, height: 230 }]}
+            resizeMode="stretch"
+          />
+          <View style={tw`w-full items-center absolute`}>
+            {/* Zone blanche arrondie pour le profil */}
 
-
-        <View style={tw`flex flex-row`}>
-          {/* first button */}
-          <TouchableOpacity
-            onPress={navigateToServiceScreen}
-            style={tw`p-10 pl-6 pb-8 pt-4 bg-gray-200 m-3 rounded-lg justify-center items-center`}
-          >
-            <View>
-              <Ionicons
-                style={tw`ml-7`}
-                name="apps"
-                size={40}
-              />
-              <Text style={tw`mt-3 ml-2 pt-1 text-lg font-bold`}>Services</Text>
+            <View
+              style={tw`w-130 bg-white p-4 rounded-b-3xl items-center rounded-b-[190px]`}
+            >
+              <View style={tw`p-2 bg-white mt-20`}>
+                <Image source={profilePic} style={tw`h-24 w-24 rounded-full`} />
+              </View>
+              <Text style={tw`text-xl font-bold text-black mt-4`}>
+                Marques Brownlee
+              </Text>
             </View>
-          </TouchableOpacity>
-          {/* second button */}
-          <TouchableOpacity
-            onPress={navigateToHistoryScreen}
-            style={tw`p-10 pl-6 pb-8 pt-4 bg-gray-200 m-3 rounded-lg justify-center items-center`}
-          >
-            <View>
-              <Ionicons
-                name="archive-outline"
-                style={tw`ml-6`}
-                size={40}
-              />
-              <Text style={tw`mt-3 ml-3 pt-1 text-lg font-bold`}>Activité</Text>
-            </View>
-          </TouchableOpacity>
-        </View>     
-        <View style={tw`bg-gray-200 h-1 w-full m-4`} />
-           <SettingsList onPress={navigateToUserScreen} iconName="person" text="Gérer mon compte" />
-        <View style={tw`bg-gray-950 h-0.3 w-1/2 m-4`} />
-           <SettingsList onPress={navigateToAdressScreen} iconName="home" text="Mes adresses" />
-        <View style={tw`bg-gray-950 h-0.3 w-1/2 m-4`} />
-           <SettingsList onPress={navigateToCarScreen} iconName="car" text="Mes voitures" />
-        <View style={tw`bg-gray-950 h-0.3 w-1/2 m-4`} />
-           <SettingsList onPress={navigateToLegalScreen} iconName="bookmark" text="Mentions légales" />
-        <View style={tw`bg-gray-950 h-0.3 w-1/2 m-4`} />
-           <SettingsList onPress={navigateToAboutScreen} iconName="information-circle-sharp" text="A propos de Swipp" />
-      </ScrollView>      
-      <Button title="Déconnexion" onPress={handleSignOut} />
+          </View>
+        </View>
+        <View style={tw`mt-80 w-5/6`}>
+          <Text style={tw`m-4 font-bold text-xl`}>Compte</Text>
+          <SettingsList
+            onPress={navigateToUserScreen}
+            iconName="person"
+            text="Gérer mon compte"
+          />
+          <SettingsList
+            onPress={navigateToAdressScreen}
+            iconName="home"
+            text="Mes adresses"
+          />
+          <SettingsList
+            onPress={navigateToCarScreen}
+            iconName="car"
+            text="Mes voitures"
+          />
+        </View>
+        <View style={tw`w-5/6`}>
+          <Text style={tw`m-4 font-bold text-xl`}>Autres</Text>
+          <SettingsList
+            onPress={navigateToLegalScreen}
+            iconName="bookmark"
+            text="Mentions légales"
+          />
+          <SettingsList
+            onPress={navigateToAboutScreen}
+            iconName="information-circle-sharp"
+            text="A propos de Swipp"
+          />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

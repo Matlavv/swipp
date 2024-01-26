@@ -4,11 +4,11 @@ import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
 import { Keyboard, Text } from "react-native";
 import tw from "twrnc";
+import HomeStack from "./components/HomeStack";
 import ProfileStack from "./components/ProfileStack";
 import ServicesStack from "./components/ServicesStack";
 import EmergencyScreen from "./screens/EmergencyScreen";
 import HistoryScreen from "./screens/HistoryScreen";
-import HomeScreen from "./screens/HomeScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -87,7 +87,7 @@ const App = () => {
           ),
         })}
       >
-        <Tab.Screen name="Accueil" component={HomeScreen} />
+        <Tab.Screen name="Accueil" component={HomeStack} />
         <Tab.Screen name="Services" component={ServicesStack} />
         <Tab.Screen name="Urgence" component={EmergencyScreen} />
         <Tab.Screen name="Historique" component={HistoryScreen} />

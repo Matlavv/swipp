@@ -1,5 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
-import { doc, getDoc } from "firebase/firestore";
+import * as ImagePicker from "expo-image-picker";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import React, { useEffect, useState } from "react";
 import {
   Image,
@@ -38,14 +40,55 @@ const UserScreen = () => {
   };
 
   const [username, setUsername] = useState("");
+  const [profileImage, setProfileImage] = useState("");
   const user = auth.currentUser;
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth); // Utilisez la méthode signOut de Firebase
+      await signOut(auth);
       // Vous pouvez naviguer vers l'écran de connexion ou effectuer d'autres actions ici après la déconnexion
     } catch (error) {
       console.error("Erreur lors de la déconnexion", error);
+    }
+  };
+
+  const uploadImage = async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const storage = getStorage();
+    const storageRef = ref(storage, `profileImages/${auth.currentUser.uid}`);
+
+    try {
+      const snapshot = await uploadBytes(storageRef, blob);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      updateUserProfile(downloadURL);
+    } catch (error) {
+      console.error("Erreur lors du téléversement de l'image", error);
+    }
+  };
+
+  const updateUserProfile = async (imageUrl) => {
+    const userDocRef = doc(db, "users", auth.currentUser.uid);
+    try {
+      await updateDoc(userDocRef, {
+        profileImageUrl: imageUrl,
+      });
+      setProfileImage(imageUrl);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du profil", error);
+    }
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets) {
+      uploadImage(result.assets[0].uri);
     }
   };
 
@@ -57,6 +100,9 @@ const UserScreen = () => {
 
         if (docSnap.exists()) {
           setUsername(docSnap.data().username);
+          // Ajoutez ceci pour récupérer l'URL de la photo de profil
+          const profileImageUrl = docSnap.data().profileImageUrl || profilePic;
+          setProfileImage(profileImageUrl);
         } else {
           console.log("No such document!");
         }
@@ -87,8 +133,20 @@ const UserScreen = () => {
               style={tw`w-130 bg-white p-4 rounded-b-3xl items-center rounded-b-[190px]`}
             >
               <View style={tw`p-2 bg-white mt-20`}>
-                <Image source={profilePic} style={tw`h-24 w-24 rounded-full`} />
+                <Image
+                  source={profileImage ? { uri: profileImage } : profilePic}
+                  style={tw`h-24 w-24 rounded-full`}
+                />
               </View>
+              <TouchableOpacity
+                onPress={pickImage}
+                style={tw`p-2 bg-[#34469C] rounded-lg`}
+              >
+                <Text style={tw`text-white text-center`}>
+                  Changer la photo de profil
+                </Text>
+              </TouchableOpacity>
+
               <Text style={tw`text-xl font-bold text-black mt-4`}>
                 {username || "Chargement..."}
               </Text>

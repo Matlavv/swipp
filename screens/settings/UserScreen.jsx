@@ -132,7 +132,7 @@ const UserScreen = () => {
             <View
               style={tw`w-130 bg-white p-4 rounded-b-3xl items-center rounded-b-[190px]`}
             >
-              <View style={tw`p-2 bg-white mt-20`}>
+              <View style={tw`p-2 bg-white mt-15`}>
                 <Image
                   source={profileImage ? { uri: profileImage } : profilePic}
                   style={tw`h-24 w-24 rounded-full`}

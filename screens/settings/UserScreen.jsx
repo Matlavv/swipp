@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
@@ -132,20 +133,18 @@ const UserScreen = () => {
             <View
               style={tw`w-130 bg-white p-4 rounded-b-3xl items-center rounded-b-[190px]`}
             >
-              <View style={tw`p-2 bg-white mt-15`}>
+              <View style={tw`p-2 bg-white mt-15 relative`}>
                 <Image
                   source={profileImage ? { uri: profileImage } : profilePic}
                   style={tw`h-24 w-24 rounded-full`}
                 />
+                <TouchableOpacity
+                  onPress={pickImage}
+                  style={tw`absolute bottom-0 right-0 bg-[#34469C] p-2 rounded-full`}
+                >
+                  <Ionicons name="camera" size={20} color="white" />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                onPress={pickImage}
-                style={tw`p-2 bg-[#34469C] rounded-lg`}
-              >
-                <Text style={tw`text-white text-center`}>
-                  Changer la photo de profil
-                </Text>
-              </TouchableOpacity>
 
               <Text style={tw`text-xl font-bold text-black mt-4`}>
                 {username || "Chargement..."}
@@ -188,7 +187,9 @@ const UserScreen = () => {
           onPress={handleSignOut}
           style={tw`p-3 bg-[#34469C] m-3 rounded-lg`}
         >
-          <Text style={tw`text-white text-center text-lg`}>Déconnexion</Text>
+          <Text style={tw`text-white text-center text-lg shadow-2xl`}>
+            Déconnexion
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

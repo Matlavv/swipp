@@ -10,7 +10,6 @@ import {
 import React, { useEffect, useState } from "react";
 import {
   Alert,
-  Button,
   Image,
   ScrollView,
   Text,
@@ -132,20 +131,23 @@ const VehicleScreen = () => {
       </View>
       {/* Affichage des véhicules existants */}
       {vehicles.map((vehicle, index) => (
-        <View key={index} style={tw`m-4 p-4 bg-white rounded-lg`}>
-          <Text style={tw`text-lg font-bold`}>{vehicle.label}</Text>
-          <Text>
-            Modèle : {vehicle.marque} {vehicle.modele}{" "}
-          </Text>
-          <Text>Type: {vehicle.type}</Text>
-          <Text>Plaque: {vehicle.immatriculation}</Text>
-          <Text>Carburant: {vehicle.carburant}</Text>
-          <Text>Année: {vehicle.annee}</Text>
-          <Button
-            title="Modifier"
+        <View
+          key={index}
+          style={tw`m-4 p-4 bg-white rounded-lg flex-row justify-between items-center`}
+        >
+          <TouchableOpacity
             onPress={() => navigateToEditVehicle(vehicle.id)}
-          />
-          <Button title="Supprimer" onPress={() => deleteVehicle(vehicle.id)} />
+            style={tw`flex-1`}
+          >
+            <Text style={tw`text-lg font-bold`}>{vehicle.label}</Text>
+            <Text>
+              Modèle: {vehicle.marque} {vehicle.modele} {vehicle.annee}
+            </Text>
+            <Text>Plaque: {vehicle.immatriculation}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => deleteVehicle(vehicle.id)}>
+            <Ionicons name="trash" size={24} color="gray" />
+          </TouchableOpacity>
         </View>
       ))}
 
@@ -195,7 +197,6 @@ const VehicleScreen = () => {
           onChangeText={setAnnee}
         />
         <TouchableOpacity
-          title="Mon entreprise"
           onPress={handleAddVehicle}
           style={tw`bg-[#34469C] px-4 py-3 rounded-full flex mt-7`}
         >

@@ -70,7 +70,7 @@ const AddBusinessScreen = ({ navigation }) => {
             collection(db, "users", user.uid, "businesses"),
             businessData
           );
-          Alert.alert("Business Added!");
+          Alert.alert("Votre entreprise a été ajoutée !");
         }
       } catch (error) {
         console.error("Error adding/updating business", error);
@@ -102,7 +102,7 @@ const AddBusinessScreen = ({ navigation }) => {
         <TextInput
           style={tw`border-b w-80 p-2 mb-4`}
           placeholder="Adresses de l'entreprise"
-          value={businessName}
+          value={businessAddress}
           onChangeText={setBusinessAddress}
         />
         <TextInput

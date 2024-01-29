@@ -24,12 +24,19 @@ const HomeScreen = () => {
     const fetchUserData = async () => {
       const user = auth.currentUser;
       if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUsername(docSnap.data().username);
-        } else {
-          console.log("No such document!");
+        try {
+          const docRef = doc(db, "users", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setUsername(docSnap.data().username);
+          } else {
+            console.log("Document utilisateur introuvable");
+          }
+        } catch (error) {
+          console.error(
+            "Erreur lors de la récupération des données utilisateur",
+            error
+          );
         }
       }
     };
@@ -48,7 +55,7 @@ const HomeScreen = () => {
           <Image style={tw`w-25 h-15`} source={swippLogo} />
         </View>
         <Text style={tw`text-2xl font-bold m-5`}>
-          Bonjour {username || "!"}
+          Bonjour {username || "!"} 👋
         </Text>
         <View style={tw`flex`}>
           <NavOptions />

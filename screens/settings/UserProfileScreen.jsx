@@ -54,7 +54,7 @@ const UserProfileScreen = ({ navigation }) => {
           email,
           phoneNumber,
         });
-        Alert.alert("Profile Updated!");
+        Alert.alert("Profil mis à jour !");
       }
     } catch (error) {
       console.error("Error updating profile", error);
@@ -89,7 +89,7 @@ const UserProfileScreen = ({ navigation }) => {
         <TextInput
           style={tw`border-b w-80 p-2 mb-4`}
           placeholder="Prénom"
-          value={username}
+          value={firstName}
           onChangeText={setFirstName}
         />
         <TextInput

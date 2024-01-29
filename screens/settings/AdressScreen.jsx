@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { Icon } from "@rneui/themed";
 import {
   addDoc,
   collection,
@@ -11,7 +10,6 @@ import {
 import React, { useState } from "react";
 import {
   Alert,
-  Button,
   Image,
   SafeAreaView,
   ScrollView,
@@ -109,11 +107,13 @@ const AdressScreen = () => {
           <Text style={tw`text-2xl font-bold m-5`}>Ajouter une adresse</Text>
         </View>
         {adresses.map((adresse, index) => (
-          <View key={index}>
+          <View key={index} style={tw`mx-4 mt-4`}>
             <TouchableOpacity
-              style={tw`flex-row justify-between items-center bg-white p-4 rounded-lg mx-4 mt-4`}
+              onPress={() => navigateToEditAdress(adresse.id)}
+              style={tw`flex-row justify-between items-center bg-white p-4 rounded-lg`}
             >
               <View style={tw`flex-1`}>
+                {/* Affichage de l'adresse */}
                 <Text style={tw`text-2xl font-bold text-black`}>
                   {adresse.label}
                 </Text>
@@ -121,25 +121,11 @@ const AdressScreen = () => {
                   {adresse.adresse}, {adresse.ville}
                 </Text>
               </View>
-              <View
-                style={tw`w-12 h-12 rounded-full bg-gray-200 items-center justify-center`}
-              >
-                <Icon
-                  name={adresse.label === "Domicile" ? "home" : "work"}
-                  size={24}
-                  color="black"
-                />
-              </View>
+              <TouchableOpacity onPress={() => deleteAdress(adresse.id)}>
+                <Ionicons name="trash" size={24} color="gray" />
+              </TouchableOpacity>
             </TouchableOpacity>
-            <Button
-              title="Modifier"
-              onPress={() => navigateToEditAdress(adresse.id)}
-            />
-            <Button
-              title="Supprimer"
-              onPress={() => deleteAdress(adresse.id)}
-            />
-            <View style={tw`bg-gray-200 h-0.2 w-11/12 ml-5`} />
+            <View style={tw`bg-gray-200 h-0.2 w-full mt-2`} />
           </View>
         ))}
         <View style={tw`flex-1 justify-center items-center mt-10`}>

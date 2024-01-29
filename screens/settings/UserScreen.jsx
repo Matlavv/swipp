@@ -1,11 +1,18 @@
 import { useNavigation } from "@react-navigation/native";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { Image, SafeAreaView, ScrollView, Text, View } from "react-native";
+import {
+  Image,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import tw from "twrnc";
 import { background1, background3, profilePic } from "../../assets";
 import SettingsList from "../../components/SettingsList";
-import { auth, db } from "../../firebaseConfig";
+import { auth, db, signOut } from "../../firebaseConfig";
 
 const UserScreen = () => {
   const navigation = useNavigation();
@@ -32,6 +39,15 @@ const UserScreen = () => {
 
   const [username, setUsername] = useState("");
   const user = auth.currentUser;
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth); // Utilisez la méthode signOut de Firebase
+      // Vous pouvez naviguer vers l'écran de connexion ou effectuer d'autres actions ici après la déconnexion
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion", error);
+    }
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -74,7 +90,7 @@ const UserScreen = () => {
                 <Image source={profilePic} style={tw`h-24 w-24 rounded-full`} />
               </View>
               <Text style={tw`text-xl font-bold text-black mt-4`}>
-                Marques Brownlee
+                {username || "Chargement..."}
               </Text>
             </View>
           </View>
@@ -110,6 +126,12 @@ const UserScreen = () => {
             text="A propos de Swipp"
           />
         </View>
+        <TouchableOpacity
+          onPress={handleSignOut}
+          style={tw`p-3 bg-[#34469C] m-3 rounded-lg`}
+        >
+          <Text style={tw`text-white text-center text-lg`}>Déconnexion</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );

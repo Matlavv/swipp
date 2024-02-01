@@ -20,15 +20,17 @@ const Tab = createMaterialTopTabNavigator();
 const HistoryScreen = () => {
   const [selected, setSelected] = useState("services");
 
-  const getComponent = (type) => {
-    if (selected === "services") {
-      return type === "Passées"
-        ? RepairPastReservation
-        : RepairIncomingReservation;
-    } else if (selected === "gas") {
-      return type === "Passées"
-        ? RefuelPastReservation
-        : RefuelIncomingReservation;
+  const getComponent = (tabName) => {
+    if (selected === "gas" && tabName === "A venir") {
+      return RefuelIncomingReservation;
+    } else if (selected === "gas" && tabName === "Passées") {
+      return RefuelPastReservation;
+    } else if (selected === "services" && tabName === "A venir") {
+      return RepairIncomingReservation;
+    } else if (selected === "services" && tabName === "Passées") {
+      return RepairPastReservation;
+    } else {
+      return null;
     }
   };
 
@@ -97,18 +99,8 @@ const HistoryScreen = () => {
           }}
           style={tw`pt-3 w-full`}
         >
-          <Tab.Screen
-            name="Passées"
-            component={
-              selected ? getComponent("Passées") : RefuelPastReservation
-            }
-          />
-          <Tab.Screen
-            name="A venir"
-            component={
-              selected ? getComponent("A venir") : RefuelIncomingReservation
-            }
-          />
+          <Tab.Screen name="Passées" component={getComponent("Passées")} />
+          <Tab.Screen name="A venir" component={getComponent("A venir")} />
         </Tab.Navigator>
       </ScrollView>
     </SafeAreaView>

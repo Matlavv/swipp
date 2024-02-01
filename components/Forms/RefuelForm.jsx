@@ -1,6 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import * as Location from "expo-location";
+import firebase from "firebase/app";
+import "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -25,6 +27,7 @@ const RefuelForm = ({ route, navigation }) => {
   const [address, setAddress] = useState("");
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
   const [price, setPrice] = useState(0);
+  const [selectedDateTime, setSelectedDateTime] = useState("");
 
   useEffect(() => {
     if (route.params?.address) {
@@ -48,25 +51,56 @@ const RefuelForm = ({ route, navigation }) => {
       .catch((error) => console.warn(error));
   };
 
-  const handleDateConfirm = (date) => {
-    // Ici vous pouvez ajouter la date à l'état si vous souhaitez l'afficher ou la sauvegarder
-    console.log("Date sélectionnée:", date);
-    // Logic pour sauvegarder la date en base de données
+  const handleDateTimeConfirm = (dateTime) => {
+    setSelectedDateTime(dateTime);
+    setDateTimePickerVisible(false);
   };
 
-  const handleChooseAppointmentPress = () => {
-    // Vérifiez que toutes les entrées sont remplies
-    if (!selectedValue || !volume || !address) {
+  const showDateTimePicker = () => {
+    setDateTimePickerVisible(true);
+  };
+
+  const handleReservationConfirm = async () => {
+    if (!selectedValue || !volume || !address || !selectedDateTime) {
       Alert.alert(
         "Erreur",
-        "Veuillez remplir tous les champs avant de choisir un rendez-vous."
+        "Veuillez remplir tous les champs avant de confirmer la réservation."
       );
       return;
     }
-    calculatePrice();
 
-    // Si tout est rempli, affichez la modale pour choisir l'heure
-    setDateTimePickerVisible(true);
+    const totalPrice = parseFloat(price) * parseFloat(volume);
+    const userId = firebase.auth().currentUser.uid;
+
+    try {
+      // Créer un objet de réservation
+      const reservation = {
+        address,
+        bookingDate,
+        vehicleId: selectedVehicleId, // Assurez-vous d'avoir l'ID du véhicule sélectionné
+        createdAt: firebase.firestore.Timestamp.now(),
+        fuelType: selectedValue,
+        isActive: true,
+        time: bookingDate.toTimeString().split(" ")[0], // Format HH:MM:SS
+        userId,
+        volume: parseFloat(volume),
+        price: totalPrice,
+      };
+
+      // Enregistrer la réservation dans Firestore
+      const docRef = await firebase
+        .firestore()
+        .collection("RefuelBookings")
+        .add(reservation);
+      console.log("Réservation enregistrée avec l'ID: ", docRef.id);
+      Alert.alert("Succès", "Votre réservation a été enregistrée.");
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement de la réservation", error);
+      Alert.alert(
+        "Erreur",
+        "Un problème est survenu lors de l'enregistrement de votre réservation."
+      );
+    }
   };
 
   const calculatePrice = (selectedFuel, currentAddress) => {
@@ -181,15 +215,37 @@ const RefuelForm = ({ route, navigation }) => {
             </Picker>
           </View>
         </View>
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+          <Text style={tw`text-xl font-bold mb-4`}>
+            Choisissez votre date de rendez-vous
+          </Text>
+          <View style={tw`bg-white rounded-md`}>
+            <TouchableOpacity
+              style={tw`border-b-2 border-[#34469C] font-bold text-base`}
+              value={selectedDateTime}
+              onPress={() => setDateTimePickerVisible(true)}
+              editable={false}
+            >
+              <TextInput
+                style={tw`text-black font-bold text-base`}
+                placeholder="Choisissez une date et une heure"
+                value={selectedDateTime}
+                onFocus={showDateTimePicker}
+                editable={false}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
 
         <DateTimePickerModal
           isVisible={isDateTimePickerVisible}
           onClose={() => setDateTimePickerVisible(false)}
-          onConfirm={handleDateConfirm}
+          onConfirm={handleDateTimeConfirm}
         />
+
         <View style={tw`mb-4 mt-3 flex items-center`}>
           <TouchableOpacity
-            onPress={handleChooseAppointmentPress}
+            onPress={handleReservationConfirm}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
           >
             <Text style={tw`text-white font-semibold text-base`}>

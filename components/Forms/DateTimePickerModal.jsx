@@ -44,10 +44,6 @@ const DateTimePickerModal = ({ isVisible, onClose, onConfirm }) => {
     }
     const dateTime = `${selectedDay.dateString} ${selectedTime}`;
     onConfirm(dateTime);
-    Alert.alert(
-      "Rendez-vous validé !",
-      `Votre rendez-vous est validé le : ${dateTime}`
-    );
     onClose();
   };
 

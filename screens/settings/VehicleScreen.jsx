@@ -109,7 +109,7 @@ const VehicleScreen = () => {
         doc(db, "users", auth.currentUser.uid, "vehicles", vehicleId)
       );
       Alert.alert("Véhicule supprimé !");
-      loadVehicles(); // Recharger la liste après la suppression
+      loadVehicles();
     } catch (error) {
       console.error("Erreur lors de la suppression du véhicule", error);
     }

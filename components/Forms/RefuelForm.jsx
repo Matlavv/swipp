@@ -1,8 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import * as Location from "expo-location";
-import firebase from "firebase/app";
-import "firebase/firestore";
+import { addDoc, collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -17,6 +16,7 @@ import {
 import Geocoder from "react-native-geocoding";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
+import { auth, db } from "../../firebaseConfig";
 import DateTimePickerModal from "./DateTimePickerModal";
 
 Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
@@ -28,6 +28,8 @@ const RefuelForm = ({ route, navigation }) => {
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
   const [price, setPrice] = useState(0);
   const [selectedDateTime, setSelectedDateTime] = useState("");
+  const [vehicles, setVehicles] = useState([]);
+  const [selectedVehicleId, setSelectedVehicleId] = useState("");
 
   useEffect(() => {
     if (route.params?.address) {
@@ -51,6 +53,28 @@ const RefuelForm = ({ route, navigation }) => {
       .catch((error) => console.warn(error));
   };
 
+  // Charger les véhicules
+  const loadVehicles = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        const querySnapshot = await getDocs(
+          collection(db, "users", user.uid, "vehicles")
+        );
+        const userVehicles = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setVehicles(userVehicles);
+      } catch (error) {
+        console.error("Erreur lors du chargement des véhicules", error);
+      }
+    }
+  };
+  useEffect(() => {
+    loadVehicles();
+  }, []);
+
   const handleDateTimeConfirm = (dateTime) => {
     setSelectedDateTime(dateTime);
     setDateTimePickerVisible(false);
@@ -61,7 +85,13 @@ const RefuelForm = ({ route, navigation }) => {
   };
 
   const handleReservationConfirm = async () => {
-    if (!selectedValue || !volume || !address || !selectedDateTime) {
+    if (
+      !selectedValue ||
+      !volume ||
+      !address ||
+      !selectedDateTime ||
+      !selectedVehicleId
+    ) {
       Alert.alert(
         "Erreur",
         "Veuillez remplir tous les champs avant de confirmer la réservation."
@@ -70,29 +100,28 @@ const RefuelForm = ({ route, navigation }) => {
     }
 
     const totalPrice = parseFloat(price) * parseFloat(volume);
-    const userId = firebase.auth().currentUser.uid;
+    const userId = auth.currentUser.uid;
+
+    // Formatage correct de la date et l'heure
+    const bookingDate = new Date(selectedDateTime);
+    const formattedTime =
+      bookingDate.getHours() + ":" + bookingDate.getMinutes();
+
+    const reservation = {
+      address,
+      bookingDate: bookingDate,
+      vehicleId: selectedVehicleId,
+      createdAt: new Date(),
+      fuelType: selectedValue,
+      isActive: true,
+      time: formattedTime,
+      userId,
+      volume: parseFloat(volume),
+      price: totalPrice,
+    };
 
     try {
-      // Créer un objet de réservation
-      const reservation = {
-        address,
-        bookingDate,
-        vehicleId: selectedVehicleId, // Assurez-vous d'avoir l'ID du véhicule sélectionné
-        createdAt: firebase.firestore.Timestamp.now(),
-        fuelType: selectedValue,
-        isActive: true,
-        time: bookingDate.toTimeString().split(" ")[0], // Format HH:MM:SS
-        userId,
-        volume: parseFloat(volume),
-        price: totalPrice,
-      };
-
-      // Enregistrer la réservation dans Firestore
-      const docRef = await firebase
-        .firestore()
-        .collection("RefuelBookings")
-        .add(reservation);
-      console.log("Réservation enregistrée avec l'ID: ", docRef.id);
+      await addDoc(collection(db, "RefuelBookings"), reservation);
       Alert.alert("Succès", "Votre réservation a été enregistrée.");
     } catch (error) {
       console.error("Erreur lors de l'enregistrement de la réservation", error);
@@ -204,14 +233,17 @@ const RefuelForm = ({ route, navigation }) => {
           <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
           <View style={tw`bg-white rounded-md`}>
             <Picker
-              selectedValue={selectedValue}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedValue(itemValue)
-              }
+              selectedValue={selectedVehicleId}
+              onValueChange={(itemValue) => setSelectedVehicleId(itemValue)}
               style={tw``}
             >
-              <Picker.Item color="#34469C" label="206+" value="206+" />
-              <Picker.Item color="#34469C" label="Clio" value="Clio" />
+              {vehicles.map((vehicle) => (
+                <Picker.Item
+                  key={vehicle.id}
+                  label={vehicle.label}
+                  value={vehicle.id}
+                />
+              ))}
             </Picker>
           </View>
         </View>
@@ -249,7 +281,7 @@ const RefuelForm = ({ route, navigation }) => {
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
           >
             <Text style={tw`text-white font-semibold text-base`}>
-              Choisir mon rendez-vous
+              Valider mon rendez-vous
             </Text>
           </TouchableOpacity>
         </View>

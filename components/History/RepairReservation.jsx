@@ -1,18 +1,12 @@
-import React, { Component } from "react";
-import { SafeAreaView, Text, View } from "react-native";
-import tw from "twrnc";
+import React from "react";
+import { Text, View } from "react-native";
 
-export class RepairReservation extends Component {
-  render() {
-    return (
-      <SafeAreaView>
-        <View>
-          <Text style={tw`flex font-bold text-2xl m-3`}>A venir</Text>
-        </View>
-        <View></View>
-      </SafeAreaView>
-    );
-  }
-}
+const RepairReservation = () => {
+  return (
+    <View>
+      <Text>RepairReservation</Text>
+    </View>
+  );
+};
 
 export default RepairReservation;

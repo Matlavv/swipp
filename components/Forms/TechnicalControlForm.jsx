@@ -17,7 +17,7 @@ import { swippLogo } from "../../assets";
 
 Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
 
-const MaintenanceForm = ({ route, navigation }) => {
+const TechnicalControlForm = ({ route, navigation }) => {
   const [selectedValue, setSelectedValue] = useState("SP98");
   const [volume, setVolume] = useState("");
   const [address, setAddress] = useState("");
@@ -60,48 +60,9 @@ const MaintenanceForm = ({ route, navigation }) => {
           >
             <Ionicons name="arrow-back-circle-outline" size={30} color="gray" />
           </TouchableOpacity>
-          <Text style={tw`text-2xl font-bold m-5`}>Entretien du véhicule</Text>
-        </View>
-        {/* Choose Maintenance */}
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>
-            Sélectionnez votre besoin
+          <Text style={tw`text-2xl font-bold m-5`}>
+            Controle technique du véhicule
           </Text>
-          <View style={tw`bg-white rounded-md`}>
-            <Picker
-              selectedValue={selectedValue}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedValue(itemValue)
-              }
-              style={tw``}
-            >
-              <Picker.Item
-                color="#34469C"
-                label="Changements des plaquettes"
-                value="plaquette"
-              />
-              <Picker.Item
-                color="#34469C"
-                label="Remplacement des filtres"
-                value="filtre"
-              />
-              <Picker.Item
-                color="#34469C"
-                label="Changement d'huile'"
-                value="huile"
-              />
-              <Picker.Item
-                color="#34469C"
-                label="Changement de pneus"
-                value="pneu"
-              />
-              <Picker.Item
-                color="#34469C"
-                label="Changement de batterie"
-                value="batterie"
-              />
-            </Picker>
-          </View>
         </View>
         {/* Choose vehicle */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
@@ -153,4 +114,4 @@ const MaintenanceForm = ({ route, navigation }) => {
   );
 };
 
-export default MaintenanceForm;
+export default TechnicalControlForm;

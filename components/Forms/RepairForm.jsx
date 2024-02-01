@@ -1,48 +1,157 @@
-import React, { useState } from 'react';
-import { View, Text, Button } from 'react-native';
-import tw from 'twrnc';
-import Checkbox from 'expo-checkbox';
+import { Ionicons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
+import * as Location from "expo-location";
+import React, { useEffect, useState } from "react";
+import {
+  Image,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Geocoder from "react-native-geocoding";
+import tw from "twrnc";
+import { swippLogo } from "../../assets";
 
-const RepairForm = () => {
- const [checked, setChecked] = useState({
-  windshield: false,
-  garage: false,
-  tire: false,
-  bodywork: false,
-  ecoProper: false,
- });
+Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
 
- const handleCheck = (choice) => {
-  setChecked({ ...checked, [choice]: !checked[choice] });
- };
+const RepairForm = ({ route, navigation }) => {
+  const [selectedValue, setSelectedValue] = useState("SP98");
+  const [volume, setVolume] = useState("");
+  const [address, setAddress] = useState("");
 
- const handleNext = () => {
-  // Logic for handling next button press
-  console.log('Next button pressed');
- };
+  useEffect(() => {
+    if (route.params?.address) {
+      setAddress(route.params.address);
+    }
+  }, [route.params?.address]);
 
- return (
-  <View style={tw`p-4`}>
-    {/* Windshield */}
-    <View style={tw`mb-4`}>
-      <Text style={tw`text-lg font-bold`}>Pare-brise</Text>
-      <Checkbox
-        value={checked.windshield}
-        onValueChange={() => handleCheck('windshield')}
-      />
-    </View>
+  const handleLocatePress = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      alert("Permission to access location was denied");
+      return;
+    }
 
-    {/* Other choices... */}
+    let location = await Location.getCurrentPositionAsync({});
+    Geocoder.from(location.coords.latitude, location.coords.longitude)
+      .then((json) => {
+        const addressComponent = json.results[0].formatted_address;
+        setAddress(addressComponent);
+      })
+      .catch((error) => console.warn(error));
+  };
 
-    {/* Next Button */}
-    <View style={tw`mb-4 flex items-center`}>
-      <Button
-        onPress={handleNext}
-        title="Suivant"
-      />
-    </View>
-  </View>
- );
+  const navigateToChooseGarageForm = () => {
+    navigation.navigate("ChooseGarageForm");
+  };
+
+  return (
+    <SafeAreaView style={tw`flex h-full`}>
+      <ScrollView style={tw`flex-1`}>
+        <View style={tw`flex p-5 mt-5 justify-start items-start flex flex-row`}>
+          <Image style={tw`w-25 h-15`} source={swippLogo} />
+        </View>
+        <View style={tw`flex-row`}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={tw`mt-5 ml-3`}
+          >
+            <Ionicons name="arrow-back-circle-outline" size={30} color="gray" />
+          </TouchableOpacity>
+          <Text style={tw`text-2xl font-bold m-5`}>Réparation du véhicule</Text>
+        </View>
+        {/* Choose reparation */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+          <Text style={tw`text-xl font-bold mb-4`}>
+            Sélectionnez votre besoin
+          </Text>
+          <View style={tw`bg-white rounded-md`}>
+            <Picker
+              selectedValue={selectedValue}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedValue(itemValue)
+              }
+              style={tw``}
+            >
+              <Picker.Item
+                color="#34469C"
+                label="Réparation du moteur"
+                value="moteur"
+              />
+              <Picker.Item
+                color="#34469C"
+                label="Réparation de la transmission"
+                value="transmission"
+              />
+              <Picker.Item
+                color="#34469C"
+                label="Réparation de la direction"
+                value="direction"
+              />
+              <Picker.Item
+                color="#34469C"
+                label="Réparation de la carrosserie"
+                value="carrosserie"
+              />
+              <Picker.Item
+                color="#34469C"
+                label="Réparation du système d'échappement"
+                value="echappement"
+              />
+            </Picker>
+          </View>
+        </View>
+        {/* Choose vehicle */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+          <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
+          <View style={tw`bg-white rounded-md`}>
+            <Picker
+              selectedValue={selectedValue}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedValue(itemValue)
+              }
+              style={tw``}
+            >
+              <Picker.Item color="#34469C" label="206+" value="206+" />
+              <Picker.Item color="#34469C" label="Clio" value="Clio" />
+            </Picker>
+          </View>
+        </View>
+        {/* Location */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+          <Text style={tw`text-xl font-bold mb-4`}>
+            Trouvez un garage près de chez vous
+          </Text>
+          <View style={tw`rounded-md`}>
+            <TextInput
+              style={tw`border-b-2 border-[#34469C] font-bold text-base`}
+              value={address}
+              onChangeText={setAddress}
+            />
+            <TouchableOpacity onPress={handleLocatePress}>
+              <Text style={tw`text-blue-900 m-2 font-semibold`}>
+                Me géolocaliser
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {/* Submit button */}
+        <View style={tw`mb-4 mt-3 flex items-center`}>
+          <TouchableOpacity
+            onPress={navigateToChooseGarageForm}
+            style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
+          >
+            <Text style={tw`text-white font-semibold text-base`}>
+              Choisir mon garage
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 };
 
 export default RepairForm;

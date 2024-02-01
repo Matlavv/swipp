@@ -1,8 +1,11 @@
-import firebase from 'firebase/app';
-import { getAuth, initializeAuth, getReactNativePersistence } from "firebase/auth";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import {
+  signOut as firebaseSignOut,
+  getReactNativePersistence,
+  initializeAuth,
+} from "firebase/auth";
+// import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -12,7 +15,7 @@ const firebaseConfig = {
   storageBucket: "swipp-b74be.appspot.com",
   messagingSenderId: "147022767859",
   appId: "1:147022767859:web:185aecccdf9c031f99b986",
-  measurementId: "G-11Q86C19N2"
+  measurementId: "G-11Q86C19N2",
 };
 
 // Initialize Firebase
@@ -22,5 +25,6 @@ const app = initializeApp(firebaseConfig);
 // export const auth = firebase.auth();
 export const db = getFirestore(app);
 export const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
+  persistence: getReactNativePersistence(AsyncStorage),
 });
+export const signOut = firebaseSignOut;

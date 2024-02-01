@@ -1,188 +1,205 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import tw from 'twrnc';
-import { Picker } from '@react-native-picker/picker';
-import * as Location from 'expo-location';
-import Geocoder from 'react-native-geocoding';
-import { useNavigation } from '@react-navigation/native';
-import {auth, db } from '../../firebaseConfig';
-import { addDoc, collection } from 'firebase/firestore';
-import ChooseTimeModal from './ChooseTimeModal';
+import { Ionicons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
+import * as Location from "expo-location";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Geocoder from "react-native-geocoding";
+import tw from "twrnc";
+import { swippLogo } from "../../assets";
+import DateTimePickerModal from "./DateTimePickerModal";
 
 Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
 
-const RefuelForm = () => {
- const [fuelType, setFuelType] = useState('');
- const [volume, setVolume] = useState('');
- const [carNumber, setCarNumber] = useState('');
- const [address, setAddress] = useState('');
- const [isModalVisible, setIsModalVisible] = useState(false);
- const [selectedTime, setSelectedTime] = useState(null);
- const times = ["08:00", "10:00", "12:00", "14:00", "16:00"];
+const RefuelForm = ({ route, navigation }) => {
+  const [selectedValue, setSelectedValue] = useState("SP98");
+  const [volume, setVolume] = useState("");
+  const [address, setAddress] = useState("");
+  const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
+  const [price, setPrice] = useState(0);
 
- const navigation = useNavigation();
-
- const handleTimeSelect = (time) => {
-  setSelectedTime(time);
-  setIsModalVisible(false);
-  console.log(`Horaire sélectionné : ${time}`);
-  };
-
-  const formatDate = (date) => {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = (d.getMonth() + 1).toString().padStart(2, '0');
-    const day = d.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-  
-
- const handleLocatePress = async () => {
-   let { status } = await Location.requestForegroundPermissionsAsync();
-   if (status !== 'granted') {
-     alert('Permission to access location was denied');
-     return;
-   }
-  
-   let location = await Location.getCurrentPositionAsync({});
-   Geocoder.from(location.coords.latitude, location.coords.longitude)
-     .then(json => {
-       const addressComponent = json.results[0].formatted_address;
-       setAddress(addressComponent);
-     })
-     .catch(error => console.warn(error));
- };
-
- const handleSubmit = async () => {
-  if (!fuelType || !volume || !carNumber || !address) {
-    Alert.alert('Erreur', 'Tous les champs sont obligatoires');
-    return;
-  }
-
-  if (Number(carNumber) >= 2) {
-    Alert.alert(
-      "Information",
-      "Si vous avez plus de 2 véhicules, veuillez contacter notre service client au 0123456789",
-      [{ text: "OK", onPress: () => console.log("OK Pressed") }]
-    );
-    return;
-  }
-
-  const user = auth.currentUser;
-  if (user) {
-    try {
-      const bookingDate = new Date(); // Date actuelle
-      const formattedBookingDate = formatDate(bookingDate); // Formatage de la date
-      const bookingData = {
-        userId: user.uid,
-        userName: user.displayName || 'Utilisateur Inconnu',
-        fuelType,
-        volume,
-        carNumber,
-        address,
-        time: selectedTime,
-        bookingDate: formattedBookingDate,
-        created: bookingDate, 
-        isActive: true
-      };
-
-      await addDoc(collection(db, 'RefuelBookings'), bookingData);
-      Alert.alert("Rendez-vous confirmé", `Votre rendez-vous a été confirmé pour le ${selectedTime}`);
-    } catch (error) {
-      console.error('Erreur lors de l\'enregistrement du rendez-vous', error);
-      Alert.alert("Erreur", "Une erreur s'est produite lors de la confirmation du rendez-vous");
+  useEffect(() => {
+    if (route.params?.address) {
+      setAddress(route.params.address);
     }
-  } else {
-    Alert.alert("Erreur", "Vous devez être connecté pour effectuer cette action");
-  }
-   // Logic for handling form submission
-   console.log('Form submitted');
- };
+  }, [route.params?.address]);
 
- return (
-   <View style={tw`p-4`}>
-     {/* Fuel Type */}
-     <View style={tw`mb-4`}>
-       <Text style={tw`text-lg font-bold`}>Type de carburant</Text>
-       <Picker
-         selectedValue={fuelType}
-         onValueChange={(value) => setFuelType(value)}
-         style={tw`border-b-2 border-black`}
-       >
-         <Picker.Item label="SP98" value="SP98" />
-         <Picker.Item label="SP95" value="SP95" />
-         <Picker.Item label="Gasoil" value="Gasoil" />
-         <Picker.Item label="Diesel" value="Diesel" />
-       </Picker>
-     </View>
+  const handleLocatePress = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      alert("Permission to access location was denied");
+      return;
+    }
 
-     {/* Volume in Liters */}
-     <View style={tw`mb-4`}>
-       <Text style={tw`text-lg font-bold`}>Volume en Litres</Text>
-       <TextInput
-         style={tw`border-b-2 border-black`}
-         keyboardType="numeric"
-         value={volume}
-         onChangeText={setVolume}
-       />
-     </View>
+    let location = await Location.getCurrentPositionAsync({});
+    Geocoder.from(location.coords.latitude, location.coords.longitude)
+      .then((json) => {
+        const addressComponent = json.results[0].formatted_address;
+        setAddress(addressComponent);
+      })
+      .catch((error) => console.warn(error));
+  };
 
-     {/* Number of Vehicles */}
-     <View style={tw`mb-4`}>
-       <Text style={tw`text-lg font-bold`}>Nombre de véhicules</Text>
-       <TextInput
-         style={tw`border-b-2 border-black`}
-         keyboardType="numeric"
-         value={carNumber}
-         onChangeText={setCarNumber}
-       />
-     </View>
+  const handleDateConfirm = (date) => {
+    // Ici vous pouvez ajouter la date à l'état si vous souhaitez l'afficher ou la sauvegarder
+    console.log("Date sélectionnée:", date);
+    // Logic pour sauvegarder la date en base de données
+  };
 
-     {/* Address */}
-     <View style={tw`mb-4`}>
-       <Text style={tw`text-lg font-bold`}>Adresse</Text>
-       <TextInput
-         style={tw`border-b-2 border-black`}
-         value={address}
-         onChangeText={setAddress}
-       />
-       <TouchableOpacity
-         onPress={handleLocatePress}
-       >
-         <Text style={tw`text-blue-900 m-2`}> Me géolocaliser</Text>
-       </TouchableOpacity>
-     </View>
+  const handleChooseAppointmentPress = () => {
+    // Vérifiez que toutes les entrées sont remplies
+    if (!selectedValue || !volume || !address) {
+      Alert.alert(
+        "Erreur",
+        "Veuillez remplir tous les champs avant de choisir un rendez-vous."
+      );
+      return;
+    }
+    calculatePrice();
 
-     <View>
-      <TouchableOpacity
-        onPress={() => setIsModalVisible(true)}
-        style={tw`bg-black p-2 rounded-md w-1/2 items-center`}
-      >
-        <Text style={tw`text-white`}>Choisir un Horaire</Text>
-      </TouchableOpacity>
-      {/* Choix de l'horaire */}
-      <Text style={tw`text-lg`}>Horaire sélectionné : {selectedTime}</Text>
+    // Si tout est rempli, affichez la modale pour choisir l'heure
+    setDateTimePickerVisible(true);
+  };
 
-      {/* Composant Modale */}
-      <ChooseTimeModal
-        isVisible={isModalVisible}
-        onTimeSelect={handleTimeSelect}
-        onClose={() => setIsModalVisible(false)}
-        times={times}
-      />
-     </View>
+  const calculatePrice = (selectedFuel, currentAddress) => {
+    let basePrice;
+    switch (selectedFuel) {
+      case "SP98":
+        basePrice = 1.95;
+        break;
+      case "SP95":
+        basePrice = 1.82;
+        break;
+      case "Gasoil":
+        basePrice = 1.72;
+        break;
+      case "E85":
+        basePrice = 1.65;
+        break;
+      default:
+        basePrice = 0;
+    }
+    setPrice(basePrice);
+  };
 
-     {/* Submit Button */}
-     <View style={tw`mb-4 flex items-center`}>
-       <TouchableOpacity
-         onPress={handleSubmit}
-         style={tw`bg-black p-2 rounded-md w-1/2 items-center`}
-       >
-         <Text style={tw`text-white`}>Choisir mon rendez-vous</Text>
-       </TouchableOpacity>
-     </View>
-   </View>
- );
+  useEffect(() => {
+    calculatePrice(selectedValue, address);
+  }, [selectedValue, address]);
+
+  return (
+    <SafeAreaView style={tw`flex h-full`}>
+      <ScrollView style={tw`flex-1`}>
+        <View style={tw`flex p-5 mt-5 justify-start items-start flex flex-row`}>
+          <Image style={tw`w-25 h-15`} source={swippLogo} />
+        </View>
+        <View style={tw`flex-row`}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={tw`mt-5 ml-3`}
+          >
+            <Ionicons name="arrow-back-circle-outline" size={30} color="gray" />
+          </TouchableOpacity>
+          <Text style={tw`text-2xl font-bold m-5`}>
+            Réservez votre carburant
+          </Text>
+        </View>
+        {/* Location */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+          <Text style={tw`text-xl font-bold mb-4`}>
+            Indiquez le point de rendez-vous
+          </Text>
+          <View style={tw`rounded-md`}>
+            <TextInput
+              style={tw`border-b-2 border-[#34469C] font-bold text-base`}
+              value={address}
+              onChangeText={setAddress}
+            />
+            <TouchableOpacity onPress={handleLocatePress}>
+              <Text style={tw`text-blue-900 m-2 font-semibold`}>
+                Me géolocaliser
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {/* Choose carburant */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 my-3`}>
+          <Text style={tw`text-xl font-bold mb-4`}>
+            Selectionnez votre carburant
+          </Text>
+          <View style={tw`bg-white rounded-md`}>
+            <Picker
+              selectedValue={selectedValue}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedValue(itemValue)
+              }
+              style={tw``}
+            >
+              <Picker.Item color="#34469C" label="SP98" value="SP98" />
+              <Picker.Item color="#34469C" label="SP95" value="SP95" />
+              <Picker.Item color="#34469C" label="Gasoil" value="Gasoil" />
+              <Picker.Item color="#34469C" label="E85" value="E85" />
+            </Picker>
+          </View>
+          {/* Afficher le prix calculé sous le choix de carburant */}
+          <Text style={tw`text-lg font-semibold mt-4`}>
+            Prix: {price.toFixed(2)}€
+          </Text>
+        </View>
+        {/* Choose litter */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+          <Text style={tw`text-xl font-bold mb-4`}>
+            Indiquez le nombre de litres
+          </Text>
+          <TextInput
+            style={tw`border-b-2 border-[#34469C] font-bold text-base`}
+            keyboardType="numeric"
+            value={volume}
+            onChangeText={setVolume}
+          />
+        </View>
+        {/* Choose vehicle */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+          <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
+          <View style={tw`bg-white rounded-md`}>
+            <Picker
+              selectedValue={selectedValue}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedValue(itemValue)
+              }
+              style={tw``}
+            >
+              <Picker.Item color="#34469C" label="206+" value="206+" />
+              <Picker.Item color="#34469C" label="Clio" value="Clio" />
+            </Picker>
+          </View>
+        </View>
+
+        <DateTimePickerModal
+          isVisible={isDateTimePickerVisible}
+          onClose={() => setDateTimePickerVisible(false)}
+          onConfirm={handleDateConfirm}
+        />
+        <View style={tw`mb-4 mt-3 flex items-center`}>
+          <TouchableOpacity
+            onPress={handleChooseAppointmentPress}
+            style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
+          >
+            <Text style={tw`text-white font-semibold text-base`}>
+              Choisir mon rendez-vous
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 };
 
 export default RefuelForm;

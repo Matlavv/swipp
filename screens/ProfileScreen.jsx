@@ -1,19 +1,17 @@
-// ProfileScreen.jsx
-import React, { useEffect, useState } from 'react';
-import { auth } from '../firebaseConfig';
-import UserScreen from './settings/UserScreen';
-import LoginScreen from './Forms/LoginScreen';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+import { auth } from "../firebaseConfig";
+import UserScreen from "./settings/UserScreen";
 
 const ProfileScreen = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const navigation = useNavigation();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
       if (!user) {
-        navigation.navigate('LoginScreen');
+        navigation.navigate("LoginScreen");
       }
     });
     return unsubscribe;

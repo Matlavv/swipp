@@ -35,6 +35,17 @@ const DisplayAdress = () => {
     fetchAdresses();
   }, [currentUser]);
 
+  useEffect(() => {
+    if (currentUser) {
+      const q = query(
+        collection(db, "users", currentUser.uid, "adresses"),
+        limit(2)
+      );
+    } else {
+      setAdresses([]);
+    }
+  }, [currentUser]);
+
   return (
     <ScrollView style={tw`flex-1 mb-10 mt-3`}>
       {adresses.map((adresse) => (

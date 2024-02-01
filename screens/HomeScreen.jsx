@@ -45,6 +45,14 @@ const HomeScreen = () => {
     fetchUserData();
   }, [currentUser]);
 
+  useEffect(() => {
+    if (currentUser) {
+      setUsername(currentUser.displayName);
+    } else {
+      setUsername("");
+    }
+  }, [currentUser]);
+
   const navigateToServiceScreen = () => {
     navigation.navigate("Services");
   };

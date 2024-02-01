@@ -64,7 +64,7 @@ const App = () => {
       }
     });
 
-    return () => unsubscribe(); // Nettoyez l'abonnement lors du démontage
+    return () => unsubscribe();
   }, []);
 
   return (

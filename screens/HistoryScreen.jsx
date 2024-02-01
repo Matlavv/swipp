@@ -10,29 +10,13 @@ import {
 } from "react-native";
 import tw from "twrnc";
 import { gas, services, swippLogo } from "../assets/index";
-import RefuelIncomingReservation from "../components/History/RefuelIncomingReservation";
-import RefuelPastReservation from "../components/History/RefuelPastReservation";
-import RepairIncomingReservation from "../components/History/RepairIncomingReservation";
-import RepairPastReservation from "../components/History/RepairPastReservation";
+import RefuelReservation from "../components/History/RefuelReservation";
+import RepairReservation from "../components/History/RepairReservation";
 
 const Tab = createMaterialTopTabNavigator();
 
 const HistoryScreen = () => {
   const [selected, setSelected] = useState("services");
-
-  const getComponent = (tabName) => {
-    if (selected === "gas" && tabName === "A venir") {
-      return RefuelIncomingReservation;
-    } else if (selected === "gas" && tabName === "Passées") {
-      return RefuelPastReservation;
-    } else if (selected === "services" && tabName === "A venir") {
-      return RepairIncomingReservation;
-    } else if (selected === "services" && tabName === "Passées") {
-      return RepairPastReservation;
-    } else {
-      return null;
-    }
-  };
 
   return (
     <SafeAreaView style={tw`flex h-full`}>
@@ -89,19 +73,8 @@ const HistoryScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
-        <Tab.Navigator
-          screenOptions={{
-            tabBarActiveTintColor: "#34469C",
-            tabBarInactiveTintColor: "grey",
-            tabBarStyle: { backgroundColor: "#F5F5F5" },
-            tabBarIndicatorStyle: { backgroundColor: "#34469C", height: 4 },
-            tabBarLabelStyle: { fontSize: 18, fontWeight: "bold" },
-          }}
-          style={tw`pt-3 w-full`}
-        >
-          <Tab.Screen name="Passées" component={getComponent("Passées")} />
-          <Tab.Screen name="A venir" component={getComponent("A venir")} />
-        </Tab.Navigator>
+        {selected === "gas" && <RefuelReservation />}
+        {selected === "services" && <RepairReservation />}
       </ScrollView>
     </SafeAreaView>
   );

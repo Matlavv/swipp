@@ -51,6 +51,7 @@ const SignUpScreen = ({ navigation }) => {
       const user = userCredential.user;
       await setDoc(doc(db, "users", user.uid), {
         username,
+        email,
         createdAt: Timestamp.now(),
       });
       navigation.navigate("LoginScreen");

@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { doc, getDoc } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Image,
   SafeAreaView,
@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import tw from "twrnc";
+import { AuthContext } from "../AuthContext";
 import { swippLogo } from "../assets";
 import DisplayAdress from "../components/DisplayAdress";
 import NavOptions from "../components/NavOptions";
@@ -19,6 +20,7 @@ import { auth, db } from "../firebaseConfig";
 const HomeScreen = () => {
   const [username, setUsername] = useState("");
   const navigation = useNavigation();
+  const { currentUser } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -41,7 +43,7 @@ const HomeScreen = () => {
       }
     };
     fetchUserData();
-  }, []);
+  }, [currentUser]);
 
   const navigateToServiceScreen = () => {
     navigation.navigate("Services");
@@ -73,7 +75,7 @@ const HomeScreen = () => {
           <Text style={tw`text-2xl font-semibold`}>
             Faites vous livrer votre plein
           </Text>
-          <DisplayAdress />
+          <DisplayAdress currentUser={currentUser} />
         </View>
       </ScrollView>
     </SafeAreaView>

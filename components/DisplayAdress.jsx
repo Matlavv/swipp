@@ -1,14 +1,16 @@
 import { useNavigation } from "@react-navigation/native";
 import { Icon } from "@rneui/themed";
 import { collection, getDocs, limit, query } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import tw from "twrnc";
+import { AuthContext } from "../AuthContext";
 import { auth, db } from "../firebaseConfig";
 
 const DisplayAdress = () => {
   const [adresses, setAdresses] = useState([]);
   const navigation = useNavigation();
+  const { currentUser } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchAdresses = async () => {
@@ -31,7 +33,7 @@ const DisplayAdress = () => {
       }
     };
     fetchAdresses();
-  }, []);
+  }, [currentUser]);
 
   return (
     <ScrollView style={tw`flex-1 mb-10 mt-3`}>

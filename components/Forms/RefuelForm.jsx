@@ -240,7 +240,7 @@ const RefuelForm = ({ route, navigation }) => {
               {vehicles.map((vehicle) => (
                 <Picker.Item
                   key={vehicle.id}
-                  label={vehicle.label}
+                  label={`${vehicle.label} - ${vehicle.immatriculation}`}
                   value={vehicle.id}
                   color="#34469C"
                 />

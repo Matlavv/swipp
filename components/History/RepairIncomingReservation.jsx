@@ -1,3 +1,4 @@
+import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { FlatList, SafeAreaView, Text, View } from "react-native";
@@ -8,29 +9,37 @@ const RepairIncomingReservation = () => {
   const [reservations, setReservations] = useState([]);
 
   useEffect(() => {
-    const loadReservations = async () => {
-      if (auth.currentUser) {
-        const q = query(
-          collection(db, "RepairBookings"),
-          where("userId", "==", auth.currentUser.uid),
-          where("isActive", "==", true)
-        );
-
-        try {
-          const querySnapshot = await getDocs(q);
-          const loadedReservations = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setReservations(loadedReservations);
-        } catch (error) {
-          console.error("Erreur lors du chargement des réservations", error);
-        }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Utilisateur connecté, charger les réservations
+        loadReservations();
+      } else {
+        // Utilisateur déconnecté, décharger les réservations
+        setReservations([]);
       }
-    };
+    });
 
-    loadReservations();
+    return () => unsubscribe(); // Nettoyer l'écouteur lors du démontage du composant
   }, []);
+
+  const loadReservations = async () => {
+    const q = query(
+      collection(db, "RepairBookings"),
+      where("userId", "==", auth.currentUser.uid),
+      where("isActive", "==", true)
+    );
+
+    try {
+      const querySnapshot = await getDocs(q);
+      const loadedReservations = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setReservations(loadedReservations);
+    } catch (error) {
+      console.error("Erreur lors du chargement des réservations", error);
+    }
+  };
 
   return (
     <SafeAreaView style={tw`flex-1`}>

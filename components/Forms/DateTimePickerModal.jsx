@@ -1,4 +1,5 @@
 import { Picker } from "@react-native-picker/picker";
+import { BlurView } from "expo-blur";
 import React, { useEffect, useState } from "react";
 import { Alert, Modal, Text, TouchableOpacity, View } from "react-native";
 import { Calendar } from "react-native-calendars";
@@ -44,10 +45,6 @@ const DateTimePickerModal = ({ isVisible, onClose, onConfirm }) => {
     }
     const dateTime = `${selectedDay.dateString} ${selectedTime}`;
     onConfirm(dateTime);
-    Alert.alert(
-      "Rendez-vous validé !",
-      `Votre rendez-vous est validé le : ${dateTime}`
-    );
     onClose();
   };
 
@@ -58,37 +55,40 @@ const DateTimePickerModal = ({ isVisible, onClose, onConfirm }) => {
 
   return (
     <Modal visible={isVisible} animationType="slide" transparent={true}>
-      <View style={tw`m-4 bg-white rounded-xl p-4 shadow-lg`}>
-        <TouchableOpacity onPress={onClose} style={tw`absolute top-2 left-1`}>
-          <Text style={tw`text-black text-xl font-bold`}>✕</Text>
-        </TouchableOpacity>
-        <Calendar
-          style={tw`mt-5`}
-          onDayPress={setSelectedDay}
-          markedDates={{
-            [selectedDay.dateString]: {
-              selected: true,
-              selectedColor: "#34469C",
-            },
-          }}
-          minDate={getDateString(new Date())}
-        />
-        <Picker
-          selectedValue={selectedTime}
-          onValueChange={(itemValue) => setSelectedTime(itemValue)}
-          style={tw`mb-4`}
-        >
-          {timeSlots.map((time, index) => (
-            <Picker.Item key={index} label={time} value={time} />
-          ))}
-        </Picker>
-        <TouchableOpacity
-          onPress={handleConfirm}
-          style={tw`bg-[#34469C] p-2 rounded-md w-full items-center mb-2`}
-        >
-          <Text style={tw`text-white font-semibold text-base`}>Valider</Text>
-        </TouchableOpacity>
-      </View>
+      <BlurView intensity={50} style={tw`absolute w-full h-full`}>
+        <View style={tw`m-4 bg-white rounded-xl p-4 shadow-lg`}>
+          <TouchableOpacity onPress={onClose} style={tw`absolute top-2 left-1`}>
+            <Text style={tw`text-black text-xl font-bold`}>✕</Text>
+          </TouchableOpacity>
+          <Calendar
+            style={tw`mt-5`}
+            onDayPress={setSelectedDay}
+            markedDates={{
+              [selectedDay.dateString]: {
+                selected: true,
+                selectedColor: "#34469C",
+              },
+            }}
+            minDate={getDateString(new Date())}
+          />
+          <View style={tw`mb-4 border border-gray-300 rounded-xl`}>
+            <Picker
+              selectedValue={selectedTime}
+              onValueChange={(itemValue) => setSelectedTime(itemValue)}
+            >
+              {timeSlots.map((time, index) => (
+                <Picker.Item key={index} label={time} value={time} />
+              ))}
+            </Picker>
+          </View>
+          <TouchableOpacity
+            onPress={handleConfirm}
+            style={tw`bg-[#34469C] p-2 rounded-md w-full items-center mb-2`}
+          >
+            <Text style={tw`text-white font-semibold text-base`}>Valider</Text>
+          </TouchableOpacity>
+        </View>
+      </BlurView>
     </Modal>
   );
 };

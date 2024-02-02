@@ -136,7 +136,7 @@ const UserScreen = () => {
               <View style={tw`p-2 bg-white mt-15 relative`}>
                 <Image
                   source={profileImage ? { uri: profileImage } : profilePic}
-                  style={tw`h-24 w-24 rounded-full`}
+                  style={tw`h-28 w-28 rounded-full`}
                 />
                 <TouchableOpacity
                   onPress={pickImage}
@@ -167,7 +167,7 @@ const UserScreen = () => {
           <SettingsList
             onPress={navigateToCarScreen}
             iconName="car"
-            text="Mes voitures"
+            text="Mes véhicules"
           />
         </View>
         <View style={tw`w-5/6`}>

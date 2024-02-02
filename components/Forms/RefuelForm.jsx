@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import * as Location from "expo-location";
+import { addDoc, collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -15,6 +16,7 @@ import {
 import Geocoder from "react-native-geocoding";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
+import { auth, db } from "../../firebaseConfig";
 import DateTimePickerModal from "./DateTimePickerModal";
 
 Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
@@ -25,6 +27,9 @@ const RefuelForm = ({ route, navigation }) => {
   const [address, setAddress] = useState("");
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
   const [price, setPrice] = useState(0);
+  const [selectedDateTime, setSelectedDateTime] = useState("");
+  const [vehicles, setVehicles] = useState([]);
+  const [selectedVehicleId, setSelectedVehicleId] = useState("");
 
   useEffect(() => {
     if (route.params?.address) {
@@ -48,25 +53,83 @@ const RefuelForm = ({ route, navigation }) => {
       .catch((error) => console.warn(error));
   };
 
-  const handleDateConfirm = (date) => {
-    // Ici vous pouvez ajouter la date à l'état si vous souhaitez l'afficher ou la sauvegarder
-    console.log("Date sélectionnée:", date);
-    // Logic pour sauvegarder la date en base de données
+  // Charger les véhicules
+  const loadVehicles = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        const querySnapshot = await getDocs(
+          collection(db, "users", user.uid, "vehicles")
+        );
+        const userVehicles = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setVehicles(userVehicles);
+      } catch (error) {
+        console.error("Erreur lors du chargement des véhicules", error);
+      }
+    }
+  };
+  useEffect(() => {
+    loadVehicles();
+  }, []);
+
+  const handleDateTimeConfirm = (dateTime) => {
+    setSelectedDateTime(dateTime);
+    setDateTimePickerVisible(false);
   };
 
-  const handleChooseAppointmentPress = () => {
-    // Vérifiez que toutes les entrées sont remplies
-    if (!selectedValue || !volume || !address) {
+  const showDateTimePicker = () => {
+    setDateTimePickerVisible(true);
+  };
+
+  const handleReservationConfirm = async () => {
+    if (
+      !selectedValue ||
+      !volume ||
+      !address ||
+      !selectedDateTime ||
+      !selectedVehicleId
+    ) {
       Alert.alert(
         "Erreur",
-        "Veuillez remplir tous les champs avant de choisir un rendez-vous."
+        "Veuillez remplir tous les champs avant de confirmer la réservation."
       );
       return;
     }
-    calculatePrice();
 
-    // Si tout est rempli, affichez la modale pour choisir l'heure
-    setDateTimePickerVisible(true);
+    const totalPrice = parseFloat(price) * parseFloat(volume);
+    const userId = auth.currentUser.uid;
+
+    // Formatage correct de la date et l'heure
+    const bookingDate = new Date(selectedDateTime);
+    const formattedTime =
+      bookingDate.getHours() + ":" + bookingDate.getMinutes();
+
+    const reservation = {
+      address,
+      bookingDate: bookingDate,
+      vehicleId: selectedVehicleId,
+      createdAt: new Date(),
+      fuelType: selectedValue,
+      isActive: true,
+      time: formattedTime,
+      userId,
+      volume: parseFloat(volume),
+      price: totalPrice,
+    };
+
+    try {
+      await addDoc(collection(db, "RefuelBookings"), reservation);
+      Alert.alert("Succès", "Votre réservation a été enregistrée.");
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement de la réservation", error);
+      Alert.alert(
+        "Erreur",
+        "Un problème est survenu lors de l'enregistrement de votre réservation."
+      );
+    }
   };
 
   const calculatePrice = (selectedFuel, currentAddress) => {
@@ -170,30 +233,56 @@ const RefuelForm = ({ route, navigation }) => {
           <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
           <View style={tw`bg-white rounded-md`}>
             <Picker
-              selectedValue={selectedValue}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedValue(itemValue)
-              }
+              selectedValue={selectedVehicleId}
+              onValueChange={(itemValue) => setSelectedVehicleId(itemValue)}
               style={tw``}
             >
-              <Picker.Item color="#34469C" label="206+" value="206+" />
-              <Picker.Item color="#34469C" label="Clio" value="Clio" />
+              {vehicles.map((vehicle) => (
+                <Picker.Item
+                  key={vehicle.id}
+                  label={vehicle.label}
+                  value={vehicle.id}
+                  color="#34469C"
+                />
+              ))}
             </Picker>
+          </View>
+        </View>
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+          <Text style={tw`text-xl font-bold mb-4`}>
+            Choisissez votre date de rendez-vous
+          </Text>
+          <View style={tw`rounded-md`}>
+            <TouchableOpacity
+              style={tw`border-b-2 border-[#34469C] font-bold text-base`}
+              value={selectedDateTime}
+              onPress={() => setDateTimePickerVisible(true)}
+              editable={false}
+            >
+              <TextInput
+                style={tw`text-black font-bold text-base`}
+                placeholder="Choisissez une date et une heure"
+                value={selectedDateTime}
+                onFocus={showDateTimePicker}
+                editable={false}
+              />
+            </TouchableOpacity>
           </View>
         </View>
 
         <DateTimePickerModal
           isVisible={isDateTimePickerVisible}
           onClose={() => setDateTimePickerVisible(false)}
-          onConfirm={handleDateConfirm}
+          onConfirm={handleDateTimeConfirm}
         />
+
         <View style={tw`mb-4 mt-3 flex items-center`}>
           <TouchableOpacity
-            onPress={handleChooseAppointmentPress}
+            onPress={handleReservationConfirm}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
           >
             <Text style={tw`text-white font-semibold text-base`}>
-              Choisir mon rendez-vous
+              Valider mon rendez-vous
             </Text>
           </TouchableOpacity>
         </View>

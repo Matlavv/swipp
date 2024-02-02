@@ -4,7 +4,7 @@ import RefuelForm from "../components/Forms/RefuelForm";
 import RepairForm from "../components/Forms/RepairForm";
 import EmergencyScreen from "../screens/EmergencyScreen";
 import HomeScreen from "../screens/HomeScreen";
-import ChooseGarageForm from "./Forms/ChooseGarageForm";
+import ChooseGarageModal from "./Forms/ChooseGarageModal";
 import DateTimePickerModal from "./Forms/DateTimePickerModal";
 import MaintenanceForm from "./Forms/MaintenanceForm";
 import TechnicalControlForm from "./Forms/TechnicalControlForm";
@@ -50,8 +50,8 @@ const HomeStack = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="ChooseGarageForm"
-        component={ChooseGarageForm}
+        name="ChooseGarageModal"
+        component={ChooseGarageModal}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

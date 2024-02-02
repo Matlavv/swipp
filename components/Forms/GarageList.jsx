@@ -3,25 +3,12 @@ import React, { useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import tw from "twrnc";
 import { garage1 } from "../../assets";
-import DateTimePickerModal from "./DateTimePickerModal";
 
-const GarageList = () => {
-  const [isPickerVisible, setPickerVisible] = useState(false);
-  const [selectedGarage, setSelectedGarage] = useState(null);
+const GarageList = ({ onSelectGarage }) => {
+  const [selectedGarage, setSelectedGarage] = useState("");
 
   const handleBookPress = (garage) => {
     setSelectedGarage(garage);
-    setPickerVisible(true);
-  };
-
-  const handleClose = () => {
-    setPickerVisible(false);
-  };
-
-  const handleConfirm = (dateTime) => {
-    console.log("Réservation pour", selectedGarage, "à", dateTime);
-    // Ici, vous pouvez gérer la confirmation, comme la mise à jour d'un état ou l'envoi à un serveur
-    setPickerVisible(false);
   };
 
   const garages = [
@@ -34,12 +21,6 @@ const GarageList = () => {
     {
       name: "Garage 2",
       description: "Pneu et jantes",
-      workerCount: "20",
-      image: garage1,
-    },
-    {
-      name: "Garage 3",
-      description: "Peinture",
       workerCount: "20",
       image: garage1,
     },
@@ -71,7 +52,7 @@ const GarageList = () => {
                     {garage.workerCount} Workers
                   </Text>
                   <TouchableOpacity
-                    onPress={() => handleBookPress(garage)}
+                    onPress={() => onSelectGarage(garage)}
                     style={tw`bg-[#34469C] px-4 py-1 rounded-full flex-row`}
                   >
                     <Text style={tw`text-white text-sm mr-1`}>Book</Text>
@@ -83,11 +64,6 @@ const GarageList = () => {
           </View>
         ))}
       </ScrollView>
-      <DateTimePickerModal
-        isVisible={isPickerVisible}
-        onClose={handleClose}
-        onConfirm={handleConfirm}
-      />
     </>
   );
 };

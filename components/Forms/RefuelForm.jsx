@@ -19,12 +19,15 @@ import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
 import DateTimePickerModal from "./DateTimePickerModal";
 
+
 Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
 
 const RefuelForm = ({ route, navigation }) => {
   const [selectedValue, setSelectedValue] = useState("SP98");
   const [volume, setVolume] = useState("");
+  const [options, setOptions] = useState([]);
   const [address, setAddress] = useState("");
+  const [addresses, setAddresses] = useState([]);
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
   const [price, setPrice] = useState(0);
   const [selectedDateTime, setSelectedDateTime] = useState("");
@@ -36,6 +39,28 @@ const RefuelForm = ({ route, navigation }) => {
       setAddress(route.params.address);
     }
   }, [route.params?.address]);
+
+  const loadAddresses = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        const querySnapshot = await getDocs(
+          collection(db, "users", user.uid, "adresses")
+        );
+        const userAddresses = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setAddresses(userAddresses);
+      } catch (error) {
+        console.error("Erreur lors du chargement des adresses", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadAddresses();
+  }, []);
 
   const handleLocatePress = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -84,6 +109,11 @@ const RefuelForm = ({ route, navigation }) => {
     setDateTimePickerVisible(true);
   };
 
+  const calculateTotalPrice = () => {
+    const totalPrice = parseFloat(volume) * price;
+    return totalPrice.toFixed(2); // Retourne le prix total avec 2 décimales
+  };
+
   const handleReservationConfirm = async () => {
     if (
       !selectedValue ||
@@ -98,15 +128,15 @@ const RefuelForm = ({ route, navigation }) => {
       );
       return;
     }
-
-    const totalPrice = parseFloat(price) * parseFloat(volume);
+  
+    const totalPrice = calculateTotalPrice();
     const userId = auth.currentUser.uid;
-
+  
     // Formatage correct de la date et l'heure
     const bookingDate = new Date(selectedDateTime);
     const formattedTime =
       bookingDate.getHours() + ":" + bookingDate.getMinutes();
-
+  
     const reservation = {
       address,
       bookingDate: bookingDate,
@@ -119,10 +149,19 @@ const RefuelForm = ({ route, navigation }) => {
       volume: parseFloat(volume),
       price: totalPrice,
     };
-
+  
     try {
       await addDoc(collection(db, "RefuelBookings"), reservation);
-      Alert.alert("Succès", "Votre réservation a été enregistrée.");
+      Alert.alert(
+        "Succès",
+        `Votre réservation a été enregistrée. PRIX : ${totalPrice} €`,
+        [
+          {
+            text: "OKAY",
+            onPress: () => navigation.navigate("Accueil"), // Redirection vers l'accueil après avoir cliqué sur "OK"
+          },
+        ]
+      );
     } catch (error) {
       console.error("Erreur lors de l'enregistrement de la réservation", error);
       Alert.alert(
@@ -180,11 +219,13 @@ const RefuelForm = ({ route, navigation }) => {
             Indiquez le point de rendez-vous
           </Text>
           <View style={tw`rounded-md`}>
+            {/* Text input pour saisir l'adresse */}
             <TextInput
               style={tw`border-b-2 border-[#34469C] font-bold text-base`}
               value={address}
               onChangeText={setAddress}
             />
+            {/* Bouton pour se géolocaliser */}
             <TouchableOpacity onPress={handleLocatePress}>
               <Text style={tw`text-blue-900 m-2 font-semibold`}>
                 Me géolocaliser
@@ -275,8 +316,11 @@ const RefuelForm = ({ route, navigation }) => {
           onClose={() => setDateTimePickerVisible(false)}
           onConfirm={handleDateTimeConfirm}
         />
-
+        
         <View style={tw`mb-4 mt-3 flex items-center`}>
+          <Text style={tw`text-lg font-semibold`}>
+              Prix total : {calculateTotalPrice()} €
+          </Text>
           <TouchableOpacity
             onPress={handleReservationConfirm}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}

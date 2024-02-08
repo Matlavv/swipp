@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { onAuthStateChanged } from "firebase/auth";
 import React, { useEffect, useState } from "react";
-import { Keyboard, Text } from "react-native";
+import { Keyboard, Text, StatusBar } from "react-native";
 import tw from "twrnc";
 import { AuthProvider } from "./AuthContext";
 import HomeStack from "./components/HomeStack";
@@ -26,13 +26,15 @@ const CustomTabLabel = ({ route, focused }) => {
   const labelText = route?.name;
   const labelStyle = focused ? tw`text-white` : tw`text-gray-400`;
 
-  return focused ? <Text style={tw`text-white`}>{labelText}</Text> : null;
+  return focused ? <Text style={[tw`text-white`, tw`mb-2`]}>{labelText}</Text> : null;
 };
 
 const App = () => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-
+  
+  StatusBar.setBackgroundColor(MyTheme.colors.background);
+  
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -64,7 +66,7 @@ const App = () => {
       }
     });
 
-    return () => unsubscribe(); // Nettoyez l'abonnement lors du démontage
+    return () => unsubscribe();
   }, []);
 
   return (

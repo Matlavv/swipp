@@ -114,7 +114,7 @@ const UserScreen = () => {
 
   return (
     <SafeAreaView style={tw`flex-1`}>
-      <ScrollView contentContainerStyle={tw`flex-1 items-center`}>
+      <ScrollView style={tw`flex-1`} contentContainerStyle={tw`items-center`}>
         {/* Zone de profil avec image de fond */}
         <View style={tw`w-full`}>
           <Image
@@ -154,16 +154,20 @@ const UserScreen = () => {
         </View>
         <View style={tw`mt-80 w-5/6`}>
           <Text style={tw`m-4 font-bold text-xl`}>Compte</Text>
-          <SettingsList
-            onPress={navigateToUserScreen}
-            iconName="person"
-            text="Gérer mon compte"
-          />
-          <SettingsList
-            onPress={navigateToAdressScreen}
-            iconName="home"
-            text="Mes adresses"
-          />
+          <View style={tw`mb-2`}>
+            <SettingsList
+              onPress={navigateToUserScreen}
+              iconName="person"
+              text="Gérer mon compte"
+            />
+          </View>
+          <View style={tw`mb-2`}>
+            <SettingsList
+              onPress={navigateToAdressScreen}
+              iconName="home"
+              text="Mes adresses"
+            />
+          </View>
           <SettingsList
             onPress={navigateToCarScreen}
             iconName="car"
@@ -172,11 +176,13 @@ const UserScreen = () => {
         </View>
         <View style={tw`w-5/6`}>
           <Text style={tw`m-4 font-bold text-xl`}>Autres</Text>
-          <SettingsList
-            onPress={navigateToLegalScreen}
-            iconName="bookmark"
-            text="Mentions légales"
-          />
+          <View style={tw`mb-2`}>
+            <SettingsList
+              onPress={navigateToLegalScreen}
+              iconName="bookmark"
+              text="Mentions légales"
+            />
+          </View>
           <SettingsList
             onPress={navigateToAboutScreen}
             iconName="information-circle-sharp"

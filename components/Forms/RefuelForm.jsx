@@ -18,6 +18,7 @@ import tw from "twrnc";
 import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
 import DateTimePickerModal from "./DateTimePickerModal";
+import { MultipleSelectList } from 'react-native-dropdown-select-list'
 
 
 Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
@@ -33,6 +34,15 @@ const RefuelForm = ({ route, navigation }) => {
   const [selectedDateTime, setSelectedDateTime] = useState("");
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
+  const [selectedOptions, setSelectedOptions] = React.useState([]);
+
+  const data = [
+    { key: '1', value: 'adblue' },
+    { key: '2', value: 'lave vitre' },
+    { key: '3', value: 'gonflage de pneus' },
+    { key: '4', value: 'liquide de refroidissement' },
+  ];
+
 
   useEffect(() => {
     if (route.params?.address) {
@@ -148,6 +158,7 @@ const RefuelForm = ({ route, navigation }) => {
       userId,
       volume: parseFloat(volume),
       price: totalPrice,
+      options: selectedOptions,
     };
   
     try {
@@ -158,7 +169,7 @@ const RefuelForm = ({ route, navigation }) => {
         [
           {
             text: "OKAY",
-            onPress: () => navigation.navigate("Accueil"), // Redirection vers l'accueil après avoir cliqué sur "OK"
+            onPress: () => navigation.navigate("Accueil"), // marche pas
           },
         ]
       );
@@ -268,6 +279,25 @@ const RefuelForm = ({ route, navigation }) => {
             value={volume}
             onChangeText={setVolume}
           />
+        </View>
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 my-3`}>
+          <Text style={tw`text-xl font-bold mb-4`}>
+            Sélectionnez vos options
+          </Text>
+          <View style={tw`bg-gray-200 rounded-md`}>
+            <MultipleSelectList
+              setSelected={(val) => setSelectedOptions(val)}
+              data={data}
+              save="value"
+              placeholder="Options"
+              search={false}
+              label="Options"
+              boxStyles={{backgroundColor: "white", borderColor: "white", borderRadius:5}}
+              dropdownStyles={{backgroundColor: 'white',}}
+              dropdownShown
+              
+            />
+          </View>
         </View>
         {/* Choose vehicle */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>

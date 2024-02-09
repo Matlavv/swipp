@@ -18,7 +18,7 @@ import tw from "twrnc";
 import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
 import DateTimePickerModal from "./DateTimePickerModal";
-import { MultipleSelectList } from 'react-native-dropdown-select-list'
+import { MultipleSelectList, SelectList } from 'react-native-dropdown-select-list'
 
 
 Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
@@ -35,6 +35,7 @@ const RefuelForm = ({ route, navigation }) => {
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [selectedOptions, setSelectedOptions] = React.useState([]);
+  // const [selected, setSelected] = React.useState("");
 
   const data = [
     { key: '1', value: 'adblue' },
@@ -109,6 +110,9 @@ const RefuelForm = ({ route, navigation }) => {
   useEffect(() => {
     loadVehicles();
   }, []);
+
+
+
 
   const handleDateTimeConfirm = (dateTime) => {
     setSelectedDateTime(dateTime);
@@ -232,13 +236,31 @@ const RefuelForm = ({ route, navigation }) => {
           <View style={tw`rounded-md`}>
             {/* Text input pour saisir l'adresse */}
             <TextInput
-              style={tw`border-b-2 border-[#34469C] font-bold text-base`}
+              style={tw`border-b-2 mb-4 border-[#34469C] font-bold text-base`}
               value={address}
               onChangeText={setAddress}
             />
+            <Text style={tw`text-lg font-semibold mb-2`}>
+              Mes adresses
+            </Text>
+            <SelectList 
+              setSelected={(val) => setAddress(val)} 
+              data={addresses.map(address => ({ 
+                value: `${address.adresse} - ${address.codePostal} - ${address.ville}`, // Ajoute l'adresse et le code postal
+                id: address.id // Ajoute l'identifiant de l'adresse comme une autre variable
+              }))} 
+              onSelect={() => setAddress(address)} 
+              save="value"
+            />
             {/* Bouton pour se géolocaliser */}
-            <TouchableOpacity onPress={handleLocatePress}>
-              <Text style={tw`text-blue-900 m-2 font-semibold`}>
+            <Text style={tw`text-lg font-semibold mb-2`}>
+              Ou
+            </Text>
+            <TouchableOpacity 
+              onPress={handleLocatePress}
+              style={tw`bg-blue-900 py-2 px-4 rounded-lg justify-center items-center`}
+            >
+              <Text style={tw`text-white font-semibold`}>
                 Me géolocaliser
               </Text>
             </TouchableOpacity>

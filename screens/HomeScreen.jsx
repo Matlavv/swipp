@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import tw from "twrnc";
 import { AuthContext } from "../AuthContext";
-import { swippLogo } from "../assets";
+import { swippLogo, profilePic } from "../assets";
 import DisplayAdress from "../components/DisplayAdress";
 import NavOptions from "../components/NavOptions";
 import SuggestedList from "../components/SuggestedList";
@@ -19,6 +19,7 @@ import { auth, db } from "../firebaseConfig";
 
 const HomeScreen = () => {
   const [username, setUsername] = useState("");
+  const [profileImage, setProfileImage] = useState("");
   const navigation = useNavigation();
   const { currentUser } = useContext(AuthContext);
 
@@ -31,6 +32,8 @@ const HomeScreen = () => {
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             setUsername(docSnap.data().username);
+            const profileImageUrl = docSnap.data().profileImageUrl || profilePic;
+            setProfileImage(profileImageUrl);
           } else {
             console.log("Document utilisateur introuvable");
           }
@@ -57,15 +60,27 @@ const HomeScreen = () => {
     navigation.navigate("Services");
   };
 
+  const navigateToProfile = () => {
+    navigation.navigate("Profile");
+  };
+
   return (
     <SafeAreaView style={tw`flex h-full`}>
       <ScrollView style={tw`flex-1`}>
         {/* Logo */}
         <View style={tw`flex p-5 mt-5 justify-start items-start flex flex-row`}>
           <Image style={tw`w-25 h-15`} source={swippLogo} />
+          {/* {currentUser && (
+            <TouchableOpacity onPress={navigateToProfile} style={tw`ml-auto mr-5 mt-2`}>
+              <Image
+                  source={profileImage ? { uri: profileImage } : profilePic}
+                  style={tw`h-28 w-20 rounded-full`}
+              />
+            </TouchableOpacity>
+          )} */}
         </View>
         <Text style={tw`text-2xl font-bold m-5`}>
-          Bonjour {username || "!"} 👋
+          Bonjour {username || "!"} 🖕🕺👨‍🦯
         </Text>
         <View style={tw`flex`}>
           <NavOptions />

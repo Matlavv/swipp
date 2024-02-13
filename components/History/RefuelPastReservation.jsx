@@ -1,12 +1,24 @@
+import { useNavigation } from "@react-navigation/native";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { FlatList, SafeAreaView, Text, View } from "react-native";
+import {
+  FlatList,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import tw from "twrnc";
 import { auth, db } from "../../firebaseConfig";
 
 const RefuelPastReservation = () => {
   const [reservations, setReservations] = useState([]);
+  const navigation = useNavigation();
+
+  const navigateToDetail = (reservationId) => {
+    navigation.navigate("DetailledRefuelReservation", { reservationId });
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -26,7 +38,8 @@ const RefuelPastReservation = () => {
     const q = query(
       collection(db, "RefuelBookings"),
       where("userId", "==", auth.currentUser.uid),
-      where("isActive", "==", false)
+      where("isActive", "==", false),
+      where("cancelled", "==", false)
     );
 
     try {
@@ -47,8 +60,9 @@ const RefuelPastReservation = () => {
         data={reservations}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View
+          <TouchableOpacity
             style={tw`flex-row ml-6 w-90 p-2 bg-white border border-gray-200 rounded-2xl shadow-md mt-1 mb-3`}
+            onPress={() => navigateToDetail(item.id)}
           >
             <View>
               <Text
@@ -78,7 +92,7 @@ const RefuelPastReservation = () => {
                 </Text>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
       />
     </SafeAreaView>

@@ -70,7 +70,7 @@ const LoginScreen = ({ navigation }) => {
           />
           <TextInput
             style={tw`border-b w-80 p-2 mb-4`}
-            placeholder="Password"
+            placeholder="Mot de passe"
             autoCapitalize="none"
             secureTextEntry
             value={password}

@@ -86,7 +86,7 @@ const SignUpScreen = ({ navigation }) => {
           />
           <TextInput
             style={tw`border-b w-80 p-2 mb-4`}
-            placeholder="Password"
+            placeholder="Mot de passe"
             autoCapitalize="none"
             secureTextEntry
             value={password}
@@ -94,7 +94,7 @@ const SignUpScreen = ({ navigation }) => {
           />
           <TextInput
             style={tw`border-b w-80 p-2 mb-4`}
-            placeholder="Username"
+            placeholder="Nom d'utilisateur"
             value={username}
             onChangeText={setUsername}
           />

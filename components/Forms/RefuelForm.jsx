@@ -22,7 +22,7 @@ import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
 import DateTimePickerModal from "./DateTimePickerModal";
 
-Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
+Geocoder.init(process.env.GEOCODER_API_KEY);
 
 const RefuelForm = ({ route, navigation }) => {
   const [selectedValue, setSelectedValue] = useState("SP98");

@@ -104,6 +104,7 @@ const RepairForm = ({ route, navigation }) => {
         bookingDate: bookingDate,
         garageId: selectedGarage,
         isActive: true,
+        cancelled: false,
       };
 
       // Ajout de la réservation à Firestore

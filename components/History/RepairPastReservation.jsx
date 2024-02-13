@@ -2,7 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { FlatList, Image, SafeAreaView, Text, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import tw from "twrnc";
 import { maintenance, oil_change, reparation } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
@@ -28,7 +35,8 @@ const RepairIncomingReservation = () => {
     const q = query(
       collection(db, "RepairBookings"),
       where("userId", "==", auth.currentUser.uid),
-      where("isActive", "==", false)
+      where("isActive", "==", false),
+      where("cancelled", "==", false)
     );
 
     try {
@@ -71,7 +79,7 @@ const RepairIncomingReservation = () => {
       <View
         style={tw`w-93 h-55 p-2 bg-white border border-gray-200 rounded-2xl m-1 mr-4 shadow-md mt-3`}
       >
-        <View style={tw`flex-row justify-between`}>
+        <TouchableOpacity style={tw`flex-row justify-between`}>
           <View style={tw`flex-1`}>
             <Text
               style={tw`text-gray-700 font-black text-2xl m-2`}
@@ -117,7 +125,7 @@ const RepairIncomingReservation = () => {
               style={tw`w-full h-full`}
             />
           </View>
-        </View>
+        </TouchableOpacity>
       </View>
     );
   };

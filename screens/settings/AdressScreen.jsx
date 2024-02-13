@@ -131,7 +131,7 @@ const AdressScreen = () => {
         <View style={tw`flex-1 justify-center items-center mt-10`}>
           <TextInput
             style={tw`border-b w-80 p-2 mb-4`}
-            placeholder="Adresse"
+            placeholder="Adresse, ex: 123 rue de la Paix"
             value={adresse}
             onChangeText={setAdresse}
           />

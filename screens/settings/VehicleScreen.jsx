@@ -86,7 +86,7 @@ const VehicleScreen = () => {
           modele,
           annee,
         });
-        Alert.alert("Voiture ajoutée !");
+        Alert.alert("Véhicule ajouté !");
         setLabel("");
         setType("");
         setImmatriculation("");
@@ -155,13 +155,13 @@ const VehicleScreen = () => {
       <View style={tw`m-4 flex-1 justify-center items-center`}>
         <TextInput
           style={tw`border-b w-80 p-2 mb-4`}
-          placeholder="Label"
+          placeholder="Label, ex: Ma voiture"
           value={label}
           onChangeText={setLabel}
         />
         <TextInput
           style={tw`border-b w-80 p-2 mb-4`}
-          placeholder="Type (voiture, moto, scooter, camionette)"
+          placeholder="Type (voiture, moto, scooter, camionette...)"
           value={type}
           onChangeText={setType}
         />
@@ -173,7 +173,8 @@ const VehicleScreen = () => {
         />
         <TextInput
           style={tw`border-b w-80 p-2 mb-4`}
-          placeholder="Type de carburant (diesel, SP98, SP95, gasoil, E85)"
+          placeholder="Type de carburant (diesel, SP98, SP95, gasoil...)"
+          autoCapitalize="characters"
           value={carburant}
           onChangeText={setCarburant}
         />

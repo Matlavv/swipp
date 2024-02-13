@@ -25,13 +25,15 @@ const SignUpScreen = ({ navigation }) => {
       Alert.alert("Erreur", "Veuillez entrer une adresse email valide.");
       return false;
     }
-    if (password.length < 6) {
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\S]{8,}$/;
+    if (!passwordRegex.test(password)) {
       Alert.alert(
         "Erreur",
-        "Le mot de passe doit contenir au moins 6 caractères."
+        "Le mot de passe doit contenir au moins 8 caractères, incluant au moins un chiffre et une majuscule."
       );
       return false;
     }
+
     if (username.length === 0) {
       Alert.alert("Erreur", "Veuillez entrer un nom d'utilisateur.");
       return false;
@@ -40,7 +42,7 @@ const SignUpScreen = ({ navigation }) => {
   };
 
   const handleSignUp = async () => {
-    if (!validateInputs()) return; // Valider les entrées avant de continuer
+    if (!validateInputs()) return;
 
     try {
       const userCredential = await createUserWithEmailAndPassword(

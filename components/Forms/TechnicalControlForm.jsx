@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
-import * as Location from "expo-location";
+import { addDoc, collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Image,
   SafeAreaView,
   ScrollView,
@@ -11,42 +11,85 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Geocoder from "react-native-geocoding";
+import { SelectList } from "react-native-dropdown-select-list";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
+import { auth, db } from "../../firebaseConfig";
+import ChooseGarageModal from "./ChooseGarageModal";
+import DateTimePickerModal from "./DateTimePickerModal";
 
-Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
-
-const TechnicalControlForm = ({ route, navigation }) => {
-  const [selectedValue, setSelectedValue] = useState("SP98");
-  const [volume, setVolume] = useState("");
-  const [address, setAddress] = useState("");
+const TechnicalControlForm = ({ navigation }) => {
+  const [vehicles, setVehicles] = useState([]);
+  const [selectedVehicleId, setSelectedVehicleId] = useState("");
+  const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
+  const [selectedDateTime, setSelectedDateTime] = useState("");
+  const [isGarageModalVisible, setGarageModalVisible] = useState(false);
+  const [selectedGarage, setSelectedGarage] = useState({});
 
   useEffect(() => {
-    if (route.params?.address) {
-      setAddress(route.params.address);
-    }
-  }, [route.params?.address]);
+    const loadVehicles = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const querySnapshot = await getDocs(
+            collection(db, "users", user.uid, "vehicles")
+          );
+          const userVehicles = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setVehicles(userVehicles);
+        } catch (error) {
+          console.error("Erreur lors du chargement des véhicules", error);
+        }
+      }
+    };
+    loadVehicles();
+  }, []);
 
-  const navigateToChooseGarageForm = () => {
-    navigation.navigate("ChooseGarageForm");
+  const handleDateTimeConfirm = (dateTime) => {
+    setSelectedDateTime(dateTime.toString());
+    setDateTimePickerVisible(false);
   };
 
-  const handleLocatePress = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      alert("Permission to access location was denied");
+  const handleSelectGarage = (garage) => {
+    setSelectedGarage(garage);
+    setGarageModalVisible(false);
+  };
+
+  const handleReservationConfirm = async () => {
+    if (!selectedVehicleId || !selectedGarage || !selectedDateTime) {
+      Alert.alert("Erreur", "Veuillez remplir tous les champs requis.");
       return;
     }
 
-    let location = await Location.getCurrentPositionAsync({});
-    Geocoder.from(location.coords.latitude, location.coords.longitude)
-      .then((json) => {
-        const addressComponent = json.results[0].formatted_address;
-        setAddress(addressComponent);
-      })
-      .catch((error) => console.warn(error));
+    const userId = auth.currentUser.uid;
+    const bookingDate = new Date(selectedDateTime);
+    const reparationType = "Contrôle technique";
+
+    try {
+      const reservation = {
+        userId,
+        vehicleId: selectedVehicleId,
+        isActive: true,
+        createdAt: new Date(),
+        garageId: selectedGarage,
+        reparationType: reparationType,
+        bookingDate: bookingDate,
+      };
+
+      await addDoc(collection(db, "RepairBookings"), reservation);
+      Alert.alert("Succès", "Votre rendez-vous a été enregistré avec succès.");
+      navigation.goBack();
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la réservation", error);
+      Alert.alert(
+        "Erreur",
+        "Un problème est survenu lors de l'enregistrement de votre réservation."
+      );
+    }
   };
+
   return (
     <SafeAreaView style={tw`flex h-full`}>
       <ScrollView style={tw`flex-1`}>
@@ -61,51 +104,85 @@ const TechnicalControlForm = ({ route, navigation }) => {
             <Ionicons name="arrow-back-circle-outline" size={30} color="gray" />
           </TouchableOpacity>
           <Text style={tw`text-2xl font-bold m-5`}>
-            Controle technique du véhicule
+            Contrôle technique du véhicule
           </Text>
         </View>
         {/* Choose vehicle */}
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-5`}>
           <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
-          <View style={tw`bg-white rounded-md`}>
-            <Picker
-              selectedValue={selectedValue}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedValue(itemValue)
-              }
-              style={tw``}
-            >
-              <Picker.Item color="#34469C" label="206+" value="206+" />
-              <Picker.Item color="#34469C" label="Clio" value="Clio" />
-            </Picker>
+          <View style={tw`rounded-md`}>
+            <SelectList
+              setSelected={(itemValue) => setSelectedVehicleId(itemValue)}
+              data={vehicles.map((vehicle) => ({
+                id: vehicle.id,
+                value: `${vehicle.label} - ${vehicle.immatriculation}`,
+              }))}
+              placeholder="Indiquez le véhicule"
+              boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
+            />
           </View>
         </View>
-        {/* Location */}
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+        {/* Choose Garage */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-7`}>
           <Text style={tw`text-xl font-bold mb-4`}>
-            Trouvez un garage près de chez vous
+            Choisissez votre garage
           </Text>
           <View style={tw`rounded-md`}>
-            <TextInput
+            <TouchableOpacity
+              onPress={() => setGarageModalVisible(true)}
               style={tw`border-b-2 border-[#34469C] font-bold text-base`}
-              value={address}
-              onChangeText={setAddress}
+              value={selectedGarage}
+              editable={false}
+            >
+              <TextInput
+                style={tw`text-black font-bold text-base`}
+                placeholder="Sélectionnez un garage"
+                value={selectedGarage.name}
+                editable={false}
+              />
+            </TouchableOpacity>
+
+            <ChooseGarageModal
+              isVisible={isGarageModalVisible}
+              onClose={() => setGarageModalVisible(false)}
+              onSelectGarage={handleSelectGarage}
             />
-            <TouchableOpacity onPress={handleLocatePress}>
-              <Text style={tw`text-blue-900 m-2 font-semibold`}>
-                Me géolocaliser
-              </Text>
+          </View>
+        </View>
+        {/* Choose Date */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-7`}>
+          <Text style={tw`text-xl font-bold mb-4`}>
+            Choisissez votre date de rendez-vous
+          </Text>
+          <View style={tw`rounded-md`}>
+            <TouchableOpacity
+              style={tw`border-b-2 border-[#34469C] font-bold text-base`}
+              value={selectedDateTime}
+              onPress={() => setDateTimePickerVisible(true)}
+              editable={false}
+            >
+              <TextInput
+                style={tw`text-black font-bold text-base`}
+                placeholder="Choisissez une date et une heure"
+                value={selectedDateTime}
+                editable={false}
+              />
             </TouchableOpacity>
           </View>
         </View>
+        <DateTimePickerModal
+          isVisible={isDateTimePickerVisible}
+          onClose={() => setDateTimePickerVisible(false)}
+          onConfirm={handleDateTimeConfirm}
+        />
         {/* Submit button */}
-        <View style={tw`mb-4 mt-3 flex items-center`}>
+        <View style={tw`mb-4 mt-7 flex items-center`}>
           <TouchableOpacity
-            onPress={navigateToChooseGarageForm}
+            onPress={handleReservationConfirm}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
           >
             <Text style={tw`text-white font-semibold text-base`}>
-              Choisir mon garage
+              Valider mon rendez-vous
             </Text>
           </TouchableOpacity>
         </View>

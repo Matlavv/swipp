@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
 import { addDoc, collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
@@ -12,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SelectList } from "react-native-dropdown-select-list";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
@@ -28,6 +28,14 @@ const RepairForm = ({ route, navigation }) => {
   const [selectedDateTime, setSelectedDateTime] = useState("");
   const [isGarageModalVisible, setGarageModalVisible] = useState(false);
   const [selectedGarage, setSelectedGarage] = useState("");
+
+  const repairOptions = [
+    { id: "moteur", value: "Réparation du moteur" },
+    { id: "transmission", value: "Réparation de la transmission" },
+    { id: "direction", value: "Réparation de la direction" },
+    { id: "carrosserie", value: "Réparation de la carrosserie" },
+    { id: "echappement", value: "Réparation du système d'échappement" },
+  ];
 
   useEffect(() => {
     if (route.params?.address) {
@@ -70,7 +78,6 @@ const RepairForm = ({ route, navigation }) => {
   }, []);
 
   const handleReservationConfirm = async () => {
-    // Assurez-vous que toutes les informations nécessaires sont présentes
     if (
       !selectedValue ||
       !selectedVehicleId ||
@@ -95,12 +102,14 @@ const RepairForm = ({ route, navigation }) => {
         reparationType: reparationType,
         reparationDetail: selectedValue,
         bookingDate: bookingDate,
-        garageId: selectedGarage.name,
+        garageId: selectedGarage,
+        isActive: true,
       };
 
       // Ajout de la réservation à Firestore
-      await addDoc(collection(db, "RepairsBookings"), reservation);
+      await addDoc(collection(db, "RepairBookings"), reservation);
       Alert.alert("Succès", "Votre rendez-vous a été enregistré avec succès.");
+      navigation.goBack();
     } catch (error) {
       console.error("Erreur lors de l'ajout de la réservation", error);
       Alert.alert(
@@ -129,58 +138,28 @@ const RepairForm = ({ route, navigation }) => {
           <Text style={tw`text-xl font-bold mb-4`}>
             Sélectionnez votre besoin
           </Text>
-          <View style={tw`bg-white rounded-md`}>
-            <Picker
-              selectedValue={selectedValue}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedValue(itemValue)
-              }
-            >
-              <Picker.Item
-                color="#34469C"
-                label="Réparation du moteur"
-                value="moteur"
-              />
-              <Picker.Item
-                color="#34469C"
-                label="Réparation de la transmission"
-                value="transmission"
-              />
-              <Picker.Item
-                color="#34469C"
-                label="Réparation de la direction"
-                value="direction"
-              />
-              <Picker.Item
-                color="#34469C"
-                label="Réparation de la carrosserie"
-                value="carrosserie"
-              />
-              <Picker.Item
-                color="#34469C"
-                label="Réparation du système d'échappement"
-                value="echappement"
-              />
-            </Picker>
+          <View style={tw`rounded-md`}>
+            <SelectList
+              setSelected={(itemValue) => setSelectedValue(itemValue)}
+              data={repairOptions}
+              placeholder="Sélectionnez votre besoin"
+              boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
+            />
           </View>
         </View>
         {/* Choose vehicle */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
           <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
-          <View style={tw`bg-white rounded-md`}>
-            <Picker
-              selectedValue={selectedVehicleId}
-              onValueChange={(itemValue) => setSelectedVehicleId(itemValue)}
-            >
-              {vehicles.map((vehicle) => (
-                <Picker.Item
-                  key={vehicle.id}
-                  label={vehicle.label}
-                  value={vehicle.id}
-                  color="#34469C"
-                />
-              ))}
-            </Picker>
+          <View style={tw`rounded-md`}>
+            <SelectList
+              setSelected={(itemValue) => setSelectedVehicleId(itemValue)}
+              data={vehicles.map((vehicle) => ({
+                id: vehicle.id,
+                value: `${vehicle.label} - ${vehicle.immatriculation}`,
+              }))}
+              placeholder="Indiquez le véhicule"
+              boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
+            />
           </View>
         </View>
         {/* Choose Garage */}

@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
 import * as Location from "expo-location";
 import { addDoc, collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
@@ -13,13 +12,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  MultipleSelectList,
+  SelectList,
+} from "react-native-dropdown-select-list";
 import Geocoder from "react-native-geocoding";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
 import DateTimePickerModal from "./DateTimePickerModal";
-import { MultipleSelectList, SelectList } from 'react-native-dropdown-select-list'
-
 
 Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
 
@@ -34,16 +35,21 @@ const RefuelForm = ({ route, navigation }) => {
   const [selectedDateTime, setSelectedDateTime] = useState("");
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
-  const [selectedOptions, setSelectedOptions] = React.useState([]);
-  // const [selected, setSelected] = React.useState("");
+  const [selectedOptions, setSelectedOptions] = useState([]);
 
   const data = [
-    { key: '1', value: 'adblue' },
-    { key: '2', value: 'lave vitre' },
-    { key: '3', value: 'gonflage de pneus' },
-    { key: '4', value: 'liquide de refroidissement' },
+    { key: "1", value: "adblue" },
+    { key: "2", value: "lave vitre" },
+    { key: "3", value: "gonflage de pneus" },
+    { key: "4", value: "liquide de refroidissement" },
   ];
 
+  const fuelOptions = [
+    { id: "SP98", value: "SP98" },
+    { id: "SP95", value: "SP95" },
+    { id: "Gasoil", value: "Gasoil" },
+    { id: "E85", value: "E85" },
+  ];
 
   useEffect(() => {
     if (route.params?.address) {
@@ -111,9 +117,6 @@ const RefuelForm = ({ route, navigation }) => {
     loadVehicles();
   }, []);
 
-
-
-
   const handleDateTimeConfirm = (dateTime) => {
     setSelectedDateTime(dateTime);
     setDateTimePickerVisible(false);
@@ -125,7 +128,7 @@ const RefuelForm = ({ route, navigation }) => {
 
   const calculateTotalPrice = () => {
     const totalPrice = parseFloat(volume) * price;
-    return totalPrice.toFixed(2); // Retourne le prix total avec 2 décimales
+    return totalPrice.toFixed(2);
   };
 
   const handleReservationConfirm = async () => {
@@ -142,41 +145,36 @@ const RefuelForm = ({ route, navigation }) => {
       );
       return;
     }
-  
+
     const totalPrice = calculateTotalPrice();
     const userId = auth.currentUser.uid;
-  
+
     // Formatage correct de la date et l'heure
     const bookingDate = new Date(selectedDateTime);
     const formattedTime =
       bookingDate.getHours() + ":" + bookingDate.getMinutes();
-  
-    const reservation = {
-      address,
-      bookingDate: bookingDate,
-      vehicleId: selectedVehicleId,
-      createdAt: new Date(),
-      fuelType: selectedValue,
-      isActive: true,
-      time: formattedTime,
-      userId,
-      volume: parseFloat(volume),
-      price: totalPrice,
-      options: selectedOptions,
-    };
-  
+
     try {
+      const reservation = {
+        address,
+        bookingDate: bookingDate,
+        vehicleId: selectedVehicleId,
+        createdAt: new Date(),
+        fuelType: selectedValue,
+        isActive: true,
+        time: formattedTime,
+        userId,
+        volume: parseFloat(volume),
+        price: totalPrice,
+        options: selectedOptions,
+      };
+
       await addDoc(collection(db, "RefuelBookings"), reservation);
       Alert.alert(
         "Succès",
-        `Votre réservation a été enregistrée. PRIX : ${totalPrice} €`,
-        [
-          {
-            text: "OKAY",
-            onPress: () => navigation.navigate("Accueil"), // marche pas
-          },
-        ]
+        `Votre réservation a été enregistrée. Pour un total de : ${totalPrice} €`
       );
+      navigation.goBack();
     } catch (error) {
       console.error("Erreur lors de l'enregistrement de la réservation", error);
       Alert.alert(
@@ -240,29 +238,25 @@ const RefuelForm = ({ route, navigation }) => {
               value={address}
               onChangeText={setAddress}
             />
-            <Text style={tw`text-lg font-semibold mb-2`}>
-              Mes adresses
-            </Text>
-            <SelectList 
-              setSelected={(val) => setAddress(val)} 
-              data={addresses.map(address => ({ 
+            <Text style={tw`text-lg font-semibold mb-2`}>Mes adresses</Text>
+            <SelectList
+              setSelected={(val) => setAddress(val)}
+              placeholder="Adresse"
+              boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
+              data={addresses.map((address) => ({
                 value: `${address.adresse} - ${address.codePostal} - ${address.ville}`, // Ajoute l'adresse et le code postal
-                id: address.id // Ajoute l'identifiant de l'adresse comme une autre variable
-              }))} 
-              onSelect={() => setAddress(address)} 
+                id: address.id, // Ajoute l'identifiant de l'adresse comme une autre variable
+              }))}
+              onSelect={() => setAddress(address)}
               save="value"
             />
             {/* Bouton pour se géolocaliser */}
-            <Text style={tw`text-lg font-semibold mb-2`}>
-              Ou
-            </Text>
-            <TouchableOpacity 
+            <Text style={tw`text-lg font-semibold mb-2`}>Ou</Text>
+            <TouchableOpacity
               onPress={handleLocatePress}
               style={tw`bg-blue-900 py-2 px-4 rounded-lg justify-center items-center`}
             >
-              <Text style={tw`text-white font-semibold`}>
-                Me géolocaliser
-              </Text>
+              <Text style={tw`text-white font-semibold`}>Me géolocaliser</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -271,19 +265,13 @@ const RefuelForm = ({ route, navigation }) => {
           <Text style={tw`text-xl font-bold mb-4`}>
             Selectionnez votre carburant
           </Text>
-          <View style={tw`bg-white rounded-md`}>
-            <Picker
-              selectedValue={selectedValue}
-              onValueChange={(itemValue, itemIndex) =>
-                setSelectedValue(itemValue)
-              }
-              style={tw``}
-            >
-              <Picker.Item color="#34469C" label="SP98" value="SP98" />
-              <Picker.Item color="#34469C" label="SP95" value="SP95" />
-              <Picker.Item color="#34469C" label="Gasoil" value="Gasoil" />
-              <Picker.Item color="#34469C" label="E85" value="E85" />
-            </Picker>
+          <View style={tw`rounded-md`}>
+            <SelectList
+              setSelected={(itemValue) => setSelectedValue(itemValue)}
+              placeholder="Carburant"
+              data={fuelOptions}
+              boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
+            />
           </View>
           {/* Afficher le prix calculé sous le choix de carburant */}
           <Text style={tw`text-lg font-semibold mt-4`}>
@@ -303,10 +291,8 @@ const RefuelForm = ({ route, navigation }) => {
           />
         </View>
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 my-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>
-            Sélectionnez vos options
-          </Text>
-          <View style={tw`bg-gray-200 rounded-md`}>
+          <Text style={tw`text-xl font-bold mb-4`}>Ajouter des options</Text>
+          <View style={tw`bg-gray-200`}>
             <MultipleSelectList
               setSelected={(val) => setSelectedOptions(val)}
               data={data}
@@ -314,31 +300,28 @@ const RefuelForm = ({ route, navigation }) => {
               placeholder="Options"
               search={false}
               label="Options"
-              boxStyles={{backgroundColor: "white", borderColor: "white", borderRadius:5}}
-              dropdownStyles={{backgroundColor: 'white',}}
-              dropdownShown
-              
+              boxStyles={{
+                backgroundColor: "white",
+                borderColor: "#34469C",
+                borderRadius: 10,
+              }}
+              dropdownStyles={{ backgroundColor: "white" }}
             />
           </View>
         </View>
         {/* Choose vehicle */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
           <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
-          <View style={tw`bg-white rounded-md`}>
-            <Picker
-              selectedValue={selectedVehicleId}
-              onValueChange={(itemValue) => setSelectedVehicleId(itemValue)}
-              style={tw``}
-            >
-              {vehicles.map((vehicle) => (
-                <Picker.Item
-                  key={vehicle.id}
-                  label={`${vehicle.label} - ${vehicle.immatriculation}`}
-                  value={vehicle.id}
-                  color="#34469C"
-                />
-              ))}
-            </Picker>
+          <View style={tw`rounded-md`}>
+            <SelectList
+              setSelected={(itemValue) => setSelectedVehicleId(itemValue)}
+              placeholder="Véhicule"
+              data={vehicles.map((vehicle) => ({
+                id: vehicle.id,
+                value: `${vehicle.label} - ${vehicle.immatriculation}`,
+              }))}
+              boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
+            />
           </View>
         </View>
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
@@ -368,10 +351,10 @@ const RefuelForm = ({ route, navigation }) => {
           onClose={() => setDateTimePickerVisible(false)}
           onConfirm={handleDateTimeConfirm}
         />
-        
+
         <View style={tw`mb-4 mt-3 flex items-center`}>
           <Text style={tw`text-lg font-semibold`}>
-              Prix total : {calculateTotalPrice()} €
+            Prix total : {calculateTotalPrice()} €
           </Text>
           <TouchableOpacity
             onPress={handleReservationConfirm}

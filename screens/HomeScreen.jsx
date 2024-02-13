@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import tw from "twrnc";
 import { AuthContext } from "../AuthContext";
-import { swippLogo, profilePic } from "../assets";
+import { profilePic, swippLogo } from "../assets";
 import DisplayAdress from "../components/DisplayAdress";
 import NavOptions from "../components/NavOptions";
 import SuggestedList from "../components/SuggestedList";
@@ -32,7 +32,8 @@ const HomeScreen = () => {
           const docSnap = await getDoc(docRef);
           if (docSnap.exists()) {
             setUsername(docSnap.data().username);
-            const profileImageUrl = docSnap.data().profileImageUrl || profilePic;
+            const profileImageUrl =
+              docSnap.data().profileImageUrl || profilePic;
             setProfileImage(profileImageUrl);
           } else {
             console.log("Document utilisateur introuvable");
@@ -80,7 +81,7 @@ const HomeScreen = () => {
           )} */}
         </View>
         <Text style={tw`text-2xl font-bold m-5`}>
-          Bonjour {username || "!"} 🖕🕺👨‍🦯
+          Bonjour {username || "!"} 👋
         </Text>
         <View style={tw`flex`}>
           <NavOptions />

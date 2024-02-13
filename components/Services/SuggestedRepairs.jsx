@@ -1,22 +1,39 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import React from "react";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import React, { useContext } from "react";
+import {
+  Alert,
+  FlatList,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import tw from "twrnc";
+import { AuthContext } from "../../AuthContext";
 import { maintenance, oil_change, reparation } from "../../assets";
 
 const SuggestedRepair = () => {
-  const navigateToMaintenanceForm = () => {
-    navigation.navigate("MaintenanceForm");
-  };
-  const navigateToRepairForm = () => {
-    navigation.navigate("RepairForm");
-  };
-  const navigateToTechnicalControlForm = () => {
-    navigation.navigate("TechnicalControlForm");
-  };
-
   const navigation = useNavigation();
+  const { isAuthenticated } = useContext(AuthContext);
+
+  const handleNavigation = (screenName) => {
+    if (!isAuthenticated) {
+      Alert.alert(
+        "Accès Restreint",
+        "Vous devez être connecté pour accéder à cette fonctionnalité.",
+        [
+          { text: "Annuler", style: "cancel" },
+          {
+            text: "Se connecter",
+            onPress: () => navigation.navigate("LoginScreen"),
+          },
+        ]
+      );
+      return;
+    }
+    navigation.navigate(screenName);
+  };
 
   const services = [
     {
@@ -24,21 +41,21 @@ const SuggestedRepair = () => {
       name: "Changement d'huile",
       image: oil_change,
       price: "A partir de 60 €",
-      redirection: navigateToRepairForm,
+      redirection: "RepairForm",
     },
     {
       id: "2",
       name: "Révision générales",
       image: maintenance,
       price: "A partir de 50 €",
-      redirection: navigateToMaintenanceForm,
+      redirection: "MaintenanceForm",
     },
     {
       id: "3",
       name: "Contrôle technique",
       image: reparation,
       price: "A partir de 40 €",
-      redirection: navigateToTechnicalControlForm,
+      redirection: "TechnicalControlForm",
     },
   ];
   const renderItem = ({ item }) => (
@@ -55,7 +72,7 @@ const SuggestedRepair = () => {
           </Text>
           <TouchableOpacity
             style={tw`bg-[#34469C] px-4 py-1 rounded-full self-start flex-row mt-7`}
-            onPress={item.redirection}
+            onPress={() => handleNavigation(item.redirection)}
           >
             <Text style={tw`text-white text-sm`}>Réserver</Text>
             <Ionicons name="arrow-forward" size={20} color="white" />

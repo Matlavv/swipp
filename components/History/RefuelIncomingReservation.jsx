@@ -48,7 +48,7 @@ const RefuelIncomingReservation = () => {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View
-            style={tw`flex-row ml-6 w-90 p-2 bg-white border border-gray-200 rounded-2xl shadow-md mt-3`}
+            style={tw`flex-row ml-6 w-90 p-2 bg-white border border-gray-200 rounded-2xl shadow-md mt-1 mb-3`}
           >
             <View>
               <Text

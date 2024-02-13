@@ -167,6 +167,7 @@ const RefuelForm = ({ route, navigation }) => {
         volume: parseFloat(volume),
         price: totalPrice,
         options: selectedOptions,
+        cancelled: false,
       };
 
       await addDoc(collection(db, "RefuelBookings"), reservation);

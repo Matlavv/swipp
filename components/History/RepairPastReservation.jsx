@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
@@ -16,6 +17,11 @@ import { auth, db } from "../../firebaseConfig";
 
 const RepairIncomingReservation = () => {
   const [reservations, setReservations] = useState([]);
+  const navigation = useNavigation();
+
+  const navigateToDetail = (reservationId) => {
+    navigation.navigate("DetailledRepairReservation", { reservationId });
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -79,7 +85,10 @@ const RepairIncomingReservation = () => {
       <View
         style={tw`w-93 h-55 p-2 bg-white border border-gray-200 rounded-2xl m-1 mr-4 shadow-md mt-3`}
       >
-        <TouchableOpacity style={tw`flex-row justify-between`}>
+        <TouchableOpacity
+          style={tw`flex-row justify-between`}
+          onPress={() => navigateToDetail(item.id)}
+        >
           <View style={tw`flex-1`}>
             <Text
               style={tw`text-gray-700 font-black text-2xl m-2`}

@@ -6,12 +6,12 @@ import React, { useEffect, useState } from "react";
 import { Keyboard, StatusBar, Text } from "react-native";
 import tw from "twrnc";
 import { AuthProvider } from "./AuthContext";
+import HistoryStack from "./components/HistoryStack";
 import HomeStack from "./components/HomeStack";
 import ProfileStack from "./components/ProfileStack";
 import ServicesStack from "./components/ServicesStack";
 import { auth } from "./firebaseConfig";
 import EmergencyScreen from "./screens/EmergencyScreen";
-import HistoryScreen from "./screens/HistoryScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -116,7 +116,7 @@ const App = () => {
 
           <Tab.Screen name="Services" component={ServicesStack} />
           <Tab.Screen name="Urgence" component={EmergencyScreen} />
-          <Tab.Screen name="Historique" component={HistoryScreen} />
+          <Tab.Screen name="Historique" component={HistoryStack} />
           <Tab.Screen name="Profil" component={ProfileStack} />
         </Tab.Navigator>
       </NavigationContainer>

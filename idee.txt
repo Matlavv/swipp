@@ -1,0 +1,20 @@
+Inspiration Gaston service
+
+/!\ Créer un compte Stripe & developer Play Store
+
+
+ 
+TO DO :
+- mettre les clés API géoloc(RefuelForm) & firebaseConfig.js dans .env
+- Ajouter adresse au garage
+- Plus d'infos en cliquant sur la réservation (style)
+- Bandeau déroulant pour le litrage ? RefuelForm
+- Personnaliser les Alert
+- Images de logo, launchingScreen, icone d'application
+- Prix pour réparation, controle technique et entretien
+- Page d'urgence
+- Les réservations sont automatiquement passées en isActive = false quand la date est passée
+
+V2 
+- QR code avec un lien redirigeant vers son refuel de son véhicule
+- Profil pro pour les entreprises

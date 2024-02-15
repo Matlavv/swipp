@@ -1,7 +1,7 @@
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   SafeAreaView,
@@ -53,6 +53,12 @@ const RefuelPastReservation = () => {
       console.error("Erreur lors du chargement des réservations", error);
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadReservations();
+    }, [])
+  );
 
   return (
     <SafeAreaView style={tw`flex-1`}>

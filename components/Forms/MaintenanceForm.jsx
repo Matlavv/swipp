@@ -142,6 +142,13 @@ const MaintenanceForm = ({ navigation, route }) => {
     }
   };
 
+  const selectedStyle = tw`bg-[#34469C] p-2 rounded-md`;
+  const selectedTextStyle = tw`text-white`;
+
+  // Styles pour le bouton non sélectionné
+  const notSelectedStyle = tw`bg-[white] p-2 rounded-md border border-[#34469C]`;
+  const notSelectedTextStyle = tw`text-black`;
+
   return (
     <SafeAreaView style={tw`flex h-full`}>
       <ScrollView style={tw`flex-1`}>
@@ -189,19 +196,39 @@ const MaintenanceForm = ({ navigation, route }) => {
           <View style={tw`flex-row justify-around`}>
             <TouchableOpacity
               onPress={() => setRepairLocationType("garage")}
-              style={tw`bg-[${
-                repairLocationType === "garage" ? "#34469C" : "white"
-              }] p-2 rounded-md`}
+              style={
+                repairLocationType === "garage"
+                  ? selectedStyle
+                  : notSelectedStyle
+              }
             >
-              <Text style={tw`text-white`}>Garage</Text>
+              <Text
+                style={
+                  repairLocationType === "garage"
+                    ? selectedTextStyle
+                    : notSelectedTextStyle
+                }
+              >
+                Garage
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setRepairLocationType("address")}
-              style={tw`bg-[${
-                repairLocationType === "address" ? "#34469C" : "white"
-              }] p-2 rounded-md`}
+              style={
+                repairLocationType === "address"
+                  ? selectedStyle
+                  : notSelectedStyle
+              }
             >
-              <Text style={tw`text-white`}>Adresse</Text>
+              <Text
+                style={
+                  repairLocationType === "address"
+                    ? selectedTextStyle
+                    : notSelectedTextStyle
+                }
+              >
+                Adresse
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -219,8 +246,8 @@ const MaintenanceForm = ({ navigation, route }) => {
               placeholder="Adresse"
               boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
               data={addresses.map((address) => ({
-                value: `${address.adresse} - ${address.codePostal} - ${address.ville}`, // Ajoute l'adresse et le code postal
-                id: address.id, // Ajoute l'identifiant de l'adresse comme une autre variable
+                value: `${address.adresse} - ${address.codePostal} - ${address.ville}`,
+                id: address.id,
               }))}
               onSelect={() => setAddress(address)}
               save="value"

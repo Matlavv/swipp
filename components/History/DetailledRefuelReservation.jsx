@@ -65,14 +65,7 @@ const DetailledRefuelReservation = ({ route }) => {
       {reservation && (
         <View style={tw`p-4`}>
           <Text style={tw`text-lg font-semibold`}>
-            A propos de votre réservation du{" "}
-            {reservation.bookingDate.toDate().toLocaleString("fr-FR", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            A propos de votre réservation du {reservation.dateTime}
           </Text>
           <View
             style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}

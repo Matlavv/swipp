@@ -31,7 +31,7 @@ const RefuelIncomingReservation = () => {
       }
     });
 
-    return () => unsubscribe(); // Nettoyer l'écouteur lors du démontage du composant
+    return () => unsubscribe();
   }, []);
 
   const loadReservations = async () => {
@@ -73,7 +73,7 @@ const RefuelIncomingReservation = () => {
                 {item.address}
               </Text>
               <Text style={tw`text-gray-700 font-light text-xs m-2`}>
-                {item.bookingDate.toDate().toLocaleString()}
+                {item.dateTime}
               </Text>
             </View>
             <View style={tw`flex-row justify-center w-65`}>

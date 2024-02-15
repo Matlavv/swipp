@@ -76,6 +76,7 @@ const TechnicalControlForm = ({ navigation }) => {
         garageId: selectedGarage,
         reparationType: reparationType,
         bookingDate: bookingDate,
+        location: selectedGarage.name,
       };
 
       await addDoc(collection(db, "RepairBookings"), reservation);

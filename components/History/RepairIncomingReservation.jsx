@@ -113,9 +113,9 @@ const RepairIncomingReservation = () => {
               <Text
                 numberOfLines={1}
                 ellipsizeMode="tail"
-                style={tw`text-base ml-1`}
+                style={tw`text-base ml-1 w-40`}
               >
-                {item.garageId.name}
+                {item.location}
               </Text>
             </View>
 

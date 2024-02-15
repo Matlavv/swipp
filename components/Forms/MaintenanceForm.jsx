@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ScrollView,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -17,7 +18,7 @@ import { auth, db } from "../../firebaseConfig";
 import ChooseGarageModal from "./ChooseGarageModal";
 import DateTimePickerModal from "./DateTimePickerModal";
 
-const MaintenanceForm = ({ navigation }) => {
+const MaintenanceForm = ({ navigation, route }) => {
   const [selectedMaintenance, setSelectedMaintenance] = useState("");
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [selectedGarage, setSelectedGarage] = useState({});
@@ -25,6 +26,9 @@ const MaintenanceForm = ({ navigation }) => {
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
   const [isGarageModalVisible, setGarageModalVisible] = useState(false);
   const [vehicles, setVehicles] = useState([]);
+  const [repairLocationType, setRepairLocationType] = useState("garage"); // 'garage' ou 'address'
+  const [address, setAddress] = useState("");
+  const [addresses, setAddresses] = useState([]);
 
   // Options pour l'entretien
   const maintenanceOptions = [
@@ -34,6 +38,35 @@ const MaintenanceForm = ({ navigation }) => {
     { id: "pneu", value: "Changement de pneus" },
     { id: "batterie", value: "Changement de batterie" },
   ];
+
+  useEffect(() => {
+    if (route.params?.address) {
+      setAddress(route.params.address);
+    }
+  }, [route.params?.address]);
+
+  const loadAddresses = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, "users", user.uid, "adresses")
+      );
+      const userAddresses = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setAddresses(userAddresses);
+    } catch (error) {
+      console.error("Erreur lors du chargement des adresses", error);
+      Alert.alert("Erreur", "Impossible de charger les adresses.");
+    }
+  };
+
+  useEffect(() => {
+    loadAddresses();
+  }, []);
 
   useEffect(() => {
     const loadVehicles = async () => {
@@ -70,27 +103,31 @@ const MaintenanceForm = ({ navigation }) => {
     if (
       !selectedMaintenance ||
       !selectedVehicleId ||
-      !selectedGarage ||
-      !selectedDateTime
+      !selectedDateTime ||
+      (repairLocationType === "garage" && !selectedGarage) ||
+      (repairLocationType === "address" && !address)
     ) {
       Alert.alert("Erreur", "Veuillez remplir tous les champs requis.");
       return;
     }
+
     const userId = auth.currentUser.uid;
     const bookingDate = new Date(selectedDateTime);
-    const reparationType = "Entretien";
+
+    const reservation = {
+      userId,
+      vehicleId: selectedVehicleId,
+      locationType: repairLocationType,
+      location: repairLocationType === "garage" ? selectedGarage.name : address,
+      bookingDate,
+      createdAt: new Date(),
+      reparationType: "Entretien",
+      reparationDetail: selectedMaintenance,
+      isActive: true,
+      cancelled: false,
+    };
 
     try {
-      const reservation = {
-        userId,
-        vehicleId: selectedVehicleId,
-        garageId: selectedGarage,
-        bookingDate: bookingDate,
-        createdAt: new Date(),
-        reparationType: reparationType,
-        reparationDetail: selectedMaintenance,
-        isActive: true,
-      };
       await addDoc(collection(db, "RepairBookings"), reservation);
       Alert.alert(
         "Succès",
@@ -98,7 +135,6 @@ const MaintenanceForm = ({ navigation }) => {
       );
       navigation.goBack();
     } catch (error) {
-      console.error("Erreur lors de l'ajout de la réservation", error);
       Alert.alert(
         "Erreur",
         "Un problème est survenu lors de l'enregistrement de votre réservation."
@@ -149,18 +185,61 @@ const MaintenanceForm = ({ navigation }) => {
 
         {/* Choose Garage */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
-          <Text style={tw`text-xl font-bold mb-4`}>
-            Choisissez votre garage
-          </Text>
-          <TouchableOpacity
-            onPress={() => setGarageModalVisible(true)}
-            style={tw`border-b-2 border-[#34469C] py-2`}
-          >
-            <Text style={tw`text-black font-bold text-base`}>
-              {selectedGarage.name || "Sélectionnez un garage"}
-            </Text>
-          </TouchableOpacity>
+          <Text style={tw`text-xl font-bold mb-4`}>Lieu de l'entretien</Text>
+          <View style={tw`flex-row justify-around`}>
+            <TouchableOpacity
+              onPress={() => setRepairLocationType("garage")}
+              style={tw`bg-[${
+                repairLocationType === "garage" ? "#34469C" : "white"
+              }] p-2 rounded-md`}
+            >
+              <Text style={tw`text-white`}>Garage</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setRepairLocationType("address")}
+              style={tw`bg-[${
+                repairLocationType === "address" ? "#34469C" : "white"
+              }] p-2 rounded-md`}
+            >
+              <Text style={tw`text-white`}>Adresse</Text>
+            </TouchableOpacity>
+          </View>
         </View>
+        {repairLocationType === "address" && (
+          <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
+            <TextInput
+              style={tw`border-b-2 mb-4 border-[#34469C] font-bold text-base`}
+              value={address}
+              onChangeText={setAddress}
+              placeholder="Adresse"
+            />
+            <Text style={tw`text-lg font-semibold mb-2`}>Mes adresses</Text>
+            <SelectList
+              setSelected={(val) => setAddress(val)}
+              placeholder="Adresse"
+              boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
+              data={addresses.map((address) => ({
+                value: `${address.adresse} - ${address.codePostal} - ${address.ville}`, // Ajoute l'adresse et le code postal
+                id: address.id, // Ajoute l'identifiant de l'adresse comme une autre variable
+              }))}
+              onSelect={() => setAddress(address)}
+              save="value"
+            />
+          </View>
+        )}
+        {repairLocationType === "garage" && (
+          <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
+            <Text style={tw`text-xl font-bold mb-4`}>Choisissez un garage</Text>
+            <TouchableOpacity
+              onPress={() => setGarageModalVisible(true)}
+              style={tw`border-b-2 border-[#34469C] py-2`}
+            >
+              <Text style={tw`text-black font-bold text-base`}>
+                {selectedGarage.name || "Choisissez un garage"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Choose Date */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>

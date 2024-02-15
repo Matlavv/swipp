@@ -105,22 +105,12 @@ const DetailledRepairReservation = ({ route }) => {
           <View
             style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
           >
-            <Text style={tw`text-lg`}>Au garage :</Text>
-            <Text style={tw`text-lg font-semibold`}>
-              {" "}
-              {reservation.garageId.name}
+            <Text style={tw`text-lg`}>Lieu de l'entretien :</Text>
+            <Text style={tw`text-lg font-semibold w-55`}>
+              {reservation.location}
             </Text>
           </View>
-          <View
-            style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
-          >
-            <Text style={tw`text-lg`}>A l'adresse :</Text>
-            <View style={tw`flex-1 ml-2`}>
-              <Text style={tw`text-lg font-semibold`}>
-                {reservation.garageId.address}
-              </Text>
-            </View>
-          </View>
+
           <View
             style={tw`mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
           >

@@ -35,17 +35,24 @@ const DetailledRepairReservation = ({ route }) => {
   }, [reservationId]);
 
   const handleCancelReservation = async () => {
-    const reservationRef = doc(db, "RepairBookings", reservationId);
+    if (reservation.isActive) {
+      const reservationRef = doc(db, "RepairBookings", reservationId);
 
-    await updateDoc(reservationRef, {
-      cancelled: true,
-    });
+      await updateDoc(reservationRef, {
+        cancelled: true,
+      });
 
-    Alert.alert(
-      "Réservation annulée",
-      "Votre réservation a été annulée avec succès."
-    );
-    navigation.goBack();
+      Alert.alert(
+        "Réservation annulée",
+        "Votre réservation a été annulée avec succès."
+      );
+      navigation.goBack();
+    } else {
+      Alert.alert(
+        "Annulation impossible",
+        "Cette réservation est déjà passée ou a été annulée et ne peut plus être modifiée."
+      );
+    }
   };
 
   return (

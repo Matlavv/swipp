@@ -7,8 +7,7 @@ Créer sous compte Swipp dans Stripe
  
 TO DO :
 - RefuelForm mettre le véhicule avant et le véhicule choisi prérempliras le carburant
-- MaintenanceForm ajouter un champ pour faire l'entretien au garage ou à domicile dans "Choisissez votre garage"
-- Actualiser lorsqu'une réservation est annulée et impossible d'annuler une reservation passée (if isActive == false alors impossible d'annuler)
+- impossible d'annuler une reservation passée (if isActive == false alors impossible d'annuler)
 - Intégrer paiement Stripe
 - mettre les clés API géoloc(RefuelForm) & firebaseConfig.js dans .env
 - Ajouter adresse au garage

@@ -35,17 +35,24 @@ const DetailledRefuelReservation = ({ route }) => {
   }, [reservationId]);
 
   const handleCancelReservation = async () => {
-    const reservationRef = doc(db, "RefuelBookings", reservationId);
+    if (reservation.isActive) {
+      const reservationRef = doc(db, "RefuelBookings", reservationId);
 
-    await updateDoc(reservationRef, {
-      cancelled: true,
-    });
+      await updateDoc(reservationRef, {
+        cancelled: true,
+      });
 
-    Alert.alert(
-      "Réservation annulée",
-      "Votre réservation a été annulée avec succès."
-    );
-    navigation.goBack();
+      Alert.alert(
+        "Réservation annulée",
+        "Votre réservation a été annulée avec succès."
+      );
+      navigation.goBack();
+    } else {
+      Alert.alert(
+        "Annulation impossible",
+        "Cette réservation a déjà été honorée et ne peut plus être annulée."
+      );
+    }
   };
 
   return (

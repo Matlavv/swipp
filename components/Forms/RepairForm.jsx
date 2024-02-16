@@ -28,13 +28,18 @@ const RepairForm = ({ route, navigation }) => {
   const [selectedDateTime, setSelectedDateTime] = useState("");
   const [isGarageModalVisible, setGarageModalVisible] = useState(false);
   const [selectedGarage, setSelectedGarage] = useState("");
+  const [selectedPrice, setSelectedPrice] = useState(0);
 
   const repairOptions = [
-    { id: "moteur", value: "Réparation du moteur" },
-    { id: "transmission", value: "Réparation de la transmission" },
-    { id: "direction", value: "Réparation de la direction" },
-    { id: "carrosserie", value: "Réparation de la carrosserie" },
-    { id: "echappement", value: "Réparation du système d'échappement" },
+    { id: "moteur", value: "Réparation du moteur", price: 100 },
+    { id: "transmission", value: "Réparation de la transmission", price: 200 },
+    { id: "direction", value: "Réparation de la direction", price: 150 },
+    { id: "carrosserie", value: "Réparation de la carrosserie", price: 250 },
+    {
+      id: "echappement",
+      value: "Réparation du système d'échappement",
+      price: 180,
+    },
   ];
 
   useEffect(() => {
@@ -77,6 +82,14 @@ const RepairForm = ({ route, navigation }) => {
     loadVehicles();
   }, []);
 
+  const handleOptionChange = (selectedId) => {
+    const selectedOption = repairOptions.find(
+      (option) => option.id === selectedId
+    );
+    setSelectedValue(selectedOption.value);
+    setSelectedPrice(selectedOption.price);
+  };
+
   const handleReservationConfirm = async () => {
     if (
       !selectedValue ||
@@ -105,7 +118,7 @@ const RepairForm = ({ route, navigation }) => {
         garageId: selectedGarage,
         isActive: true,
         cancelled: false,
-        location: selectedGarage.name,
+        price: selectedPrice,
       };
 
       // Ajout de la réservation à Firestore
@@ -142,8 +155,19 @@ const RepairForm = ({ route, navigation }) => {
           </Text>
           <View style={tw`rounded-md`}>
             <SelectList
-              setSelected={(itemValue) => setSelectedValue(itemValue)}
-              data={repairOptions}
+              setSelected={(itemValue) => {
+                const selectedOption = repairOptions.find(
+                  (option) => option.id === itemValue
+                );
+                if (selectedOption) {
+                  setSelectedValue(selectedOption.value);
+                  setSelectedPrice(selectedOption.price);
+                }
+              }}
+              data={repairOptions.map((option) => ({
+                key: option.id,
+                value: `${option.value} - ${option.price}€`,
+              }))}
               placeholder="Sélectionnez votre besoin"
               boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
             />
@@ -219,9 +243,10 @@ const RepairForm = ({ route, navigation }) => {
         />
         {/* Submit button */}
         <View style={tw`mb-4 mt-3 flex items-center`}>
+          <Text style={tw`font-bold text-lg`}>Prix : {selectedPrice}</Text>
           <TouchableOpacity
             onPress={handleReservationConfirm}
-            style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
+            style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center mt-3`}
           >
             <Text style={tw`text-white font-semibold text-base`}>
               Valider mon rendez-vous

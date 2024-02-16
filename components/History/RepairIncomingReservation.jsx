@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   Image,
@@ -56,6 +56,12 @@ const RepairIncomingReservation = () => {
       console.error("Erreur lors du chargement des réservations", error);
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadReservations();
+    }, [])
+  );
 
   const renderItem = ({ item }) => {
     let imageSource;
@@ -113,9 +119,9 @@ const RepairIncomingReservation = () => {
               <Text
                 numberOfLines={1}
                 ellipsizeMode="tail"
-                style={tw`text-base ml-1`}
+                style={tw`text-base ml-1 w-40`}
               >
-                {item.garageId.name}
+                {item.location}
               </Text>
             </View>
 

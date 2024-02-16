@@ -20,7 +20,7 @@ import Geocoder from "react-native-geocoding";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
-import DateTimePickerModal from "./DateTimePickerModal";
+import RefuelDateTimePickerModal from "./RefuelDateTimePickerModal";
 
 Geocoder.init(process.env.GEOCODER_API_KEY);
 
@@ -59,19 +59,20 @@ const RefuelForm = ({ route, navigation }) => {
 
   const loadAddresses = async () => {
     const user = auth.currentUser;
-    if (user) {
-      try {
-        const querySnapshot = await getDocs(
-          collection(db, "users", user.uid, "adresses")
-        );
-        const userAddresses = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setAddresses(userAddresses);
-      } catch (error) {
-        console.error("Erreur lors du chargement des adresses", error);
-      }
+    if (!user) return;
+
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, "users", user.uid, "adresses")
+      );
+      const userAddresses = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setAddresses(userAddresses);
+    } catch (error) {
+      console.error("Erreur lors du chargement des adresses", error);
+      Alert.alert("Erreur", "Impossible de charger les adresses.");
     }
   };
 
@@ -117,8 +118,9 @@ const RefuelForm = ({ route, navigation }) => {
     loadVehicles();
   }, []);
 
-  const handleDateTimeConfirm = (dateTime) => {
-    setSelectedDateTime(dateTime);
+  const handleDateTimeConfirm = (dateTimeObj) => {
+    const formattedDateTime = `${dateTimeObj.date} ${dateTimeObj.timeSlot}`;
+    setSelectedDateTime(formattedDateTime);
     setDateTimePickerVisible(false);
   };
 
@@ -157,17 +159,16 @@ const RefuelForm = ({ route, navigation }) => {
     try {
       const reservation = {
         address,
-        bookingDate: bookingDate,
         vehicleId: selectedVehicleId,
         createdAt: new Date(),
         fuelType: selectedValue,
         isActive: true,
-        time: formattedTime,
         userId,
         volume: parseFloat(volume),
         price: totalPrice,
         options: selectedOptions,
         cancelled: false,
+        dateTime: selectedDateTime,
       };
 
       await addDoc(collection(db, "RefuelBookings"), reservation);
@@ -319,7 +320,7 @@ const RefuelForm = ({ route, navigation }) => {
               placeholder="Véhicule"
               data={vehicles.map((vehicle) => ({
                 id: vehicle.id,
-                value: `${vehicle.label} - ${vehicle.immatriculation}`,
+                value: `${vehicle.label} - ${vehicle.immatriculation} - ${vehicle.carburant}`,
               }))}
               boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
             />
@@ -347,7 +348,7 @@ const RefuelForm = ({ route, navigation }) => {
           </View>
         </View>
 
-        <DateTimePickerModal
+        <RefuelDateTimePickerModal
           isVisible={isDateTimePickerVisible}
           onClose={() => setDateTimePickerVisible(false)}
           onConfirm={handleDateTimeConfirm}

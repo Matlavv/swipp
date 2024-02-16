@@ -1,10 +1,14 @@
 Inspiration Gaston service
 
 /!\ Créer un compte Stripe & developer Play Store
+Créer sous compte Swipp dans Stripe
 
 
  
 TO DO :
+- RefuelForm mettre le véhicule avant et le véhicule choisi prérempliras le carburant
+- impossible d'annuler une reservation passée (if isActive == false alors impossible d'annuler)
+- Intégrer paiement Stripe
 - mettre les clés API géoloc(RefuelForm) & firebaseConfig.js dans .env
 - Ajouter adresse au garage
 - Plus d'infos en cliquant sur la réservation (style)

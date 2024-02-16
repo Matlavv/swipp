@@ -17,12 +17,14 @@ const GarageList = ({ onSelectGarage }) => {
       description: "Peinture & carrosserie",
       workerCount: "50",
       image: garage1,
+      address: "Rue de la Gare 12, 78940 Lausanne",
     },
     {
       name: "Garage 2",
       description: "Pneu et jantes",
       workerCount: "20",
       image: garage1,
+      adress: "3 rue des Potiers, 75008 Paris",
     },
   ];
 

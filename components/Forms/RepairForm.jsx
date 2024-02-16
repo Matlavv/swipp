@@ -119,6 +119,7 @@ const RepairForm = ({ route, navigation }) => {
         isActive: true,
         cancelled: false,
         price: selectedPrice,
+        location: selectedGarage.name,
       };
 
       // Ajout de la réservation à Firestore

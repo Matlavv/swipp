@@ -29,14 +29,15 @@ const MaintenanceForm = ({ navigation, route }) => {
   const [repairLocationType, setRepairLocationType] = useState("garage"); // 'garage' ou 'address'
   const [address, setAddress] = useState("");
   const [addresses, setAddresses] = useState([]);
+  const [selectedPrice, setSelectedPrice] = useState(0);
 
   // Options pour l'entretien
   const maintenanceOptions = [
-    { id: "plaquette", value: "Changements des plaquettes" },
-    { id: "filtre", value: "Remplacement des filtres" },
-    { id: "huile", value: "Changement d'huile" },
-    { id: "pneu", value: "Changement de pneus" },
-    { id: "batterie", value: "Changement de batterie" },
+    { id: "plaquette", value: "Changements des plaquettes", price: 80 },
+    { id: "filtre", value: "Remplacement des filtres", price: 60 },
+    { id: "huile", value: "Changement d'huile", price: 90 },
+    { id: "pneu", value: "Changement de pneus", price: 100 },
+    { id: "batterie", value: "Changement de batterie", price: 120 },
   ];
 
   useEffect(() => {
@@ -99,6 +100,16 @@ const MaintenanceForm = ({ navigation, route }) => {
     setGarageModalVisible(false);
   };
 
+  const handleMaintenanceSelection = (selectedId) => {
+    const selectedOption = maintenanceOptions.find(
+      (option) => option.id === selectedId
+    );
+    if (selectedOption) {
+      setSelectedMaintenance(selectedOption.value);
+      setSelectedPrice(selectedOption.price);
+    }
+  };
+
   const handleReservationConfirm = async () => {
     if (
       !selectedMaintenance ||
@@ -125,6 +136,7 @@ const MaintenanceForm = ({ navigation, route }) => {
       reparationDetail: selectedMaintenance,
       isActive: true,
       cancelled: false,
+      price: selectedPrice,
     };
 
     try {
@@ -172,8 +184,11 @@ const MaintenanceForm = ({ navigation, route }) => {
             Sélectionnez votre besoin
           </Text>
           <SelectList
-            setSelected={setSelectedMaintenance}
-            data={maintenanceOptions}
+            setSelected={handleMaintenanceSelection}
+            data={maintenanceOptions.map((option) => ({
+              key: option.id,
+              value: `${option.value} - ${option.price}€`,
+            }))}
             placeholder="Sélectionnez votre besoin"
             boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
           />
@@ -300,9 +315,12 @@ const MaintenanceForm = ({ navigation, route }) => {
 
         {/* Submit button */}
         <View style={tw`mb-4 mt-5 flex items-center`}>
+          <Text style={tw`text-lg font-bold`}>
+            Prix estimé : {selectedPrice} €
+          </Text>
           <TouchableOpacity
             onPress={handleReservationConfirm}
-            style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
+            style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center mt-3`}
           >
             <Text style={tw`text-white font-semibold text-base`}>
               Valider mon rendez-vous

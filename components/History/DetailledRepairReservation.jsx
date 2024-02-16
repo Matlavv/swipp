@@ -112,7 +112,7 @@ const DetailledRepairReservation = ({ route }) => {
           <View
             style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
           >
-            <Text style={tw`text-lg`}>Lieu de l'entretien :</Text>
+            <Text style={tw`text-lg`}>Lieu de l'entretien : </Text>
             <Text style={tw`text-lg font-semibold w-55`}>
               {reservation.location}
             </Text>

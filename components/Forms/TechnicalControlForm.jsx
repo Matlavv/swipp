@@ -25,6 +25,7 @@ const TechnicalControlForm = ({ navigation }) => {
   const [selectedDateTime, setSelectedDateTime] = useState("");
   const [isGarageModalVisible, setGarageModalVisible] = useState(false);
   const [selectedGarage, setSelectedGarage] = useState({});
+  const [controlPrice, setControlPrice] = useState(100);
 
   useEffect(() => {
     const loadVehicles = async () => {
@@ -77,6 +78,8 @@ const TechnicalControlForm = ({ navigation }) => {
         reparationType: reparationType,
         bookingDate: bookingDate,
         location: selectedGarage.name,
+        price: controlPrice,
+        cancelled: false,
       };
 
       await addDoc(collection(db, "RepairBookings"), reservation);
@@ -177,10 +180,11 @@ const TechnicalControlForm = ({ navigation }) => {
           onConfirm={handleDateTimeConfirm}
         />
         {/* Submit button */}
-        <View style={tw`mb-4 mt-7 flex items-center`}>
+        <View style={tw`mb-4 mt-5 flex items-center`}>
+          <Text style={tw`font-bold text-lg`}>Prix : {controlPrice}</Text>
           <TouchableOpacity
             onPress={handleReservationConfirm}
-            style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
+            style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center mt-3`}
           >
             <Text style={tw`text-white font-semibold text-base`}>
               Valider mon rendez-vous

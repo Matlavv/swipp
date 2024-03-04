@@ -17,6 +17,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  SelectList,
+} from "react-native-dropdown-select-list";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
@@ -32,6 +35,13 @@ const VehicleScreen = () => {
   const [vehicles, setVehicles] = useState([]);
 
   const navigation = useNavigation();
+  
+  const fuelOptions = [
+    { id: "SP98", value: "SP98" },
+    { id: "SP95", value: "SP95" },
+    { id: "Gasoil", value: "Gasoil" },
+    { id: "E85", value: "E85" },
+  ];
 
   useEffect(() => {
     loadVehicles();
@@ -171,13 +181,21 @@ const VehicleScreen = () => {
           value={immatriculation}
           onChangeText={setImmatriculation}
         />
-        <TextInput
+        {/* <TextInput
           style={tw`border-b w-80 p-2 mb-4`}
           placeholder="Type de carburant (diesel, SP98, SP95, gasoil...)"
           autoCapitalize="characters"
           value={carburant}
           onChangeText={setCarburant}
-        />
+        /> */}
+        <View style={tw`w-80 mb-4`}>
+          <SelectList
+            setSelected={(itemValue) => setCarburant(itemValue)}
+            placeholder="Carburant"
+            data={fuelOptions}
+            // boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
+          />
+        </View>
         <TextInput
           style={tw`border-b w-80 p-2 mb-4`}
           placeholder="Marque"

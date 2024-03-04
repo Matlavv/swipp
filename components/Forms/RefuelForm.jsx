@@ -25,7 +25,7 @@ import RefuelDateTimePickerModal from "./RefuelDateTimePickerModal";
 Geocoder.init(process.env.GEOCODER_API_KEY);
 
 const RefuelForm = ({ route, navigation }) => {
-  const [selectedValue, setSelectedValue] = useState("SP98");
+  const [selectedFuel, setSelectedFuel] = useState("SP98");
   const [volume, setVolume] = useState("");
   const [options, setOptions] = useState([]);
   const [address, setAddress] = useState("");
@@ -56,7 +56,16 @@ const RefuelForm = ({ route, navigation }) => {
       setAddress(route.params.address);
     }
   }, [route.params?.address]);
+  // Fonction pour mettre à jour le carburant sélectionné
+  const updateSelectedFuel = (newFuel) => {
+    setSelectedFuel(newFuel);
+  };
 
+  // Simulation d'un changement de carburant ailleurs dans le code
+  const handleFuelChange = () => {
+    // Mettre à jour le carburant sélectionné avec une nouvelle valeur
+    updateSelectedFuel("SP95");
+  };
   const loadAddresses = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -135,7 +144,7 @@ const RefuelForm = ({ route, navigation }) => {
 
   const handleReservationConfirm = async () => {
     if (
-      !selectedValue ||
+      // !selectedFuel ||
       !volume ||
       !address ||
       !selectedDateTime ||
@@ -161,7 +170,7 @@ const RefuelForm = ({ route, navigation }) => {
         address,
         vehicleId: selectedVehicleId,
         createdAt: new Date(),
-        fuelType: selectedValue,
+        // fuelType: selectedFuel,
         isActive: true,
         userId,
         volume: parseFloat(volume),
@@ -174,7 +183,7 @@ const RefuelForm = ({ route, navigation }) => {
       await addDoc(collection(db, "RefuelBookings"), reservation);
       Alert.alert(
         "Succès",
-        `Votre réservation a été enregistrée. Pour un total de : ${totalPrice} €`
+        `Votre réservation a été enregistrée. Pour un total de : ${totalPrice} ${selectedVehicleId} €`
       );
       navigation.goBack();
     } catch (error) {
@@ -208,8 +217,8 @@ const RefuelForm = ({ route, navigation }) => {
   };
 
   useEffect(() => {
-    calculatePrice(selectedValue, address);
-  }, [selectedValue, address]);
+    calculatePrice(selectedFuel, address);
+  }, [selectedFuel, address]);
 
   return (
     <SafeAreaView style={tw`flex h-full`}>
@@ -263,23 +272,24 @@ const RefuelForm = ({ route, navigation }) => {
           </View>
         </View>
         {/* Choose carburant */}
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 my-3`}>
+        {/* <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 my-3`}>
           <Text style={tw`text-xl font-bold mb-4`}>
             Selectionnez votre carburant
           </Text>
           <View style={tw`rounded-md`}>
             <SelectList
-              setSelected={(itemValue) => setSelectedValue(itemValue)}
+              setSelected={(itemValue) => setSelectedFuel(itemValue)}
               placeholder="Carburant"
               data={fuelOptions}
+              selectedValue={selectedFuel} // Spécifier la valeur sélectionnée
               boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
             />
           </View>
           {/* Afficher le prix calculé sous le choix de carburant */}
-          <Text style={tw`text-lg font-semibold mt-4`}>
+          {/* <Text style={tw`text-lg font-semibold mt-4`}>
             Prix: {price.toFixed(2)}€
           </Text>
-        </View>
+        </View> */}
         {/* Choose litter */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
           <Text style={tw`text-xl font-bold mb-4`}>
@@ -291,7 +301,11 @@ const RefuelForm = ({ route, navigation }) => {
             value={volume}
             onChangeText={setVolume}
           />
+          <Text style={tw`text-lg font-semibold mt-4`}>
+            Prix: {price.toFixed(2)}€
+          </Text>
         </View>
+
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 my-3`}>
           <Text style={tw`text-xl font-bold mb-4`}>Ajouter des options</Text>
           <View style={tw`bg-gray-200`}>
@@ -316,12 +330,17 @@ const RefuelForm = ({ route, navigation }) => {
           <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
           <View style={tw`rounded-md`}>
             <SelectList
-              setSelected={(itemValue) => setSelectedVehicleId(itemValue)}
-              placeholder="Véhicule"
               data={vehicles.map((vehicle) => ({
                 id: vehicle.id,
-                value: `${vehicle.label} - ${vehicle.immatriculation} - ${vehicle.carburant}`,
+                value: `${vehicle.label} - ${vehicle.immatriculation} - ${vehicle.carburant}`, // Utiliser l'ID du véhicule comme valeur
               }))}
+              setSelected={(itemValue) => {
+                setSelectedVehicleId(itemValue); // Définir l'ID du véhicule sélectionné
+                const parts = itemValue.split('-'); // Diviser la chaîne en fonction du caractère "-"
+                const lastPart = parts[parts.length - 1].trim(); // Récupérer le dernier élément et le nettoyer des espaces autour
+                setSelectedFuel(lastPart); // Utiliser la partie après le dernier "-" comme carburant sélectionné
+              }}
+              placeholder="Véhicule"
               boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
             />
           </View>

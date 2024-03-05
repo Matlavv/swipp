@@ -1,21 +1,34 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 import { initializeApp } from "firebase/app";
 import {
   signOut as firebaseSignOut,
   getReactNativePersistence,
   initializeAuth,
 } from "firebase/auth";
-// import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
+// import { getAnalytics } from "firebase/analytics";
+const expoConfig = Constants.expoConfig || {};
+const { extra } = expoConfig;
+
+const {
+  apiKey = "",
+  authDomain = "",
+  projectId = "",
+  storageBucket = "",
+  messagingSenderId = "",
+  appId = "",
+  measurementId = "",
+} = extra || {};
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDN3tkrUuf6AY8QRLLHMVc4ZZ72zf1cd54",
-  authDomain: "swipp-b74be.firebaseapp.com",
-  projectId: "swipp-b74be",
-  storageBucket: "swipp-b74be.appspot.com",
-  messagingSenderId: "147022767859",
-  appId: "1:147022767859:web:185aecccdf9c031f99b986",
-  measurementId: "G-11Q86C19N2",
+  apiKey,
+  authDomain,
+  projectId,
+  storageBucket,
+  messagingSenderId,
+  appId,
+  measurementId,
 };
 
 // Initialize Firebase

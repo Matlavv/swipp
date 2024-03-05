@@ -158,7 +158,7 @@ const MaintenanceForm = ({ navigation, route }) => {
   const selectedTextStyle = tw`text-white`;
 
   // Styles pour le bouton non sélectionné
-  const notSelectedStyle = tw`bg-[white] p-2 rounded-md border border-[#34469C]`;
+  const notSelectedStyle = tw`p-2 rounded-md border border-[#34469C]`;
   const notSelectedTextStyle = tw`text-black`;
 
   return (

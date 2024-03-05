@@ -23,6 +23,8 @@
     "@reduxjs/toolkit": "^1.9.7",
     "@rneui/base": "^4.0.0-rc.8",
     "@rneui/themed": "^4.0.0-rc.8",
+    "@stripe/stripe-js": "^3.0.7",
+    "@stripe/stripe-react-native": "0.28.0",
     "expo": "~49.0.15",
     "expo-blur": "~12.4.1",
     "expo-checkbox": "~2.4.0",
@@ -53,6 +55,7 @@
     "react-native-tab-view": "^3.5.2",
     "react-native-vector-icons": "^10.0.2",
     "react-redux": "^8.1.3",
+    "stripe": "^14.17.0",
     "twrnc": "^3.6.5"
   },
   "devDependencies": {

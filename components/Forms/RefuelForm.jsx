@@ -18,6 +18,7 @@ import {
 } from "react-native-dropdown-select-list";
 import Geocoder from "react-native-geocoding";
 import tw from "twrnc";
+import { fetchPaymentIntentClientSecret } from "../../StripeService";
 import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
 import RefuelDateTimePickerModal from "./RefuelDateTimePickerModal";
@@ -156,35 +157,38 @@ const RefuelForm = ({ route, navigation }) => {
       );
       return;
     }
-
+    navigation.navigate("PaymentScreen", { totalPrice: calculateTotalPrice() });
     const totalPrice = calculateTotalPrice();
     const userId = auth.currentUser.uid;
-
+    const amount = calculateTotalPrice();
+    const clientSecret = await fetchPaymentIntentClientSecret(amount);
+    // await initializeAndPresentPaymentSheet(totalPrice);
     // Formatage correct de la date et l'heure
     const bookingDate = new Date(selectedDateTime);
     const formattedTime =
       bookingDate.getHours() + ":" + bookingDate.getMinutes();
+  };
+
+  const finalizeReservation = async () => {
+    const bookingDate = new Date(selectedDateTime);
+    const formattedTime =
+      bookingDate.getHours() + ":" + bookingDate.getMinutes();
+    const reservation = {
+      address,
+      vehicleId: selectedVehicleId,
+      createdAt: new Date(),
+      isActive: true,
+      userId: auth.currentUser.uid,
+      volume: parseFloat(volume),
+      price: calculateTotalPrice(),
+      options: selectedOptions,
+      cancelled: false,
+      dateTime: selectedDateTime,
+    };
 
     try {
-      const reservation = {
-        address,
-        vehicleId: selectedVehicleId,
-        createdAt: new Date(),
-        // fuelType: selectedFuel,
-        isActive: true,
-        userId,
-        volume: parseFloat(volume),
-        price: totalPrice,
-        options: selectedOptions,
-        cancelled: false,
-        dateTime: selectedDateTime,
-      };
-
       await addDoc(collection(db, "RefuelBookings"), reservation);
-      Alert.alert(
-        "Succès",
-        `Votre réservation a été enregistrée. Pour un total de : ${totalPrice} ${selectedVehicleId} €`
-      );
+      Alert.alert("Succès", `Votre réservation a été enregistrée.`);
       navigation.goBack();
     } catch (error) {
       console.error("Erreur lors de l'enregistrement de la réservation", error);
@@ -271,25 +275,26 @@ const RefuelForm = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
         </View>
-        {/* Choose carburant */}
-        {/* <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 my-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>
-            Selectionnez votre carburant
-          </Text>
+        {/* Choose vehicle */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+          <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
           <View style={tw`rounded-md`}>
             <SelectList
-              setSelected={(itemValue) => setSelectedFuel(itemValue)}
-              placeholder="Carburant"
-              data={fuelOptions}
-              selectedValue={selectedFuel} // Spécifier la valeur sélectionnée
+              data={vehicles.map((vehicle) => ({
+                id: vehicle.id,
+                value: `${vehicle.label} - ${vehicle.immatriculation} - ${vehicle.carburant}`, // Utiliser l'ID du véhicule comme valeur
+              }))}
+              setSelected={(itemValue) => {
+                setSelectedVehicleId(itemValue); // Définir l'ID du véhicule sélectionné
+                const parts = itemValue.split("-"); // Diviser la chaîne en fonction du caractère "-"
+                const lastPart = parts[parts.length - 1].trim(); // Récupérer le dernier élément et le nettoyer des espaces autour
+                setSelectedFuel(lastPart); // Utiliser la partie après le dernier "-" comme carburant sélectionné
+              }}
+              placeholder="Véhicule"
               boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
             />
           </View>
-          {/* Afficher le prix calculé sous le choix de carburant */}
-          {/* <Text style={tw`text-lg font-semibold mt-4`}>
-            Prix: {price.toFixed(2)}€
-          </Text>
-        </View> */}
+        </View>
         {/* Choose litter */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
           <Text style={tw`text-xl font-bold mb-4`}>
@@ -325,26 +330,7 @@ const RefuelForm = ({ route, navigation }) => {
             />
           </View>
         </View>
-        {/* Choose vehicle */}
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
-          <View style={tw`rounded-md`}>
-            <SelectList
-              data={vehicles.map((vehicle) => ({
-                id: vehicle.id,
-                value: `${vehicle.label} - ${vehicle.immatriculation} - ${vehicle.carburant}`, // Utiliser l'ID du véhicule comme valeur
-              }))}
-              setSelected={(itemValue) => {
-                setSelectedVehicleId(itemValue); // Définir l'ID du véhicule sélectionné
-                const parts = itemValue.split('-'); // Diviser la chaîne en fonction du caractère "-"
-                const lastPart = parts[parts.length - 1].trim(); // Récupérer le dernier élément et le nettoyer des espaces autour
-                setSelectedFuel(lastPart); // Utiliser la partie après le dernier "-" comme carburant sélectionné
-              }}
-              placeholder="Véhicule"
-              boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
-            />
-          </View>
-        </View>
+
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
           <Text style={tw`text-xl font-bold mb-4`}>
             Choisissez votre date de rendez-vous

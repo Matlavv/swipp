@@ -6,10 +6,10 @@ export default {
     slug: "swipp",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/icon.png",
+    icon: "./assets/swipp_1.png",
     userInterfaceStyle: "light",
     splash: {
-      image: "./assets/splash.png",
+      image: "./assets/swipp_1.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff",
     },
@@ -20,13 +20,13 @@ export default {
     android: {
       package: "com.flucity.swipp",
       adaptiveIcon: {
-        foregroundImage: "./assets/adaptive-icon.png",
+        foregroundImage: "./assets/swipp_1.png",
         backgroundColor: "#ffffff",
       },
       googleServicesFile: "./google-services.json",
     },
     web: {
-      favicon: "./assets/favicon.png",
+      favicon: "./assets/swipp_1.png",
     },
     extra: {
       eas: {
@@ -39,6 +39,7 @@ export default {
       messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
       appId: process.env.FIREBASE_APP_ID,
       measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+      stripeSecretKey: process.env.STRIPE_SECRET_KEY,
     },
   },
 };

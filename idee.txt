@@ -4,15 +4,13 @@ Inspiration Gaston service
 TO DO :
 - RefuelForm mettre le véhicule avant et le véhicule choisi prérempliras le carburant
 - Intégrer paiement Stripe
-- mettre les clés firebaseConfig.js dans .env
 
-
-
+- activer Blaze firebase
+- google cloud -> compte swipp
 - Plus d'infos en cliquant sur la réservation (style)
 - Bandeau déroulant pour le litrage ? RefuelForm
 - Personnaliser les Alert
 - Images de logo, launchingScreen, icone d'application
-- Prix pour réparation, controle technique et entretien
 - Page d'urgence
 - Les réservations sont automatiquement passées en isActive = false quand la date est passée
 

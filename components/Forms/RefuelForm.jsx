@@ -18,7 +18,6 @@ import {
 } from "react-native-dropdown-select-list";
 import Geocoder from "react-native-geocoding";
 import tw from "twrnc";
-import { fetchPaymentIntentClientSecret } from "../../StripeService";
 import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
 import RefuelDateTimePickerModal from "./RefuelDateTimePickerModal";
@@ -157,19 +156,8 @@ const RefuelForm = ({ route, navigation }) => {
       );
       return;
     }
-    navigation.navigate("PaymentScreen", { totalPrice: calculateTotalPrice() });
     const totalPrice = calculateTotalPrice();
     const userId = auth.currentUser.uid;
-    const amount = calculateTotalPrice();
-    const clientSecret = await fetchPaymentIntentClientSecret(amount);
-    // await initializeAndPresentPaymentSheet(totalPrice);
-    // Formatage correct de la date et l'heure
-    const bookingDate = new Date(selectedDateTime);
-    const formattedTime =
-      bookingDate.getHours() + ":" + bookingDate.getMinutes();
-  };
-
-  const finalizeReservation = async () => {
     const bookingDate = new Date(selectedDateTime);
     const formattedTime =
       bookingDate.getHours() + ":" + bookingDate.getMinutes();

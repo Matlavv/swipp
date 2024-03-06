@@ -6,7 +6,6 @@ TO DO :
 - Enlever prix reparation
 - Annulation garage / refuelform : choix sur 1h par exemple, mais a partir d 'une heure. Apres 1h : popup parlant de frais d annulation OU contact garage
 - Créer une doc
-- google cloud -> compte swipp
 - Bandeau déroulant pour le litrage ? RefuelForm
 - Images de logo, launchingScreen, icone d'application
 - Page d'urgence

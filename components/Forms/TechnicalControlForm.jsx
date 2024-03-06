@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useStripe } from "@stripe/stripe-react-native";
 import { addDoc, collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
@@ -26,6 +27,7 @@ const TechnicalControlForm = ({ navigation }) => {
   const [isGarageModalVisible, setGarageModalVisible] = useState(false);
   const [selectedGarage, setSelectedGarage] = useState({});
   const [controlPrice, setControlPrice] = useState(100);
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   useEffect(() => {
     const loadVehicles = async () => {
@@ -58,12 +60,59 @@ const TechnicalControlForm = ({ navigation }) => {
     setGarageModalVisible(false);
   };
 
-  const handleReservationConfirm = async () => {
-    if (!selectedVehicleId || !selectedGarage || !selectedDateTime) {
-      Alert.alert("Erreur", "Veuillez remplir tous les champs requis.");
+  const isFormValid = () => {
+    return selectedVehicleId && selectedGarage && selectedDateTime;
+  };
+
+  // Paiement avec Stripe
+  const fetchPaymentIntentClientSecret = async () => {
+    const response = await fetch(
+      "https://europe-west3-swipp-b74be.cloudfunctions.net/createPaymentIntent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: controlPrice * 100,
+        }),
+      }
+    );
+    const { clientSecret } = await response.json();
+    return clientSecret;
+  };
+
+  const openPaymentSheet = async () => {
+    if (!isFormValid()) {
+      Alert.alert(
+        "Erreur",
+        "Veuillez remplir tous les champs avant de procéder au paiement."
+      );
       return;
     }
+    const clientSecret = await fetchPaymentIntentClientSecret();
+    const { error } = await initPaymentSheet({
+      paymentIntentClientSecret: clientSecret,
+      merchantDisplayName: "Swipp",
+      style: "alwaysLight",
+    });
+    if (error) {
+      console.error(error);
+      return;
+    }
+    const result = await presentPaymentSheet();
+    if (result.error) {
+      Alert.alert("Erreur de paiement", result.error.message);
+    } else {
+      Alert.alert(
+        "Paiement réussi",
+        "Votre paiement a été effectué avec succès."
+      );
+      await handleReservationConfirm();
+    }
+  };
 
+  const handleReservationConfirm = async () => {
     const userId = auth.currentUser.uid;
     const bookingDate = new Date(selectedDateTime);
     const reparationType = "Contrôle technique";
@@ -183,7 +232,7 @@ const TechnicalControlForm = ({ navigation }) => {
         <View style={tw`mb-4 mt-5 flex items-center`}>
           <Text style={tw`font-bold text-lg`}>Prix : {controlPrice}</Text>
           <TouchableOpacity
-            onPress={handleReservationConfirm}
+            onPress={openPaymentSheet}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center mt-3`}
           >
             <Text style={tw`text-white font-semibold text-base`}>

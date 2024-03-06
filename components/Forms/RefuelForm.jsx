@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useStripe } from "@stripe/stripe-react-native";
 import * as Location from "expo-location";
 import { addDoc, collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
@@ -18,7 +19,6 @@ import {
 } from "react-native-dropdown-select-list";
 import Geocoder from "react-native-geocoding";
 import tw from "twrnc";
-import { fetchPaymentIntentClientSecret } from "../../StripeService";
 import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
 import RefuelDateTimePickerModal from "./RefuelDateTimePickerModal";
@@ -37,6 +37,7 @@ const RefuelForm = ({ route, navigation }) => {
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   const data = [
     { key: "1", value: "adblue" },
@@ -45,28 +46,66 @@ const RefuelForm = ({ route, navigation }) => {
     { key: "4", value: "liquide de refroidissement" },
   ];
 
-  const fuelOptions = [
-    { id: "SP98", value: "SP98" },
-    { id: "SP95", value: "SP95" },
-    { id: "Gasoil", value: "Gasoil" },
-    { id: "E85", value: "E85" },
-  ];
-
   useEffect(() => {
     if (route.params?.address) {
       setAddress(route.params.address);
     }
   }, [route.params?.address]);
-  // Fonction pour mettre à jour le carburant sélectionné
-  const updateSelectedFuel = (newFuel) => {
-    setSelectedFuel(newFuel);
+
+  const isFormValid = () => {
+    return (
+      selectedFuel && volume && address && selectedDateTime && selectedVehicleId
+    );
   };
 
-  // Simulation d'un changement de carburant ailleurs dans le code
-  const handleFuelChange = () => {
-    // Mettre à jour le carburant sélectionné avec une nouvelle valeur
-    updateSelectedFuel("SP95");
+  // Paiement avec Stripe
+  const fetchPaymentIntentClientSecret = async () => {
+    const response = await fetch(
+      "https://europe-west3-swipp-b74be.cloudfunctions.net/createPaymentIntent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: calculateTotalPrice() * 100, // Convertir en centimes pour Stripe
+        }),
+      }
+    );
+    const { clientSecret } = await response.json();
+    return clientSecret;
   };
+
+  const openPaymentSheet = async () => {
+    if (!isFormValid()) {
+      Alert.alert(
+        "Erreur",
+        "Veuillez remplir tous les champs avant de procéder au paiement."
+      );
+      return;
+    }
+    const clientSecret = await fetchPaymentIntentClientSecret();
+    const { error } = await initPaymentSheet({
+      paymentIntentClientSecret: clientSecret,
+      merchantDisplayName: "Swipp",
+      style: "alwaysLight",
+    });
+    if (error) {
+      console.error(error);
+      return;
+    }
+    const result = await presentPaymentSheet();
+    if (result.error) {
+      Alert.alert("Erreur de paiement", result.error.message);
+    } else {
+      Alert.alert(
+        "Paiement réussi",
+        "Votre paiement a été effectué avec succès."
+      );
+      await handleReservationConfirm();
+    }
+  };
+
   const loadAddresses = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -144,35 +183,6 @@ const RefuelForm = ({ route, navigation }) => {
   };
 
   const handleReservationConfirm = async () => {
-    if (
-      // !selectedFuel ||
-      !volume ||
-      !address ||
-      !selectedDateTime ||
-      !selectedVehicleId
-    ) {
-      Alert.alert(
-        "Erreur",
-        "Veuillez remplir tous les champs avant de confirmer la réservation."
-      );
-      return;
-    }
-    navigation.navigate("PaymentScreen", { totalPrice: calculateTotalPrice() });
-    const totalPrice = calculateTotalPrice();
-    const userId = auth.currentUser.uid;
-    const amount = calculateTotalPrice();
-    const clientSecret = await fetchPaymentIntentClientSecret(amount);
-    // await initializeAndPresentPaymentSheet(totalPrice);
-    // Formatage correct de la date et l'heure
-    const bookingDate = new Date(selectedDateTime);
-    const formattedTime =
-      bookingDate.getHours() + ":" + bookingDate.getMinutes();
-  };
-
-  const finalizeReservation = async () => {
-    const bookingDate = new Date(selectedDateTime);
-    const formattedTime =
-      bookingDate.getHours() + ":" + bookingDate.getMinutes();
     const reservation = {
       address,
       vehicleId: selectedVehicleId,
@@ -364,11 +374,11 @@ const RefuelForm = ({ route, navigation }) => {
             Prix total : {calculateTotalPrice()} €
           </Text>
           <TouchableOpacity
-            onPress={handleReservationConfirm}
+            onPress={openPaymentSheet}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
           >
             <Text style={tw`text-white font-semibold text-base`}>
-              Valider mon rendez-vous
+              Payer maintenant
             </Text>
           </TouchableOpacity>
         </View>

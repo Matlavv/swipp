@@ -44,10 +44,15 @@ const RefuelPastReservation = () => {
 
     try {
       const querySnapshot = await getDocs(q);
-      const loadedReservations = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const loadedReservations = querySnapshot.docs.map((doc) => {
+        const reservation = {
+          id: doc.id,
+          ...doc.data(),
+        };
+        // Extraire et ajouter le type de carburant à l'objet de la réservation
+        reservation.fuelType = getFuelTypeFromVehicleId(reservation.vehicleId);
+        return reservation;
+      });
       setReservations(loadedReservations);
     } catch (error) {
       console.error("Erreur lors du chargement des réservations", error);
@@ -59,6 +64,11 @@ const RefuelPastReservation = () => {
       loadReservations();
     }, [])
   );
+
+  const getFuelTypeFromVehicleId = (vehicleId) => {
+    const parts = vehicleId.split(" - ");
+    return parts[parts.length - 1];
+  };
 
   return (
     <SafeAreaView style={tw`flex-1`}>

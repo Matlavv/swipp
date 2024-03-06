@@ -1,25 +1,10 @@
 /* eslint-disable */
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const stripe = require("stripe")(stripeSecretKey);
 const stripeSecretKey =
-  "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";
+  "sk_test_51Ojf5bF83Tq1HuHR4d48flqniJdmtwkoWAi5qXzJvP3fJOQH2speMP7JtyBy2VQ9ibqeDdVYLzlKatwPHTvjoDgk00TGPDfJSn";
+const stripe = require("stripe")(stripeSecretKey);
 admin.initializeApp();
-
-exports.createPaymentIntent = functions.https.onRequest(async (req, res) => {
-  const { amount } = req.body;
-  try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency: "eur",
-    });
-
-    res.json({ clientSecret: paymentIntent.client_secret });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Erreur lors de la création du PaymentIntent");
-  }
-});
 
 exports.checkAndUpdateBookings = functions.pubsub
   .schedule("every 60 minutes")
@@ -48,4 +33,19 @@ exports.checkAndUpdateBookings = functions.pubsub
     await updateBookingStatus("RepairBookings");
 
     return null;
+  });
+
+exports.createPaymentIntent = functions
+  .region("europe-west3")
+  .https.onRequest(async (request, response) => {
+    try {
+      const { amount } = request.body;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency: "eur",
+      });
+      response.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error) {
+      response.status(500).send(error);
+    }
   });

@@ -51,9 +51,11 @@ const RefuelForm = ({ route, navigation }) => {
       setAddress(route.params.address);
     }
   }, [route.params?.address]);
-  // Fonction pour mettre à jour le carburant sélectionné
-  const updateSelectedFuel = (newFuel) => {
-    setSelectedFuel(newFuel);
+
+  const isFormValid = () => {
+    return (
+      selectedFuel && volume && address && selectedDateTime && selectedVehicleId
+    );
   };
 
   // Paiement avec Stripe
@@ -75,10 +77,18 @@ const RefuelForm = ({ route, navigation }) => {
   };
 
   const openPaymentSheet = async () => {
+    if (!isFormValid()) {
+      Alert.alert(
+        "Erreur",
+        "Veuillez remplir tous les champs avant de procéder au paiement."
+      );
+      return;
+    }
     const clientSecret = await fetchPaymentIntentClientSecret();
     const { error } = await initPaymentSheet({
       paymentIntentClientSecret: clientSecret,
       merchantDisplayName: "Swipp",
+      style: "alwaysLight",
     });
     if (error) {
       console.error(error);
@@ -173,24 +183,6 @@ const RefuelForm = ({ route, navigation }) => {
   };
 
   const handleReservationConfirm = async () => {
-    if (
-      // !selectedFuel ||
-      !volume ||
-      !address ||
-      !selectedDateTime ||
-      !selectedVehicleId
-    ) {
-      Alert.alert(
-        "Erreur",
-        "Veuillez remplir tous les champs avant de confirmer la réservation."
-      );
-      return;
-    }
-    const totalPrice = calculateTotalPrice();
-    const userId = auth.currentUser.uid;
-    const bookingDate = new Date(selectedDateTime);
-    const formattedTime =
-      bookingDate.getHours() + ":" + bookingDate.getMinutes();
     const reservation = {
       address,
       vehicleId: selectedVehicleId,
@@ -387,15 +379,6 @@ const RefuelForm = ({ route, navigation }) => {
           >
             <Text style={tw`text-white font-semibold text-base`}>
               Payer maintenant
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={handleReservationConfirm}
-            style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
-          >
-            <Text style={tw`text-white font-semibold text-base`}>
-              Valider mon rendez-vous
             </Text>
           </TouchableOpacity>
         </View>

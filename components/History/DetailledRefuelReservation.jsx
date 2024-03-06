@@ -55,6 +55,11 @@ const DetailledRefuelReservation = ({ route }) => {
     }
   };
 
+  const getFuelTypeFromVehicleId = (vehicleId) => {
+    const parts = vehicleId.split(" - ");
+    return parts[parts.length - 1];
+  };
+
   return (
     <SafeAreaView style={tw`flex h-full`}>
       <View style={tw`flex p-5 mt-5 justify-start items-start flex flex-row`}>
@@ -89,7 +94,7 @@ const DetailledRefuelReservation = ({ route }) => {
             <Text style={tw`text-lg`}>Carburant choisi :</Text>
             <Text style={tw`text-lg font-semibold`}>
               {" "}
-              {reservation.fuelType}
+              {getFuelTypeFromVehicleId(reservation.vehicleId)}
             </Text>
           </View>
           <View

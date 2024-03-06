@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useStripe } from "@stripe/stripe-react-native";
 import * as Location from "expo-location";
 import { addDoc, collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
@@ -36,19 +37,13 @@ const RefuelForm = ({ route, navigation }) => {
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   const data = [
     { key: "1", value: "adblue" },
     { key: "2", value: "lave vitre" },
     { key: "3", value: "gonflage de pneus" },
     { key: "4", value: "liquide de refroidissement" },
-  ];
-
-  const fuelOptions = [
-    { id: "SP98", value: "SP98" },
-    { id: "SP95", value: "SP95" },
-    { id: "Gasoil", value: "Gasoil" },
-    { id: "E85", value: "E85" },
   ];
 
   useEffect(() => {
@@ -61,11 +56,46 @@ const RefuelForm = ({ route, navigation }) => {
     setSelectedFuel(newFuel);
   };
 
-  // Simulation d'un changement de carburant ailleurs dans le code
-  const handleFuelChange = () => {
-    // Mettre à jour le carburant sélectionné avec une nouvelle valeur
-    updateSelectedFuel("SP95");
+  // Paiement avec Stripe
+  const fetchPaymentIntentClientSecret = async () => {
+    const response = await fetch(
+      "https://europe-west3-swipp-b74be.cloudfunctions.net/createPaymentIntent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: calculateTotalPrice() * 100, // Convertir en centimes pour Stripe
+        }),
+      }
+    );
+    const { clientSecret } = await response.json();
+    return clientSecret;
   };
+
+  const openPaymentSheet = async () => {
+    const clientSecret = await fetchPaymentIntentClientSecret();
+    const { error } = await initPaymentSheet({
+      paymentIntentClientSecret: clientSecret,
+      merchantDisplayName: "Swipp",
+    });
+    if (error) {
+      console.error(error);
+      return;
+    }
+    const result = await presentPaymentSheet();
+    if (result.error) {
+      Alert.alert("Erreur de paiement", result.error.message);
+    } else {
+      Alert.alert(
+        "Paiement réussi",
+        "Votre paiement a été effectué avec succès."
+      );
+      await handleReservationConfirm();
+    }
+  };
+
   const loadAddresses = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -351,6 +381,15 @@ const RefuelForm = ({ route, navigation }) => {
           <Text style={tw`text-lg font-semibold`}>
             Prix total : {calculateTotalPrice()} €
           </Text>
+          <TouchableOpacity
+            onPress={openPaymentSheet}
+            style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
+          >
+            <Text style={tw`text-white font-semibold text-base`}>
+              Payer maintenant
+            </Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             onPress={handleReservationConfirm}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}

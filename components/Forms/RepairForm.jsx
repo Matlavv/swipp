@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useStripe } from "@stripe/stripe-react-native";
 import { addDoc, collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
@@ -29,6 +30,7 @@ const RepairForm = ({ route, navigation }) => {
   const [isGarageModalVisible, setGarageModalVisible] = useState(false);
   const [selectedGarage, setSelectedGarage] = useState("");
   const [selectedPrice, setSelectedPrice] = useState(0);
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   const repairOptions = [
     { id: "moteur", value: "Réparation du moteur", price: 100 },
@@ -48,10 +50,6 @@ const RepairForm = ({ route, navigation }) => {
     }
   }, [route.params?.address]);
 
-  const handleVehicleChange = (itemValue) => {
-    setSelectedVehicleId(itemValue);
-  };
-
   const handleSelectGarage = (garage) => {
     setSelectedGarage(garage);
   };
@@ -59,6 +57,60 @@ const RepairForm = ({ route, navigation }) => {
   const handleDateTimeConfirm = (dateTime) => {
     setSelectedDateTime(dateTime);
     setDateTimePickerVisible(false);
+  };
+
+  const isFormValid = () => {
+    return (
+      selectedValue && selectedVehicleId && selectedGarage && selectedDateTime
+    );
+  };
+
+  // Paiement avec Stripe
+  const fetchPaymentIntentClientSecret = async () => {
+    const response = await fetch(
+      "https://europe-west3-swipp-b74be.cloudfunctions.net/createPaymentIntent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: selectedPrice * 100,
+        }),
+      }
+    );
+    const { clientSecret } = await response.json();
+    return clientSecret;
+  };
+
+  const openPaymentSheet = async () => {
+    if (!isFormValid()) {
+      Alert.alert(
+        "Erreur",
+        "Veuillez remplir tous les champs avant de procéder au paiement."
+      );
+      return;
+    }
+    const clientSecret = await fetchPaymentIntentClientSecret();
+    const { error } = await initPaymentSheet({
+      paymentIntentClientSecret: clientSecret,
+      merchantDisplayName: "Swipp",
+      style: "alwaysLight",
+    });
+    if (error) {
+      console.error(error);
+      return;
+    }
+    const result = await presentPaymentSheet();
+    if (result.error) {
+      Alert.alert("Erreur de paiement", result.error.message);
+    } else {
+      Alert.alert(
+        "Paiement réussi",
+        "Votre paiement a été effectué avec succès."
+      );
+      await handleReservationConfirm();
+    }
   };
 
   const loadVehicles = async () => {
@@ -82,25 +134,7 @@ const RepairForm = ({ route, navigation }) => {
     loadVehicles();
   }, []);
 
-  const handleOptionChange = (selectedId) => {
-    const selectedOption = repairOptions.find(
-      (option) => option.id === selectedId
-    );
-    setSelectedValue(selectedOption.value);
-    setSelectedPrice(selectedOption.price);
-  };
-
   const handleReservationConfirm = async () => {
-    if (
-      !selectedValue ||
-      !selectedVehicleId ||
-      !selectedGarage ||
-      !selectedDateTime
-    ) {
-      Alert.alert("Erreur", "Veuillez remplir tous les champs requis.");
-      return;
-    }
-
     const userId = auth.currentUser.uid;
     const bookingDate = new Date(selectedDateTime);
     const reparationType = "Réparation";
@@ -246,7 +280,7 @@ const RepairForm = ({ route, navigation }) => {
         <View style={tw`mb-4 mt-3 flex items-center`}>
           <Text style={tw`font-bold text-lg`}>Prix : {selectedPrice}</Text>
           <TouchableOpacity
-            onPress={handleReservationConfirm}
+            onPress={openPaymentSheet}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center mt-3`}
           >
             <Text style={tw`text-white font-semibold text-base`}>

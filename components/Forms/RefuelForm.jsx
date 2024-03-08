@@ -212,6 +212,7 @@ const RefuelForm = ({ route, navigation }) => {
         createdAt: new Date(),
         dateTime: selectedDateTime,
         bookingId: docRef.id,
+        type: "Refuel",
       });
     } catch (error) {
       console.error("Erreur lors de l'enregistrement de la réservation", error);

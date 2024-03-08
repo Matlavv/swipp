@@ -139,27 +139,40 @@ const RepairForm = ({ route, navigation }) => {
     const bookingDate = new Date(selectedDateTime);
     const reparationType = "Réparation";
 
+    // Création de l'objet réservation
+    const reservation = {
+      userId,
+      vehicleId: selectedVehicleId,
+      isActive: true,
+      createdAt: new Date(),
+      reparationType: reparationType,
+      reparationDetail: selectedValue,
+      bookingDate: bookingDate,
+      garageId: selectedGarage,
+      isActive: true,
+      cancelled: false,
+      price: selectedPrice,
+      location: selectedGarage.name,
+    };
     try {
-      // Création de l'objet réservation
-      const reservation = {
-        userId,
-        vehicleId: selectedVehicleId,
-        isActive: true,
-        createdAt: new Date(),
-        reparationType: reparationType,
-        reparationDetail: selectedValue,
-        bookingDate: bookingDate,
-        garageId: selectedGarage,
-        isActive: true,
-        cancelled: false,
-        price: selectedPrice,
-        location: selectedGarage.name,
-      };
-
       // Ajout de la réservation à Firestore
-      await addDoc(collection(db, "RepairBookings"), reservation);
+      const docRef = await addDoc(
+        collection(db, "RepairBookings"),
+        reservation
+      );
       Alert.alert("Succès", "Votre rendez-vous a été enregistré avec succès.");
       navigation.goBack();
+
+      // Ajout de la facture à Firestore
+      await addDoc(collection(db, "purchases"), {
+        userId: auth.currentUser.uid,
+        amount: selectedPrice,
+        createdAt: new Date(),
+        dateTime: bookingDate,
+        bookingId: docRef.id,
+        type: "Reparation",
+        reparationDetail: selectedValue,
+      });
     } catch (error) {
       console.error("Erreur lors de l'ajout de la réservation", error);
       Alert.alert(

@@ -117,23 +117,36 @@ const TechnicalControlForm = ({ navigation }) => {
     const bookingDate = new Date(selectedDateTime);
     const reparationType = "Contrôle technique";
 
-    try {
-      const reservation = {
-        userId,
-        vehicleId: selectedVehicleId,
-        isActive: true,
-        createdAt: new Date(),
-        garageId: selectedGarage,
-        reparationType: reparationType,
-        bookingDate: bookingDate,
-        location: selectedGarage.name,
-        price: controlPrice,
-        cancelled: false,
-      };
+    const reservation = {
+      userId,
+      vehicleId: selectedVehicleId,
+      isActive: true,
+      createdAt: new Date(),
+      garageId: selectedGarage,
+      reparationType: reparationType,
+      bookingDate: bookingDate,
+      location: selectedGarage.name,
+      price: controlPrice,
+      cancelled: false,
+    };
 
-      await addDoc(collection(db, "RepairBookings"), reservation);
+    try {
+      const docRef = await addDoc(
+        collection(db, "RepairBookings"),
+        reservation
+      );
       Alert.alert("Succès", "Votre rendez-vous a été enregistré avec succès.");
       navigation.goBack();
+
+      // Ajout de la facture à Firestore
+      await addDoc(collection(db, "purchases"), {
+        userId: auth.currentUser.uid,
+        amount: controlPrice,
+        createdAt: new Date(),
+        dateTime: bookingDate,
+        bookingId: docRef.id,
+        type: "Contrôle technique",
+      });
     } catch (error) {
       console.error("Erreur lors de l'ajout de la réservation", error);
       Alert.alert(

@@ -127,37 +127,3 @@ async function storeInvoiceData(userId, invoice) {
     invoice_pdf: invoice.invoice_pdf,
   });
 }
-
-exports.updateEmailInAuthOnVerification = functions.firestore
-  .document("users/{userId}")
-  .onUpdate(async (change, context) => {
-    const newValue = change.after.data();
-    const previousValue = change.before.data();
-    const userId = context.params.userId;
-
-    // Vérifier si l'emailToVerify a changé et n'est pas null
-    if (
-      newValue.emailToVerify &&
-      newValue.emailToVerify !== previousValue.emailToVerify
-    ) {
-      try {
-        // Mettre à jour l'email dans Firebase Auth
-        const user = await admin.auth().getUser(userId);
-        if (user.email !== newValue.emailToVerify) {
-          await admin.auth().updateUser(userId, {
-            email: newValue.emailToVerify,
-          });
-
-          // Optionnellement, mettre à jour l'email dans le document de l'utilisateur et supprimer emailToVerify
-          await admin.firestore().collection("users").doc(userId).update({
-            email: newValue.emailToVerify,
-            emailToVerify: admin.firestore.FieldValue.delete(), // Supprimer le champ après mise à jour
-          });
-
-          console.log(`Email updated for user ${userId}`);
-        }
-      } catch (error) {
-        console.error("Error updating email in Auth:", error);
-      }
-    }
-  });

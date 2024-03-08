@@ -1,4 +1,7 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { Timestamp, doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import {
@@ -51,12 +54,18 @@ const SignUpScreen = ({ navigation }) => {
         password
       );
       const user = userCredential.user;
+      await sendEmailVerification(user);
+
       await setDoc(doc(db, "users", user.uid), {
         username,
         email,
         createdAt: Timestamp.now(),
       });
       navigation.navigate("LoginScreen");
+      Alert.alert(
+        "Vérification de l'email",
+        "Un email de vérification a été envoyé. Veuillez vérifier votre boîte de réception."
+      );
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
         Alert.alert("Inscription impossible", "Erreur lors de l'inscription");

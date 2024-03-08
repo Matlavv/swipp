@@ -1,13 +1,13 @@
 Inspiration Gaston service
 
+Vue admin pour garages & refuelers
  
 TO DO :
-
+- Ajouter à purchases dans les réparations, CT et entretien
 - Envoyer une facture au client lors de l'achat
-- Activer le paiement en plusieurs fois (voir les conditions)
+- Ajouter sécurité, impossible de se connecter si l'email n'est pas vérifié (envoyer email de verif lors de changment de mail)
 - Enlever prix reparation
 - Créer une doc
-- Bandeau déroulant pour le litrage ? RefuelForm
 - Images de logo, launchingScreen, icone d'application
 - Page d'urgence
 - Les réservations sont automatiquement passées en isActive = false quand la date est passée
@@ -15,3 +15,5 @@ TO DO :
 V2 
 - QR code avec un lien redirigeant vers son refuel de son véhicule
 - Profil pro pour les entreprises
+
+

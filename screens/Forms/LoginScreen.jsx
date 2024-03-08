@@ -1,4 +1,7 @@
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import React, { useState } from "react";
 import {
   Alert,
@@ -50,6 +53,28 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
+  const handlePasswordReset = async () => {
+    if (email.length === 0 || !email.includes("@")) {
+      Alert.alert(
+        "Erreur",
+        "Veuillez fournir une adresse email valide pour réinitialiser votre mot de passe."
+      );
+    } else {
+      try {
+        await sendPasswordResetEmail(auth, email);
+        Alert.alert(
+          "Réinitialisation du mot de passe",
+          "Un email de réinitialisation de mot de passe a été envoyé. Veuillez vérifier votre boîte de réception."
+        );
+      } catch (error) {
+        Alert.alert(
+          "Erreur",
+          "Une erreur est survenue lors de la réinitialisation du mot de passe."
+        );
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={tw`flex h-full`}>
       <ScrollView style={tw`flex-1`}>
@@ -91,6 +116,13 @@ const LoginScreen = ({ navigation }) => {
             >
               <Text style={tw`text-blue-500 ml-2 font-bold text-sm`}>
                 S'inscrire
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={tw`flex justify-center items-center mt-8`}>
+            <TouchableOpacity onPress={handlePasswordReset} style={tw`mt-5`}>
+              <Text style={tw`text-blue-500 text-center font-bold text-sm`}>
+                Mot de passe oublié ?
               </Text>
             </TouchableOpacity>
           </View>

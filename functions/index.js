@@ -7,7 +7,7 @@ const stripe = require("stripe")(stripeSecretKey);
 admin.initializeApp();
 
 exports.checkAndUpdateBookings = functions.pubsub
-  .schedule("every 60 minutes")
+  .schedule("every 300 minutes")
   .onRun(async (context) => {
     const db = admin.firestore();
     const now = admin.firestore.Timestamp.now();
@@ -47,5 +47,117 @@ exports.createPaymentIntent = functions
       response.json({ clientSecret: paymentIntent.client_secret });
     } catch (error) {
       response.status(500).send(error);
+    }
+  });
+
+exports.createStripeInvoiceOnPurchase = functions
+  .region("europe-west3")
+  .firestore.document("purchases/{purchaseId}")
+  .onCreate(async (snap, context) => {
+    try {
+      const purchaseData = snap.data();
+      const userId = purchaseData.userId;
+      const amount = purchaseData.amount;
+
+      // Récupérer ou créer un client Stripe
+      const stripeCustomerId = await getOrCreateStripeCustomer(userId);
+
+      // Créer une facture Stripe
+      const invoice = await createStripeInvoice(stripeCustomerId, amount);
+
+      // Stocker les informations de la facture dans Firebase
+      await storeInvoiceData(userId, invoice);
+
+      console.log("Facture créée et stockée avec succès.");
+    } catch (error) {
+      console.error("Erreur lors de la création de la facture:", error);
+    }
+  });
+
+async function getOrCreateStripeCustomer(userId) {
+  const userRef = admin.firestore().collection("users").doc(userId);
+  const doc = await userRef.get();
+  const docData = doc.data();
+  let stripeCustomerId = docData ? docData.stripeCustomerId : undefined;
+
+  if (!stripeCustomerId) {
+    const docData = doc.data();
+    const email = docData ? docData.email : undefined;
+    const customer = await stripe.customers.create({
+      email: email,
+    });
+    stripeCustomerId = customer.id;
+    await userRef.update({ stripeCustomerId });
+  }
+
+  return stripeCustomerId;
+}
+
+async function createStripeInvoice(stripeCustomerId, amount) {
+  // Création d'un article de facturation
+  const invoiceItem = await stripe.invoiceItems.create({
+    customer: stripeCustomerId,
+    amount: amount * 100, // Convertir en centimes
+    currency: "eur",
+    description: "Achat de produit",
+  });
+
+  // Création de la facture
+  const invoice = await stripe.invoices.create({
+    customer: stripeCustomerId,
+    auto_advance: true,
+  });
+
+  // Finalisation de la facture déclenche l'envoi de l'email
+  await stripe.invoices.finalizeInvoice(invoice.id);
+
+  return invoice;
+}
+
+async function storeInvoiceData(userId, invoice) {
+  const userInvoicesRef = admin
+    .firestore()
+    .collection("users")
+    .doc(userId)
+    .collection("invoices");
+  await userInvoicesRef.add({
+    invoiceId: invoice.id,
+    amount: invoice.total,
+    created: invoice.created,
+    invoice_pdf: invoice.invoice_pdf,
+  });
+}
+
+exports.updateEmailInAuthOnVerification = functions.firestore
+  .document("users/{userId}")
+  .onUpdate(async (change, context) => {
+    const newValue = change.after.data();
+    const previousValue = change.before.data();
+    const userId = context.params.userId;
+
+    // Vérifier si l'emailToVerify a changé et n'est pas null
+    if (
+      newValue.emailToVerify &&
+      newValue.emailToVerify !== previousValue.emailToVerify
+    ) {
+      try {
+        // Mettre à jour l'email dans Firebase Auth
+        const user = await admin.auth().getUser(userId);
+        if (user.email !== newValue.emailToVerify) {
+          await admin.auth().updateUser(userId, {
+            email: newValue.emailToVerify,
+          });
+
+          // Optionnellement, mettre à jour l'email dans le document de l'utilisateur et supprimer emailToVerify
+          await admin.firestore().collection("users").doc(userId).update({
+            email: newValue.emailToVerify,
+            emailToVerify: admin.firestore.FieldValue.delete(), // Supprimer le champ après mise à jour
+          });
+
+          console.log(`Email updated for user ${userId}`);
+        }
+      } catch (error) {
+        console.error("Error updating email in Auth:", error);
+      }
     }
   });

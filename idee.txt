@@ -3,7 +3,6 @@ Inspiration Gaston service
 Vue admin pour garages & refuelers
  
 TO DO :
-- Ajouter à purchases dans les réparations, CT et entretien
 - Envoyer une facture au client lors de l'achat
 - Ajouter sécurité, impossible de se connecter si l'email n'est pas vérifié (envoyer email de verif lors de changment de mail)
 - Enlever prix reparation
@@ -11,9 +10,14 @@ TO DO :
 - Images de logo, launchingScreen, icone d'application
 - Page d'urgence
 - Les réservations sont automatiquement passées en isActive = false quand la date est passée
+- Page urgence, enregistrer les données de sa voiture d'assurance lors d'un ajout de véhicule 
+- Avoir un accès rapide à tous les numéros d'assurance
+- Afficher le num de tél du livreur afin de pouvoir l'appeler et lui laisser la main sur que faire de la réservation
 
 V2 
 - QR code avec un lien redirigeant vers son refuel de son véhicule
 - Profil pro pour les entreprises
 
 
+
+Site web pour enregistrer les garagistes, ils y auront accès, afin d'ajouter leurs infos, ils nous contacterons afin d'etre vérifiés et personnaliser leurs infos 

@@ -5,11 +5,9 @@ Vue admin pour garages & refuelers
 TO DO :
 - Envoyer une facture au client lors de l'achat
 - Ajouter sécurité, impossible de se connecter si l'email n'est pas vérifié (envoyer email de verif lors de changment de mail)
-- Enlever prix reparation
 - Créer une doc
 - Images de logo, launchingScreen, icone d'application
 - Page d'urgence
-- Les réservations sont automatiquement passées en isActive = false quand la date est passée
 - Page urgence, enregistrer les données de sa voiture d'assurance lors d'un ajout de véhicule 
 - Avoir un accès rapide à tous les numéros d'assurance
 - Afficher le num de tél du livreur afin de pouvoir l'appeler et lui laisser la main sur que faire de la réservation

@@ -2,7 +2,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import RefuelForm from "../components/Forms/RefuelForm";
 import RepairForm from "../components/Forms/RepairForm";
-import EmergencyScreen from "../screens/EmergencyScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ChooseGarageModal from "./Forms/ChooseGarageModal";
 import DateTimePickerModal from "./Forms/DateTimePickerModal";
@@ -34,11 +33,7 @@ const HomeStack = () => {
         component={RepairForm}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="EmergencyScreen"
-        component={EmergencyScreen}
-        options={{ headerShown: false }}
-      />
+
       <Stack.Screen
         name="MaintenanceForm"
         component={MaintenanceForm}

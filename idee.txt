@@ -3,6 +3,7 @@ Inspiration Gaston service
 Vue admin pour garages & refuelers
  
 TO DO :
+- Ajouter des garages en BDD et les rendre visible dans l'app
 - Envoyer une facture au client lors de l'achat
 - Ajouter sécurité, impossible de se connecter si l'email n'est pas vérifié (envoyer email de verif lors de changment de mail)
 - Créer une doc

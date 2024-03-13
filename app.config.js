@@ -40,6 +40,7 @@ export default {
       appId: process.env.FIREBASE_APP_ID,
       measurementId: process.env.FIREBASE_MEASUREMENT_ID,
       stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+      geocoderApiKey: process.env.GEOCODER_API_KEY,
     },
   },
 };

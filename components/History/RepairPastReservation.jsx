@@ -121,7 +121,7 @@ const RepairIncomingReservation = () => {
                 ellipsizeMode="tail"
                 style={tw`text-base ml-1`}
               >
-                {item.garageId.name}
+                {item.location}
               </Text>
             </View>
 

@@ -35,7 +35,12 @@ const DetailledRefuelReservation = ({ route }) => {
   }, [reservationId]);
 
   const handleCancelReservation = async () => {
-    if (reservation.isActive) {
+    const now = new Date(); // L'heure actuelle
+    const createdAt = reservation.createdAt.toDate(); // Convertit le Timestamp Firestore en objet Date JavaScript
+    const timeDiff = now - createdAt; // Différence en millisecondes
+    const minutesDiff = timeDiff / (1000 * 60); // Convertit en minutes
+
+    if (reservation.isActive && minutesDiff <= 60) {
       const reservationRef = doc(db, "RefuelBookings", reservationId);
 
       await updateDoc(reservationRef, {
@@ -47,10 +52,16 @@ const DetailledRefuelReservation = ({ route }) => {
         "Votre réservation a été annulée avec succès."
       );
       navigation.goBack();
-    } else {
+    } else if (!reservation.isActive) {
       Alert.alert(
         "Annulation impossible",
         "Cette réservation a déjà été honorée et ne peut plus être annulée."
+      );
+    } else {
+      // Si la réservation a été faite il y a plus de 60 minutes
+      Alert.alert(
+        "Annulation impossible",
+        "Le délai d'annulation d'une heure est dépassé. Veuillez contacter le garage pour toute demande d'annulation."
       );
     }
   };

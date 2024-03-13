@@ -178,7 +178,7 @@ const MaintenanceForm = ({ navigation, route }) => {
       vehicleId: selectedVehicleId,
       locationType: repairLocationType,
       location: repairLocationType === "garage" ? selectedGarage.name : address,
-      bookingDate,
+      bookingDate: bookingDate,
       createdAt: new Date(),
       reparationType: "Entretien",
       reparationDetail: selectedMaintenance,
@@ -188,12 +188,26 @@ const MaintenanceForm = ({ navigation, route }) => {
     };
 
     try {
-      await addDoc(collection(db, "RepairBookings"), reservation);
+      const docRef = await addDoc(
+        collection(db, "RepairBookings"),
+        reservation
+      );
       Alert.alert(
         "Succès",
         "Votre rendez-vous pour l'entretien a été enregistré avec succès."
       );
       navigation.goBack();
+
+      // Ajout de la facture à Firestore
+      await addDoc(collection(db, "purchases"), {
+        userId: auth.currentUser.uid,
+        amount: selectedPrice,
+        createdAt: new Date(),
+        dateTime: bookingDate,
+        bookingId: docRef.id,
+        type: "Entretien",
+        reparationDetail: selectedMaintenance,
+      });
     } catch (error) {
       Alert.alert(
         "Erreur",

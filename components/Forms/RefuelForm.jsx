@@ -23,7 +23,7 @@ import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
 import RefuelDateTimePickerModal from "./RefuelDateTimePickerModal";
 
-Geocoder.init(process.env.GEOCODER_API_KEY);
+Geocoder.init("AIzaSyAxJi9a4Bt8lKrKtl5DH6WIsPWkbBMgbeg");
 
 const RefuelForm = ({ route, navigation }) => {
   const [selectedFuel, setSelectedFuel] = useState("SP98");
@@ -192,14 +192,28 @@ const RefuelForm = ({ route, navigation }) => {
       volume: parseFloat(volume),
       price: calculateTotalPrice(),
       options: selectedOptions,
-      cancelled: false,
       dateTime: selectedDateTime,
+      cancelled: false,
     };
 
     try {
-      await addDoc(collection(db, "RefuelBookings"), reservation);
+      const docRef = await addDoc(
+        collection(db, "RefuelBookings"),
+        reservation
+      );
       Alert.alert("Succès", `Votre réservation a été enregistrée.`);
       navigation.goBack();
+
+      // Enregistrer l'achat dans Firestore pour déclencher la création de la facture
+      await addDoc(collection(db, "purchases"), {
+        userId: auth.currentUser.uid,
+        amount: calculateTotalPrice(),
+        fuelType: selectedFuel,
+        createdAt: new Date(),
+        dateTime: selectedDateTime,
+        bookingId: docRef.id,
+        type: "Refuel",
+      });
     } catch (error) {
       console.error("Erreur lors de l'enregistrement de la réservation", error);
       Alert.alert(

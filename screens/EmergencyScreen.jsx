@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import {
   Image,
@@ -10,6 +11,16 @@ import tw from "twrnc";
 import { breakdown, crash, swippLogo } from "../assets";
 
 const EmergencyScreen = ({ onPress }) => {
+  const navigation = useNavigation();
+
+  const navigateToCrashInfo = () => {
+    navigation.navigate("CrashInfo");
+  };
+
+  const navigateToBreakdownInfo = () => {
+    navigation.navigate("BreakdownInfo");
+  };
+
   return (
     <SafeAreaView style={tw`flex-1`}>
       {/* Logo */}
@@ -21,7 +32,7 @@ const EmergencyScreen = ({ onPress }) => {
         {/* First button */}
         <TouchableOpacity
           style={tw`w-96 h-55 bg-[#34469C] border border-gray-200 rounded-2xl shadow-md flex-row justify-between items-center px-5`}
-          onPress={onPress}
+          onPress={navigateToBreakdownInfo}
         >
           <Text style={tw`text-white font-bold text-3xl`}>
             {"Prévenir\nune panne"}
@@ -35,7 +46,7 @@ const EmergencyScreen = ({ onPress }) => {
         {/* Second button */}
         <TouchableOpacity
           style={tw`w-96 h-55 bg-[#34469C] border border-gray-200 rounded-2xl shadow-md relative flex-row items-center px-5 mt-5`}
-          onPress={onPress}
+          onPress={navigateToCrashInfo}
         >
           <Text style={tw`text-white font-bold text-3xl z-10`}>
             {"Indiquer\nun accident"}

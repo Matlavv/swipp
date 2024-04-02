@@ -54,15 +54,11 @@ const ServiceScreen = () => {
           >
             <TouchableOpacity
               style={tw`justify-center items-center`}
-              onPress={() => handleNavigation("RepairForm")}
+              onPress={() => handleNavigation("RefuelForm")}
             >
-              <Image
-                source={reparation}
-                resizeMode="contain"
-                style={tw`w-20 h-20`}
-              />
+              <Image source={gas} resizeMode="contain" style={tw`w-20 h-20`} />
               <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
-                Réparation véhicules
+                Livraison carburant
               </Text>
             </TouchableOpacity>
           </LinearGradient>
@@ -74,11 +70,15 @@ const ServiceScreen = () => {
           >
             <TouchableOpacity
               style={tw`justify-center items-center`}
-              onPress={() => handleNavigation("RefuelForm")}
+              onPress={() => handleNavigation("RepairForm")}
             >
-              <Image source={gas} resizeMode="contain" style={tw`w-20 h-20`} />
+              <Image
+                source={reparation}
+                resizeMode="contain"
+                style={tw`w-20 h-20`}
+              />
               <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
-                Livraison carbuant
+                Réparation véhicule
               </Text>
             </TouchableOpacity>
           </LinearGradient>

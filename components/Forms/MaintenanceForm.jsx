@@ -22,6 +22,8 @@ import DateTimePickerModal from "./DateTimePickerModal";
 const MaintenanceForm = ({ navigation, route }) => {
   const [selectedMaintenance, setSelectedMaintenance] = useState("");
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
+  const [selectedImmatriculationPlate, setSelectedImmatriculationPlate] =
+    useState("");
   const [selectedGarage, setSelectedGarage] = useState({});
   const [selectedDateTime, setSelectedDateTime] = useState("");
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
@@ -138,7 +140,7 @@ const MaintenanceForm = ({ navigation, route }) => {
           );
           const userVehicles = querySnapshot.docs.map((doc) => ({
             id: doc.id,
-            value: `${doc.data().label} - ${doc.data().immatriculation}`,
+            ...doc.data(),
           }));
           setVehicles(userVehicles);
         } catch (error) {
@@ -176,8 +178,10 @@ const MaintenanceForm = ({ navigation, route }) => {
     const reservation = {
       userId,
       vehicleId: selectedVehicleId,
+      immatriculationPlate: selectedImmatriculationPlate,
       locationType: repairLocationType,
       location: repairLocationType === "garage" ? selectedGarage.name : address,
+      garageId: repairLocationType === "garage" ? selectedGarage.id : "",
       bookingDate: bookingDate,
       createdAt: new Date(),
       reparationType: "Entretien",
@@ -198,7 +202,6 @@ const MaintenanceForm = ({ navigation, route }) => {
       );
       navigation.goBack();
 
-      // Ajout de la facture à Firestore
       await addDoc(collection(db, "purchases"), {
         userId: auth.currentUser.uid,
         amount: selectedPrice,
@@ -209,6 +212,7 @@ const MaintenanceForm = ({ navigation, route }) => {
         reparationDetail: selectedMaintenance,
       });
     } catch (error) {
+      console.error("Erreur lors de l'ajout de la réservation", error);
       Alert.alert(
         "Erreur",
         "Un problème est survenu lors de l'enregistrement de votre réservation."
@@ -260,9 +264,24 @@ const MaintenanceForm = ({ navigation, route }) => {
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
           <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
           <SelectList
-            setSelected={setSelectedVehicleId}
-            data={vehicles}
-            placeholder="Sélectionnez le véhicule"
+            setSelected={(itemValue) => {
+              const vehicle = vehicles.find((v) => v.id === itemValue);
+              if (vehicle) {
+                setSelectedVehicleId(vehicle.id);
+                setSelectedImmatriculationPlate(vehicle.immatriculation);
+              } else {
+                console.error("Selected vehicle not found");
+                Alert.alert(
+                  "Erreur",
+                  "Le véhicule sélectionné n'est pas trouvé dans la liste."
+                );
+              }
+            }}
+            data={vehicles.map((vehicle) => ({
+              key: vehicle.id,
+              value: `${vehicle.label} - ${vehicle.immatriculation}`,
+            }))}
+            placeholder="Indiquez le véhicule"
             boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
           />
         </View>

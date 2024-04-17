@@ -22,6 +22,8 @@ import DateTimePickerModal from "./DateTimePickerModal";
 const TechnicalControlForm = ({ navigation }) => {
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
+  const [selectedImmatriculationPlate, setSelectedImmatriculationPlate] =
+    useState("");
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
   const [selectedDateTime, setSelectedDateTime] = useState("");
   const [isGarageModalVisible, setGarageModalVisible] = useState(false);
@@ -120,14 +122,17 @@ const TechnicalControlForm = ({ navigation }) => {
     const reservation = {
       userId,
       vehicleId: selectedVehicleId,
+      immatriculationPlate: selectedImmatriculationPlate,
       isActive: true,
       createdAt: new Date(),
-      garageId: selectedGarage,
+      garageId: selectedGarage.id,
       reparationType: reparationType,
       bookingDate: bookingDate,
       location: selectedGarage.name,
       price: controlPrice,
+      reparationDetail: "Contrôle technique",
       cancelled: false,
+      state: "Active",
     };
 
     try {
@@ -178,9 +183,21 @@ const TechnicalControlForm = ({ navigation }) => {
           <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
           <View style={tw`rounded-md`}>
             <SelectList
-              setSelected={(itemValue) => setSelectedVehicleId(itemValue)}
+              setSelected={(itemValue) => {
+                const vehicle = vehicles.find((v) => v.id === itemValue);
+                if (vehicle) {
+                  setSelectedVehicleId(vehicle.id);
+                  setSelectedImmatriculationPlate(vehicle.immatriculation);
+                } else {
+                  console.error("Selected vehicle not found");
+                  Alert.alert(
+                    "Erreur",
+                    "Le véhicule sélectionné n'est pas trouvé dans la liste."
+                  );
+                }
+              }}
               data={vehicles.map((vehicle) => ({
-                id: vehicle.id,
+                key: vehicle.id,
                 value: `${vehicle.label} - ${vehicle.immatriculation}`,
               }))}
               placeholder="Indiquez le véhicule"

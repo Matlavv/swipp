@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useStripe } from "@stripe/stripe-react-native";
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -23,7 +23,10 @@ const RepairForm = ({ route, navigation }) => {
   const [selectedValue, setSelectedValue] = useState("Réparation du moteur");
   const [address, setAddress] = useState("");
   const [vehicles, setVehicles] = useState([]);
-  const [selectedVehicleId, setSelectedVehicleId] = useState("");
+  const [selectedVehicleId, setSelectedVehicleId] = useState({
+    id: "",
+    immatriculationPlate: "",
+  });
   const [selectedDate, setSelectedDate] = useState("");
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
   const [selectedDateTime, setSelectedDateTime] = useState("");
@@ -125,35 +128,64 @@ const RepairForm = ({ route, navigation }) => {
           ...doc.data(),
         }));
         setVehicles(userVehicles);
+        console.log(userVehicles); // Ajouter ce log pour vérifier les données chargées
       } catch (error) {
         console.error("Erreur lors du chargement des véhicules", error);
       }
     }
   };
+
   useEffect(() => {
     loadVehicles();
   }, []);
+
+  const fetchUserData = async (userId) => {
+    const userDoc = doc(db, "users", userId);
+    const docSnap = await getDoc(userDoc);
+
+    if (docSnap.exists()) {
+      return docSnap.data();
+    } else {
+      console.error("Aucun document utilisateur trouvé!");
+      return null;
+    }
+  };
 
   const handleReservationConfirm = async () => {
     const userId = auth.currentUser.uid;
     const bookingDate = new Date(selectedDateTime);
     const reparationType = "Réparation";
 
+    const userData = await fetchUserData(userId);
+    if (!userData) {
+      Alert.alert(
+        "Erreur",
+        "Impossible de récupérer les informations de l'utilisateur."
+      );
+      return;
+    }
+
     // Création de l'objet réservation
     const reservation = {
       userId,
-      vehicleId: selectedVehicleId,
+      vehicleId: selectedVehicleId.id,
+      immatriculationPlate: selectedVehicleId.immatriculationPlate,
       isActive: true,
       createdAt: new Date(),
-      reparationType: reparationType,
+      reparationType: "Réparation",
       reparationDetail: selectedValue,
-      bookingDate: bookingDate,
-      garageId: selectedGarage,
+      bookingDate: new Date(selectedDateTime),
+      garageId: selectedGarage.id,
       isActive: true,
       cancelled: false,
       price: selectedPrice,
       location: selectedGarage.name,
+      firstName: userData.firstName || "",
+      lastName: userData.lastName || "",
+      username: userData.username,
+      state: "Active",
     };
+
     try {
       // Ajout de la réservation à Firestore
       const docRef = await addDoc(
@@ -226,10 +258,27 @@ const RepairForm = ({ route, navigation }) => {
           <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
           <View style={tw`rounded-md`}>
             <SelectList
-              setSelected={(itemValue) => setSelectedVehicleId(itemValue)}
+              setSelected={(itemValue) => {
+                console.log("Selected vehicle ID:", itemValue);
+                const selectedVehicle = vehicles.find(
+                  (vehicle) => vehicle.id === itemValue
+                );
+                if (selectedVehicle) {
+                  setSelectedVehicleId({
+                    id: selectedVehicle.id,
+                    immatriculationPlate: selectedVehicle.immatriculation,
+                  });
+                } else {
+                  console.error("Selected vehicle not found");
+                  Alert.alert(
+                    "Error",
+                    "The selected vehicle was not found in the list."
+                  );
+                }
+              }}
               data={vehicles.map((vehicle) => ({
-                id: vehicle.id,
-                value: `${vehicle.label} - ${vehicle.immatriculation}`,
+                key: vehicle.id, // Use vehicle.id as the key for selection
+                value: `${vehicle.label} - ${vehicle.immatriculation}`, // Display format
               }))}
               placeholder="Indiquez le véhicule"
               boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}

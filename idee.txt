@@ -3,7 +3,11 @@ Inspiration Gaston service
 Vue admin pour garages & refuelers
  
 TO DO :
-- Ajouter des garages en BDD et les rendre visible dans l'app
+- Page admin pour refueler, lien maps et infos clients
+- Garage mobile ou fixe à cocher 
+- Informations précise sur le type de réparation (idGarage, votre devis comprend :)
+- Annuler commande coté garagiste et notifier le client
+- Coté admin pour garagiste pour modifier son profil de garage
 - Envoyer une facture au client lors de l'achat
 - Ajouter sécurité, impossible de se connecter si l'email n'est pas vérifié (envoyer email de verif lors de changment de mail)
 - Créer une doc

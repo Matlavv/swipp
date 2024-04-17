@@ -194,6 +194,7 @@ const RefuelForm = ({ route, navigation }) => {
       options: selectedOptions,
       dateTime: selectedDateTime,
       cancelled: false,
+      state: "Active",
     };
 
     try {

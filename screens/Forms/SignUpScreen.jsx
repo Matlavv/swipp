@@ -60,6 +60,7 @@ const SignUpScreen = ({ navigation }) => {
         username,
         email,
         createdAt: Timestamp.now(),
+        role: "user",
       });
       navigation.navigate("LoginScreen");
       Alert.alert(

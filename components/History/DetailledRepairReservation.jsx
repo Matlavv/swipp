@@ -12,10 +12,11 @@ import {
 } from "react-native";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
-import { db } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig";
 
 const DetailledRepairReservation = ({ route }) => {
   const { reservationId } = route.params;
+  const [vehicle, setVehicle] = useState(null);
   const [reservation, setReservation] = useState(null);
   const navigation = useNavigation();
 
@@ -25,7 +26,24 @@ const DetailledRepairReservation = ({ route }) => {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        setReservation({ id: docSnap.id, ...docSnap.data() });
+        const reservationData = { id: docSnap.id, ...docSnap.data() };
+        setReservation(reservationData);
+
+        // Charger les détails du véhicule
+        const vehicleRef = doc(
+          db,
+          "users",
+          auth.currentUser.uid,
+          "vehicles",
+          reservationData.vehicleId
+        );
+        const vehicleSnap = await getDoc(vehicleRef);
+
+        if (vehicleSnap.exists()) {
+          setVehicle({ id: vehicleSnap.id, ...vehicleSnap.data() });
+        } else {
+          Alert.alert("Erreur", "Véhicule non trouvé.");
+        }
       } else {
         Alert.alert("Erreur", "Réservation non trouvée.");
       }
@@ -92,15 +110,18 @@ const DetailledRepairReservation = ({ route }) => {
               minute: "2-digit",
             })}
           </Text>
-          <View
-            style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
-          >
-            <Text style={tw`text-lg`}>Véhicule :</Text>
-            <Text style={tw`text-lg font-semibold`}>
-              {" "}
-              {reservation.vehicleId}
-            </Text>
-          </View>
+
+          {vehicle && (
+            <View
+              style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
+            >
+              <Text style={tw`text-lg`}>Véhicule :</Text>
+              <Text style={tw`text-lg font-semibold`}>
+                {" "}
+                {vehicle.label} - {vehicle.immatriculation}
+              </Text>
+            </View>
+          )}
           <View
             style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
           >

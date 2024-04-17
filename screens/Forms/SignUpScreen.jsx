@@ -22,6 +22,9 @@ const SignUpScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const validateInputs = () => {
     if (email.length === 0 || !email.includes("@")) {
@@ -36,9 +39,21 @@ const SignUpScreen = ({ navigation }) => {
       );
       return false;
     }
-
     if (username.length === 0) {
       Alert.alert("Erreur", "Veuillez entrer un nom d'utilisateur.");
+      return false;
+    }
+    if (firstName.length === 0) {
+      Alert.alert("Erreur", "Veuillez entrer votre prénom.");
+      return false;
+    }
+    if (lastName.length === 0) {
+      Alert.alert("Erreur", "Veuillez entrer votre nom.");
+      return false;
+    }
+    const phoneRegex = /^(\+\d{1,3}[- ]?)?\d{10}$/; // Adjust regex as needed for your format
+    if (!phoneRegex.test(phoneNumber)) {
+      Alert.alert("Erreur", "Veuillez entrer un numéro de téléphone valide.");
       return false;
     }
     return true;
@@ -59,9 +74,13 @@ const SignUpScreen = ({ navigation }) => {
       await setDoc(doc(db, "users", user.uid), {
         username,
         email,
+        firstName,
+        lastName,
+        phoneNumber,
         createdAt: Timestamp.now(),
         role: "user",
       });
+
       navigation.navigate("LoginScreen");
       Alert.alert(
         "Vérification de l'email",
@@ -108,6 +127,26 @@ const SignUpScreen = ({ navigation }) => {
             value={username}
             onChangeText={setUsername}
           />
+          <TextInput
+            style={tw`border-b w-80 p-2 mb-4`}
+            placeholder="Prénom"
+            value={firstName}
+            onChangeText={setFirstName}
+          />
+          <TextInput
+            style={tw`border-b w-80 p-2 mb-4`}
+            placeholder="Nom"
+            value={lastName}
+            onChangeText={setLastName}
+          />
+          <TextInput
+            style={tw`border-b w-80 p-2 mb-4`}
+            placeholder="Numéro de téléphone"
+            keyboardType="phone-pad"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+          />
+
           <TouchableOpacity
             onPress={handleSignUp}
             style={tw`bg-[#34469C] px-5 py-3 rounded-full flex mt-7 shadow-2xl`}

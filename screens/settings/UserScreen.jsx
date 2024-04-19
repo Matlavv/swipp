@@ -13,12 +13,15 @@ import {
   View,
 } from "react-native";
 import tw from "twrnc";
-import { background1, background3, profilePic } from "../../assets";
+import { background1, background3 } from "../../assets";
 import SettingsList from "../../components/SettingsList";
 import { auth, db, signOut } from "../../firebaseConfig";
 
 const UserScreen = () => {
   const navigation = useNavigation();
+  const [username, setUsername] = useState("");
+  const [profileImage, setProfileImage] = useState(null);
+  const user = auth.currentUser;
 
   const navigateToUserScreen = () => {
     navigation.navigate("UserProfileScreen");
@@ -40,14 +43,9 @@ const UserScreen = () => {
     navigation.navigate("AboutScreen");
   };
 
-  const [username, setUsername] = useState("");
-  const [profileImage, setProfileImage] = useState("");
-  const user = auth.currentUser;
-
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      // Vous pouvez naviguer vers l'écran de connexion ou effectuer d'autres actions ici après la déconnexion
     } catch (error) {
       console.error("Erreur lors de la déconnexion", error);
     }
@@ -57,24 +55,24 @@ const UserScreen = () => {
     const response = await fetch(uri);
     const blob = await response.blob();
     const storage = getStorage();
-    const storageRef = ref(storage, `profileImages/${auth.currentUser.uid}`);
+    const storageRef = ref(storage, `profileImages/${user.uid}`);
 
     try {
       const snapshot = await uploadBytes(storageRef, blob);
       const downloadURL = await getDownloadURL(snapshot.ref);
-      updateUserProfile(downloadURL);
+      updateUserProfile(downloadURL); // Update user profile with new image URL
     } catch (error) {
       console.error("Erreur lors du téléversement de l'image", error);
     }
   };
 
   const updateUserProfile = async (imageUrl) => {
-    const userDocRef = doc(db, "users", auth.currentUser.uid);
+    const userDocRef = doc(db, "users", user.uid);
     try {
       await updateDoc(userDocRef, {
         profileImageUrl: imageUrl,
       });
-      setProfileImage(imageUrl);
+      setProfileImage({ uri: imageUrl }); // Update local state to reflect new image
     } catch (error) {
       console.error("Erreur lors de la mise à jour du profil", error);
     }
@@ -101,11 +99,8 @@ const UserScreen = () => {
 
         if (docSnap.exists()) {
           setUsername(docSnap.data().username);
-          // Ajoutez ceci pour récupérer l'URL de la photo de profil
-          const profileImageUrl = docSnap.data().profileImageUrl || profilePic;
-          setProfileImage(profileImageUrl);
-        } else {
-          console.log("No such document!");
+          const imageUrl = docSnap.data().profileImageUrl;
+          setProfileImage({ uri: imageUrl });
         }
       }
     };
@@ -135,9 +130,10 @@ const UserScreen = () => {
             >
               <View style={tw`p-2 bg-white mt-15 relative`}>
                 <Image
-                  source={profileImage ? { uri: profileImage } : profilePic}
+                  source={profileImage}
                   style={tw`h-28 w-28 rounded-full`}
                 />
+
                 <TouchableOpacity
                   onPress={pickImage}
                   style={tw`absolute bottom-0 right-0 bg-[#34469C] p-2 rounded-full`}

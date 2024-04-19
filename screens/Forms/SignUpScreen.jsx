@@ -71,6 +71,9 @@ const SignUpScreen = ({ navigation }) => {
       const user = userCredential.user;
       await sendEmailVerification(user);
 
+      const defaultProfileImgUrl =
+        "https://firebasestorage.googleapis.com/v0/b/swipp-b74be.appspot.com/o/profileImages%2FprofilePic.png?alt=media&token=34edfdcb-9114-45a4-b84f-bd9a22f92c57";
+
       await setDoc(doc(db, "users", user.uid), {
         username,
         email,
@@ -78,6 +81,7 @@ const SignUpScreen = ({ navigation }) => {
         lastName,
         phoneNumber,
         createdAt: Timestamp.now(),
+        profileImageUrl: defaultProfileImgUrl,
         role: "user",
       });
 

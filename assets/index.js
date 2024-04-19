@@ -10,7 +10,6 @@ import garage1 from "./img/garage1.png";
 import gas from "./img/gas.png";
 import maintenance from "./img/maintenance.png";
 import oil_change from "./img/oil_change.png";
-import profilePic from "./img/profilePic.png";
 import reparation from "./img/reparation.png";
 import services from "./img/services.png";
 import swippLogo from "./img/swipp_1.png";
@@ -28,7 +27,6 @@ export {
   gas,
   maintenance,
   oil_change,
-  profilePic,
   reparation,
   services,
   swippLogo,

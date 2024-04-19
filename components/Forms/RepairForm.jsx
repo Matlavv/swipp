@@ -128,7 +128,6 @@ const RepairForm = ({ route, navigation }) => {
           ...doc.data(),
         }));
         setVehicles(userVehicles);
-        console.log(userVehicles); // Ajouter ce log pour vérifier les données chargées
       } catch (error) {
         console.error("Erreur lors du chargement des véhicules", error);
       }
@@ -259,7 +258,6 @@ const RepairForm = ({ route, navigation }) => {
           <View style={tw`rounded-md`}>
             <SelectList
               setSelected={(itemValue) => {
-                console.log("Selected vehicle ID:", itemValue);
                 const selectedVehicle = vehicles.find(
                   (vehicle) => vehicle.id === itemValue
                 );

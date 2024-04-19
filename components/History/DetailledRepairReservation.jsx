@@ -39,11 +39,11 @@ const DetailledRepairReservation = ({ route }) => {
         );
         const vehicleSnap = await getDoc(vehicleRef);
 
-        if (vehicleSnap.exists()) {
-          setVehicle({ id: vehicleSnap.id, ...vehicleSnap.data() });
-        } else {
-          Alert.alert("Erreur", "Véhicule non trouvé.");
-        }
+        // if (vehicleSnap.exists()) {
+        //   setVehicle({ id: vehicleSnap.id, ...vehicleSnap.data() });
+        // } else {
+        //   Alert.alert("Erreur", "Véhicule non trouvé.");
+        // }
       } else {
         Alert.alert("Erreur", "Réservation non trouvée.");
       }

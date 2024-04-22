@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
@@ -11,10 +12,20 @@ import {
 } from "react-native";
 import tw from "twrnc";
 import { db } from "../../firebaseConfig";
+import GaragesDetailsModal from "../GaragesDetailsModal";
 
 const GarageList = ({ searchTerm, onSelectGarage }) => {
   const [garages, setGarages] = useState([]);
   const [noResults, setNoResults] = useState(false);
+  const [selectedGarage, setSelectedGarage] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const navigation = useNavigation();
+
+  const handleSelectGarage = (garage) => {
+    setSelectedGarage(garage);
+    setModalVisible(true);
+  };
 
   useEffect(() => {
     const fetchGarages = async () => {
@@ -58,6 +69,10 @@ const GarageList = ({ searchTerm, onSelectGarage }) => {
     fetchGarages();
   }, [searchTerm]);
 
+  const onPressGarage = (garageId) => {
+    navigation.navigate("GarageDetails", { garageId: garageId });
+  };
+
   return (
     <SafeAreaView style={tw`flex`}>
       <FlatList
@@ -65,7 +80,7 @@ const GarageList = ({ searchTerm, onSelectGarage }) => {
         renderItem={({ item }) => (
           <View style={tw`flex w-95`}>
             <TouchableOpacity
-              onPress={() => onSelectGarage(item)}
+              onPress={() => handleSelectGarage(item)}
               style={tw`flex mb-4 bg-white rounded-xl border border-gray-200 shadow-xl`}
             >
               <Image
@@ -89,7 +104,7 @@ const GarageList = ({ searchTerm, onSelectGarage }) => {
                     onPress={() => onSelectGarage(item)}
                     style={tw`bg-[#34469C] px-4 py-1 rounded-full flex-row`}
                   >
-                    <Text style={tw`text-white text-sm mr-1`}>Book</Text>
+                    <Text style={tw`text-white text-sm mr-1`}>Réserver</Text>
                     <Ionicons name="arrow-forward" size={20} color="white" />
                   </TouchableOpacity>
                 </View>
@@ -107,6 +122,11 @@ const GarageList = ({ searchTerm, onSelectGarage }) => {
             </Text>
           ) : null
         }
+      />
+      <GaragesDetailsModal
+        isVisible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        garage={selectedGarage}
       />
     </SafeAreaView>
   );

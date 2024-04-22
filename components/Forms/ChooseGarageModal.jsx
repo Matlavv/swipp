@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import React, { useState } from "react";
-import { Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Modal, TextInput, TouchableOpacity, View } from "react-native";
 import tw from "twrnc";
 import GarageList from "./GarageList";
 
@@ -20,7 +20,7 @@ const ChooseGarageModal = ({ isVisible, onClose, onSelectGarage }) => {
               onPress={onClose}
               style={tw`absolute top-1 left-2`}
             >
-              <Text style={tw`text-black text-2xl font-bold`}>✕</Text>
+              <Ionicons name="close-circle" size={34} color="gray" />
             </TouchableOpacity>
             <View style={tw`absolute flex-row`}>
               <TextInput

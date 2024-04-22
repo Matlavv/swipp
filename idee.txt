@@ -1,26 +1,30 @@
 Inspiration Gaston service
 
-Vue admin pour garages & refuelers
- 
+Vue admin pour refuelers
+
 TO DO :
+- Sur le site page admin , et supprimer le compte garagiste / modifier
+- Ajouter agenda dans dashboard Admin
+- Réserver garage proche de chez soi donc dans un rayon proche
 - Page admin pour refueler, lien maps et infos clients
-- Garage mobile ou fixe à cocher 
+- Garage mobile ou fixe à cocher
 - Informations précise sur le type de réparation (idGarage, votre devis comprend :)
 - Annuler commande coté garagiste et notifier le client
-- Coté admin pour garagiste pour modifier son profil de garage
 - Envoyer une facture au client lors de l'achat
 - Ajouter sécurité, impossible de se connecter si l'email n'est pas vérifié (envoyer email de verif lors de changment de mail)
 - Créer une doc
 - Images de logo, launchingScreen, icone d'application
 - Page d'urgence
-- Page urgence, enregistrer les données de sa voiture d'assurance lors d'un ajout de véhicule 
+- Page urgence, enregistrer les données de sa voiture d'assurance lors d'un ajout de véhicule
 - Avoir un accès rapide à tous les numéros d'assurance
 - Afficher le num de tél du livreur afin de pouvoir l'appeler et lui laisser la main sur que faire de la réservation
 
-V2 
+V2
 - QR code avec un lien redirigeant vers son refuel de son véhicule
 - Profil pro pour les entreprises
 
 
-
-Site web pour enregistrer les garagistes, ils y auront accès, afin d'ajouter leurs infos, ils nous contacterons afin d'etre vérifiés et personnaliser leurs infos 
+////////// Page admin refueler ///////////
+- role refueler
+- Page refuel pour voir la liste des réservations de la prochaine à la plus éloignée
+- Le client choisi son refueler ? ou est associé à un refueler dispo en réservant sur le calendrier 

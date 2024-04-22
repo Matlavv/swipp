@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
@@ -12,25 +12,51 @@ import {
 import tw from "twrnc";
 import { db } from "../../firebaseConfig";
 
-const GarageList = ({ onSelectGarage }) => {
+const GarageList = ({ searchTerm, onSelectGarage }) => {
   const [garages, setGarages] = useState([]);
-
-  const loadGarages = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "garages"));
-      const loadedGarages = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setGarages(loadedGarages);
-    } catch (error) {
-      console.error("Erreur lors du chargement des garages", error);
-    }
-  };
+  const [noResults, setNoResults] = useState(false);
 
   useEffect(() => {
-    loadGarages();
-  }, []);
+    const fetchGarages = async () => {
+      let queries = [];
+      const formattedSearch = searchTerm.trim().toLowerCase();
+      if (formattedSearch) {
+        // Ajoutez les requêtes pour la ville et le département
+        queries.push(
+          query(collection(db, "garages"), where("city", "==", formattedSearch))
+        );
+        queries.push(
+          query(
+            collection(db, "garages"),
+            where("department", "==", formattedSearch)
+          )
+        );
+      } else {
+        // Requête pour tous les garages si aucun terme de recherche
+        queries.push(query(collection(db, "garages"), orderBy("city")));
+      }
+
+      let uniqueGarages = new Map();
+      for (let q of queries) {
+        const snapshot = await getDocs(q);
+        snapshot.forEach((doc) => {
+          // Utiliser un Map pour éviter les doublons
+          uniqueGarages.set(doc.id, { id: doc.id, ...doc.data() });
+        });
+      }
+
+      const results = Array.from(uniqueGarages.values());
+      if (results.length === 0 && searchTerm) {
+        setGarages([]);
+        setNoResults(true);
+      } else {
+        setGarages(results);
+        setNoResults(false);
+      }
+    };
+
+    fetchGarages();
+  }, [searchTerm]);
 
   return (
     <SafeAreaView style={tw`flex`}>
@@ -57,7 +83,7 @@ const GarageList = ({ onSelectGarage }) => {
                   <Text
                     style={tw`text-sm text-black border-2 rounded-full px-3 py-1 border-slate-400`}
                   >
-                    {item.workerCount} Workers
+                    {item.city}
                   </Text>
                   <TouchableOpacity
                     onPress={() => onSelectGarage(item)}
@@ -74,6 +100,13 @@ const GarageList = ({ onSelectGarage }) => {
         keyExtractor={(item) => item.id}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={tw`p-2 ml-2`}
+        ListEmptyComponent={() =>
+          noResults ? (
+            <Text style={tw`text-center text-lg`}>
+              Aucun garage trouvé dans la zone indiquée.
+            </Text>
+          ) : null
+        }
       />
     </SafeAreaView>
   );

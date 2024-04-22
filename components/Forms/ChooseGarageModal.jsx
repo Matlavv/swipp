@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import React, { useState } from "react";
 import { Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -6,6 +7,9 @@ import GarageList from "./GarageList";
 
 const ChooseGarageModal = ({ isVisible, onClose, onSelectGarage }) => {
   const [address, setAddress] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearch = () => {};
 
   return (
     <Modal visible={isVisible} animationType="slide" transparent={true}>
@@ -18,16 +22,23 @@ const ChooseGarageModal = ({ isVisible, onClose, onSelectGarage }) => {
             >
               <Text style={tw`text-black text-2xl font-bold`}>✕</Text>
             </TouchableOpacity>
-            <View style={tw`absolute`}>
+            <View style={tw`absolute flex-row`}>
               <TextInput
-                style={tw`border-b-2 border-[#34469C] font-bold text-sm w-full my-5 ml-12`}
-                value={address}
-                onChangeText={setAddress}
-                placeholder="Entrez votre adresse pour trouver un garage"
+                style={tw`border-b-2 border-[#34469C] font-bold text-sm w-2/3 my-5 ml-12`}
+                value={searchTerm}
+                onChangeText={setSearchTerm}
+                placeholder="Entrez votre ville ou département"
               />
+              <TouchableOpacity
+                onPress={handleSearch}
+                style={tw`m-2 bg-blue-500 p-2 rounded-md`}
+              >
+                <Ionicons name="search" size={24} color="white" />
+              </TouchableOpacity>
             </View>
-            <View style={tw`mt-15`}>
+            <View style={tw`flex mt-15`}>
               <GarageList
+                searchTerm={searchTerm}
                 onSelectGarage={(garage) => {
                   onSelectGarage(garage);
                   onClose();

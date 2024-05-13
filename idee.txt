@@ -3,7 +3,6 @@ Inspiration Gaston service
 Vue admin pour refuelers
 
 TO DO :
-- Sur le site page admin , et supprimer le compte garagiste / modifier
 - Ajouter agenda dans dashboard Admin
 - Page admin pour refueler, lien maps et infos clients
 - Annuler commande coté garagiste et notifier le client

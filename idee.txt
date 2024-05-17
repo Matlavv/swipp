@@ -22,3 +22,19 @@ V2
 - role refueler
 - Page refuel pour voir la liste des réservations de la prochaine à la plus éloignée
 - Le client choisi son refueler ? ou est associé à un refueler dispo en réservant sur le calendrier 
+
+///////// site web swipp.fr /////////////
+
+Favicon
+
+Page d'accueil - L'univers de l'automobile à portée de clic
+Plus axer sur tout ce que propose l'app en général
+
+
+
+Header - "Nos métiers"
+
+
+
+Nos métier - Refueling, réparation voir canva 
+

@@ -21,6 +21,7 @@ import Geocoder from "react-native-geocoding";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
+import ChooseRefuelerModal from "./ChooseRefuelerModal";
 import RefuelDateTimePickerModal from "./RefuelDateTimePickerModal";
 
 Geocoder.init("AIzaSyAxJi9a4Bt8lKrKtl5DH6WIsPWkbBMgbeg");
@@ -38,6 +39,8 @@ const RefuelForm = ({ route, navigation }) => {
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [selectedOptions, setSelectedOptions] = useState([]);
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const [isRefuelerModalVisible, setRefuelerModalVisible] = useState(false);
+  const [selectedRefueler, setSelectedRefueler] = useState(null);
 
   const data = [
     { key: "1", value: "adblue" },
@@ -58,6 +61,10 @@ const RefuelForm = ({ route, navigation }) => {
     );
   };
 
+  const handleSelectRefueler = (refueler) => {
+    setSelectedRefueler(refueler);
+  };
+
   // Paiement avec Stripe
   const fetchPaymentIntentClientSecret = async () => {
     const response = await fetch(
@@ -72,6 +79,7 @@ const RefuelForm = ({ route, navigation }) => {
         }),
       }
     );
+
     const { clientSecret } = await response.json();
     return clientSecret;
   };
@@ -195,6 +203,7 @@ const RefuelForm = ({ route, navigation }) => {
       dateTime: selectedDateTime,
       cancelled: false,
       state: "Active",
+      refuelerId: selectedRefueler.id,
     };
 
     try {
@@ -334,6 +343,33 @@ const RefuelForm = ({ route, navigation }) => {
           <Text style={tw`text-lg font-semibold mt-4`}>
             Prix: {price.toFixed(2)}€
           </Text>
+        </View>
+        {/* Choose Refueler */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+          <Text style={tw`text-xl font-bold mb-4`}>
+            Choisissez votre refueler
+          </Text>
+          <View style={tw`rounded-md`}>
+            <TouchableOpacity
+              onPress={() => setRefuelerModalVisible(true)}
+              style={tw`border-b-2 border-[#34469C] font-bold text-base`}
+              value={selectedRefueler}
+              editable={false}
+            >
+              <TextInput
+                style={tw`text-black font-bold text-base`}
+                placeholder="Sélectionnez un refueler"
+                value={selectedRefueler ? selectedRefueler.firstName : ""}
+                editable={false}
+              />
+            </TouchableOpacity>
+
+            <ChooseRefuelerModal
+              isVisible={isRefuelerModalVisible}
+              onClose={() => setRefuelerModalVisible(false)}
+              onSelectRefueler={handleSelectRefueler}
+            />
+          </View>
         </View>
 
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 my-3`}>

@@ -21,6 +21,7 @@ const UserScreen = () => {
   const navigation = useNavigation();
   const [username, setUsername] = useState("");
   const [profileImage, setProfileImage] = useState(null);
+  const [role, setRole] = useState("");
   const user = auth.currentUser;
 
   const navigateToUserScreen = () => {
@@ -41,6 +42,10 @@ const UserScreen = () => {
 
   const navigateToAboutScreen = () => {
     navigation.navigate("AboutScreen");
+  };
+
+  const navigateToRefuelAdminScreen = () => {
+    navigation.navigate("RefuelAdmin");
   };
 
   const handleSignOut = async () => {
@@ -105,6 +110,18 @@ const UserScreen = () => {
       }
     };
     fetchUserData();
+  }, [user]);
+
+  // récupérer le role de l'user
+  useEffect(() => {
+    if (user) {
+      const userDoc = doc(db, "users", user.uid);
+      getDoc(userDoc).then((docSnapshot) => {
+        if (docSnapshot.exists()) {
+          setRole(docSnapshot.data().role);
+        }
+      });
+    }
   }, [user]);
 
   return (
@@ -172,6 +189,15 @@ const UserScreen = () => {
         </View>
         <View style={tw`w-5/6`}>
           <Text style={tw`m-4 font-bold text-xl`}>Autres</Text>
+          <View style={tw`mb-2`}>
+            {role === "refueler" && (
+              <SettingsList
+                onPress={navigateToRefuelAdminScreen}
+                iconName="person-circle-sharp"
+                text="Vue Admin"
+              />
+            )}
+          </View>
           <View style={tw`mb-2`}>
             <SettingsList
               onPress={navigateToLegalScreen}

@@ -9,6 +9,7 @@ import AdressScreen from "../screens/settings/AdressScreen";
 import EditAdressScreen from "../screens/settings/EditAdressScreen";
 import EditVehicleScreen from "../screens/settings/EditVehicleScreen";
 import LegalScreen from "../screens/settings/LegalScreen";
+import RefuelAdmin from "../screens/settings/RefuelAdmin";
 import UserProfileScreen from "../screens/settings/UserProfileScreen";
 import UserScreen from "../screens/settings/UserScreen";
 import VehicleScreen from "../screens/settings/VehicleScreen";
@@ -51,6 +52,11 @@ const ProfileStack = () => {
       <Stack.Screen
         name="AboutScreen"
         component={AboutScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="RefuelAdmin"
+        component={RefuelAdmin}
         options={{ headerShown: false }}
       />
       <Stack.Screen

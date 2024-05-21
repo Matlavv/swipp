@@ -17,7 +17,7 @@ const bookings = [
   {
     id: 1,
     date: "17/05/2024",
-    time: "13h-14h",
+    time: "16h-17h",
     vehicleId: "206+ - ABC-123-DEF",
     fuelType: "SP98",
     userId: "John Doe",
@@ -26,7 +26,7 @@ const bookings = [
   {
     id: 2,
     date: "17/05/2024",
-    time: "13h-14h",
+    time: "14h-15h",
     vehicleId: "206+ - ABC-123-DEF",
     fuelType: "SP98",
     userId: "John Doe",

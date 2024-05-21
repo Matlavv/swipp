@@ -1,6 +1,7 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { FlatList, Text, TouchableOpacity } from "react-native";
+import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import tw from "twrnc";
 import { db } from "../../firebaseConfig";
 
 const RefuelerList = ({ onSelectRefueler }) => {
@@ -30,7 +31,15 @@ const RefuelerList = ({ onSelectRefueler }) => {
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
         <TouchableOpacity onPress={() => onSelectRefueler(item)}>
-          <Text>{item.firstName}</Text>
+          <View style={tw`flex-row justify-between items-center p-4 border-b`}>
+            <Image
+              source={{ uri: item.profileImageUrl }}
+              style={tw`w-12 h-12 rounded-full`}
+            />
+            <Text style={tw`text-lg font-semibold`}>
+              {item.firstName} - {item.phoneNumber}
+            </Text>
+          </View>
         </TouchableOpacity>
       )}
     />

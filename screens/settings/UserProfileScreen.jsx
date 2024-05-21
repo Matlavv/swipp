@@ -164,6 +164,13 @@ const UserProfileScreen = ({ navigation }) => {
     navigation.navigate("AddBusinessScreen");
   };
 
+  const handlePhoneNumberChange = (text) => {
+    const numericText = text.replace(/[^0-9]/g, ""); // Allow only numbers
+    if (numericText.length <= 10) {
+      setPhoneNumber(numericText);
+    }
+  };
+
   return (
     <ScrollView style={tw`flex-1 mt-5`}>
       <View style={tw`p-5 mt-5 items-center justify-center flex-row`}>
@@ -207,7 +214,9 @@ const UserProfileScreen = ({ navigation }) => {
           style={tw`border-b w-80 p-2 mb-4`}
           placeholder="Numéro de téléphone"
           value={phoneNumber}
-          onChangeText={setPhoneNumber}
+          onChangeText={handlePhoneNumberChange}
+          keyboardType="numeric"
+          maxLength={10}
         />
         <View style={tw`flex items-center`}>
           <TouchableOpacity

@@ -13,7 +13,7 @@ const generateTimeSlots = (startHour = 10, endHour = 18) => {
   return slots;
 };
 
-const DateTimePickerModal = ({ isVisible, onClose, onConfirm }) => {
+const RefuelDateTimePickerModal = ({ isVisible, onClose, onConfirm }) => {
   const [selectedDay, setSelectedDay] = useState("");
   const [timeSlots, setTimeSlots] = useState(generateTimeSlots());
   const [selectedTime, setSelectedTime] = useState(timeSlots[0]);
@@ -102,4 +102,4 @@ const DateTimePickerModal = ({ isVisible, onClose, onConfirm }) => {
   );
 };
 
-export default DateTimePickerModal;
+export default RefuelDateTimePickerModal;

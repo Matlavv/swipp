@@ -14,7 +14,7 @@ const ChooseRefuelerModal = ({ isVisible, onClose, onSelectRefueler }) => {
   return (
     <Modal visible={isVisible} animationType="slide" transparent={true}>
       <View style={tw`flex-1 justify-center items-center`}>
-        <BlurView intensity={50} style={tw`absolute w-full h-full`}>
+        <BlurView intensity={100} style={tw`absolute inset-0`}>
           <View style={tw`bg-white rounded-xl pt-2 shadow-lg w-full mt-8`}>
             <TouchableOpacity
               onPress={onClose}

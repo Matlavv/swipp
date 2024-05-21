@@ -34,7 +34,8 @@ const RefuelForm = ({ route, navigation }) => {
   const [addresses, setAddresses] = useState([]);
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
   const [price, setPrice] = useState(0);
-  const [selectedDateTime, setSelectedDateTime] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -57,7 +58,13 @@ const RefuelForm = ({ route, navigation }) => {
 
   const isFormValid = () => {
     return (
-      selectedFuel && volume && address && selectedDateTime && selectedVehicleId
+      selectedFuel &&
+      volume &&
+      address &&
+      selectedDate &&
+      selectedTime &&
+      selectedVehicleId &&
+      selectedRefueler
     );
   };
 
@@ -171,13 +178,14 @@ const RefuelForm = ({ route, navigation }) => {
       }
     }
   };
+
   useEffect(() => {
     loadVehicles();
   }, []);
 
   const handleDateTimeConfirm = (dateTimeObj) => {
-    const formattedDateTime = `${dateTimeObj.date} ${dateTimeObj.timeSlot}`;
-    setSelectedDateTime(formattedDateTime);
+    setSelectedDate(dateTimeObj.date);
+    setSelectedTime(dateTimeObj.timeSlot);
     setDateTimePickerVisible(false);
   };
 
@@ -200,7 +208,8 @@ const RefuelForm = ({ route, navigation }) => {
       volume: parseFloat(volume),
       price: calculateTotalPrice(),
       options: selectedOptions,
-      dateTime: selectedDateTime,
+      date: selectedDate,
+      time: selectedTime,
       cancelled: false,
       state: "Active",
       refuelerId: selectedRefueler.id,
@@ -220,7 +229,8 @@ const RefuelForm = ({ route, navigation }) => {
         amount: calculateTotalPrice(),
         fuelType: selectedFuel,
         createdAt: new Date(),
-        dateTime: selectedDateTime,
+        date: selectedDate,
+        time: selectedTime,
         bookingId: docRef.id,
         type: "Refuel",
       });
@@ -399,14 +409,14 @@ const RefuelForm = ({ route, navigation }) => {
           <View style={tw`rounded-md`}>
             <TouchableOpacity
               style={tw`border-b-2 border-[#34469C] font-bold text-base`}
-              value={selectedDateTime}
+              value={selectedDate ? `${selectedDate} ${selectedTime}` : ""}
               onPress={() => setDateTimePickerVisible(true)}
               editable={false}
             >
               <TextInput
                 style={tw`text-black font-bold text-base`}
                 placeholder="Choisissez une date et une heure"
-                value={selectedDateTime}
+                value={selectedDate ? `${selectedDate} ${selectedTime}` : ""}
                 onFocus={showDateTimePicker}
                 editable={false}
               />

@@ -79,28 +79,30 @@ const RefuelIncomingReservation = () => {
             style={tw`flex-row ml-6 w-90 p-2 bg-white border border-gray-200 rounded-2xl shadow-md mt-1 mb-3`}
             onPress={() => navigateToDetail(item.id)}
           >
-            <View>
+            <View style={tw`flex-1`}>
               <Text
                 numberOfLines={1}
                 ellipsizeMode="tail"
-                style={tw`w-30 overflow-hidden text-gray-700 font-black text-xl mt-3 m-2`}
+                style={tw`w-36 overflow-hidden text-gray-700 font-black text-xl mt-3 my-2 ml-2`}
               >
                 {item.address}
               </Text>
-              <Text style={tw`text-gray-700 font-light text-xs m-2`}>
-                {item.dateTime}
-              </Text>
+              <View style={tw`ml-2`}>
+                <Text style={tw`text-gray-700 font-light text-xs my-2`}>
+                  {item.bookingDate} - {item.bookingHour}
+                </Text>
+              </View>
             </View>
-            <View style={tw`flex-row justify-center w-65`}>
+            <View style={tw`flex-row justify-end items-center`}>
               <View
-                style={tw`flex bg-white border border-gray-200 rounded-xl m-1 shadow-md w-1/4 items-center justify-center`}
+                style={tw`flex bg-white border border-gray-200 rounded-xl m-1 shadow-md w-20 items-center justify-center py-5`}
               >
                 <Text style={tw`text-[#34469C] text-base font-semibold`}>
                   {item.fuelType}
                 </Text>
               </View>
               <View
-                style={tw`flex bg-white border border-gray-200 rounded-xl m-1 shadow-md w-1/4 items-center justify-center`}
+                style={tw`flex bg-white border border-gray-200 rounded-xl m-1 shadow-md w-20 items-center justify-center py-5`}
               >
                 <Text style={tw`text-[#34469C] text-base font-semibold`}>
                   {item.price}€

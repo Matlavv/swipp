@@ -24,7 +24,7 @@ import { auth, db } from "../../firebaseConfig";
 import ChooseRefuelerModal from "./ChooseRefuelerModal";
 import RefuelDateTimePickerModal from "./RefuelDateTimePickerModal";
 
-Geocoder.init("AIzaSyAxJi9a4Bt8lKrKtl5DH6WIsPWkbBMgbeg");
+Geocoder.init("YOUR_GOOGLE_API_KEY");
 
 const RefuelForm = ({ route, navigation }) => {
   const [selectedFuel, setSelectedFuel] = useState("SP98");
@@ -208,8 +208,8 @@ const RefuelForm = ({ route, navigation }) => {
       volume: parseFloat(volume),
       price: calculateTotalPrice(),
       options: selectedOptions,
-      date: selectedDate,
-      time: selectedTime,
+      bookingDate: selectedDate,
+      bookingHour: selectedTime,
       cancelled: false,
       state: "Active",
       refuelerId: selectedRefueler.id,
@@ -229,8 +229,8 @@ const RefuelForm = ({ route, navigation }) => {
         amount: calculateTotalPrice(),
         fuelType: selectedFuel,
         createdAt: new Date(),
-        date: selectedDate,
-        time: selectedTime,
+        bookingDate: selectedDate,
+        bookingHour: selectedTime,
         bookingId: docRef.id,
         type: "Refuel",
       });

@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useStripe } from "@stripe/stripe-react-native";
 import * as Location from "expo-location";
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -39,6 +39,9 @@ const RefuelForm = ({ route, navigation }) => {
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [carBrand, setCarBrand] = useState(""); // Nouvelle état pour la marque de la voiture
+  const [carModel, setCarModel] = useState(""); // Nouvelle état pour le modèle de la voiture
+  const [selectedVehicle, setSelectedVehicle] = useState(null); // Nouvelle état pour le véhicule
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [isRefuelerModalVisible, setRefuelerModalVisible] = useState(false);
   const [selectedRefueler, setSelectedRefueler] = useState(null);
@@ -198,6 +201,32 @@ const RefuelForm = ({ route, navigation }) => {
     return totalPrice.toFixed(2);
   };
 
+  const handleSelectVehicle = async (vehicleId) => {
+    setSelectedVehicleId(vehicleId);
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        const vehicleDoc = await getDoc(
+          doc(db, "users", user.uid, "vehicles", vehicleId)
+        );
+        if (vehicleDoc.exists()) {
+          const vehicleData = vehicleDoc.data();
+          setCarBrand(vehicleData.marque);
+          setCarModel(vehicleData.modele);
+          setSelectedVehicle(vehicleData); // Enregistre les informations du véhicule
+          const parts = vehicleId.split("-");
+          const lastPart = parts[parts.length - 1].trim();
+          setSelectedFuel(lastPart); // Utiliser la partie après le dernier "-" comme carburant sélectionné
+        }
+      } catch (error) {
+        console.error(
+          "Erreur lors de la récupération des informations du véhicule",
+          error
+        );
+      }
+    }
+  };
+
   const handleReservationConfirm = async () => {
     const reservation = {
       address,
@@ -213,6 +242,9 @@ const RefuelForm = ({ route, navigation }) => {
       cancelled: false,
       state: "Active",
       refuelerId: selectedRefueler.id,
+      carBrand: carBrand, // Ajoutez la marque de la voiture
+      carModel: carModel, // Ajoutez le modèle de la voiture
+      vehicle: selectedVehicleId, // Enregistrer l'ID du véhicule
     };
 
     try {
@@ -328,12 +360,7 @@ const RefuelForm = ({ route, navigation }) => {
                 id: vehicle.id,
                 value: `${vehicle.label} - ${vehicle.immatriculation} - ${vehicle.carburant}`, // Utiliser l'ID du véhicule comme valeur
               }))}
-              setSelected={(itemValue) => {
-                setSelectedVehicleId(itemValue); // Définir l'ID du véhicule sélectionné
-                const parts = itemValue.split("-"); // Diviser la chaîne en fonction du caractère "-"
-                const lastPart = parts[parts.length - 1].trim(); // Récupérer le dernier élément et le nettoyer des espaces autour
-                setSelectedFuel(lastPart); // Utiliser la partie après le dernier "-" comme carburant sélectionné
-              }}
+              setSelected={handleSelectVehicle}
               placeholder="Véhicule"
               boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
             />

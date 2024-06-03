@@ -58,16 +58,12 @@ exports.createStripeInvoiceOnPurchase = functions
       const purchaseData = snap.data();
       const userId = purchaseData.userId;
       const amount = purchaseData.amount;
-
       // Récupérer ou créer un client Stripe
       const stripeCustomerId = await getOrCreateStripeCustomer(userId);
-
       // Créer une facture Stripe
       const invoice = await createStripeInvoice(stripeCustomerId, amount);
-
       // Stocker les informations de la facture dans Firebase
       await storeInvoiceData(userId, invoice);
-
       console.log("Facture créée et stockée avec succès.");
     } catch (error) {
       console.error("Erreur lors de la création de la facture:", error);

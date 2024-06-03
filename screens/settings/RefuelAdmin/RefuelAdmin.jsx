@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import {
   collection,
   doc,
@@ -7,7 +8,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Image,
   SafeAreaView,
@@ -17,8 +18,8 @@ import {
   View,
 } from "react-native";
 import tw from "twrnc";
-import { swippLogo } from "../../assets";
-import { auth, db } from "../../firebaseConfig";
+import { swippLogo } from "../../../assets";
+import { auth, db } from "../../../firebaseConfig";
 
 const RefuelAdmin = () => {
   const [date, setDate] = useState(new Date());
@@ -27,6 +28,7 @@ const RefuelAdmin = () => {
   const [bookings, setBookings] = useState([]);
   const [users, setUsers] = useState({});
   const user = auth.currentUser;
+  const navigation = useNavigation();
 
   const getFuelTypeFromVehicleId = (vehicleId) => {
     const parts = vehicleId.split(" - ");
@@ -58,21 +60,6 @@ const RefuelAdmin = () => {
     setUsers(usersData);
   };
 
-  useEffect(() => {
-    if (user) {
-      const userDoc = doc(db, "users", user.uid);
-      getDoc(userDoc).then((docSnapshot) => {
-        if (docSnapshot.exists()) {
-          const userData = docSnapshot.data();
-          setFirstName(userData.firstName);
-          setLastName(userData.lastName);
-        }
-      });
-
-      fetchBookings();
-    }
-  }, [user]);
-
   const fetchBookings = async () => {
     if (user) {
       const q = query(
@@ -88,6 +75,27 @@ const RefuelAdmin = () => {
       fetchUsersData(bookingsData);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      const userDoc = doc(db, "users", user.uid);
+      getDoc(userDoc).then((docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const userData = docSnapshot.data();
+          setFirstName(userData.firstName);
+          setLastName(userData.lastName);
+        }
+      });
+
+      fetchBookings();
+    }
+  }, [user]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchBookings();
+    }, [user])
+  );
 
   const formatDate = (date) => {
     const options = { year: "numeric", month: "2-digit", day: "2-digit" };
@@ -116,6 +124,15 @@ const RefuelAdmin = () => {
         parseBookingHour(a.bookingHour) - parseBookingHour(b.bookingHour)
     );
 
+  const upcomingBookings = filteredBookings.filter(
+    (booking) => booking.isActive
+  );
+  const pastBookings = filteredBookings.filter((booking) => !booking.isActive);
+
+  const navigateToDetail = (reservationId) => {
+    navigation.navigate("AdminRefuelReservationDetailled", { reservationId });
+  };
+
   return (
     <SafeAreaView>
       <ScrollView>
@@ -142,18 +159,22 @@ const RefuelAdmin = () => {
           </TouchableOpacity>
         </View>
         <View style={tw`p-3 border-b-2 border-gray-400`}></View>
-        {/* List of reservations */}
-        <View>
-          {filteredBookings.length > 0 ? (
-            filteredBookings.map((booking) => (
+
+        <Text style={tw`text-2xl font-bold p-3 mt-4`}>
+          Réservations à venir
+        </Text>
+        <View style={tw`mt-5`}>
+          {upcomingBookings.length > 0 ? (
+            upcomingBookings.map((booking) => (
               <View key={booking.id}>
                 <View style={tw`flex items-center justify-center`}>
-                  <Text style={tw`text-lg font-semibold`}>
+                  <Text style={tw`text-lg font-semibold text-[#34469C]`}>
                     {booking.bookingHour}
                   </Text>
                 </View>
                 <TouchableOpacity
                   style={tw`flex flex-row justify-between items-center p-5 border-b-2 border-gray-200`}
+                  onPress={() => navigateToDetail(booking.id)}
                 >
                   {/* first column, name & adress & phone */}
                   <View style={tw`flex w-50`}>
@@ -186,7 +207,59 @@ const RefuelAdmin = () => {
             ))
           ) : (
             <Text style={tw`text-center text-lg p-5`}>
-              Aucune réservation pour cette date.
+              Aucune réservation à venir pour cette date.
+            </Text>
+          )}
+        </View>
+
+        <Text style={tw`text-2xl font-bold p-3 mt-5`}>
+          Réservations passées
+        </Text>
+        <View>
+          {pastBookings.length > 0 ? (
+            pastBookings.map((booking) => (
+              <View key={booking.id}>
+                <View style={tw`flex items-center justify-center`}>
+                  <Text style={tw`text-lg font-semibold text-[#34469C]`}>
+                    {booking.bookingHour}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={tw`flex flex-row justify-between items-center p-5 border-b-2 border-gray-200`}
+                  onPress={() => navigateToDetail(booking.id)}
+                >
+                  {/* first column, name & adress & phone */}
+                  <View style={tw`flex w-50`}>
+                    <Text style={tw`font-semibold text-lg`}>
+                      {users[booking.userId]?.firstName}{" "}
+                      {users[booking.userId]?.lastName}
+                    </Text>
+                    <Text style={tw`text-gray-600 font-semibold text-base`}>
+                      {users[booking.userId]?.phoneNumber}
+                    </Text>
+                    <Text style={tw`font-semibold text-base`}>
+                      {booking.address}
+                    </Text>
+                  </View>
+                  <View style={tw`border-r h-full`}></View>
+                  {/* Car informations */}
+                  <View style={tw`ml-5`}>
+                    <Text style={tw`text-lg font-semibold`}>
+                      {getFuelTypeFromVehicleId(booking.vehicleId)}
+                    </Text>
+                    <Text style={tw`text-lg font-semibold`}>
+                      {getPlateFromVehicleId(booking.vehicleId)}
+                    </Text>
+                    <Text style={tw`text-lg font-semibold`}>
+                      {booking.volume} Litres
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            ))
+          ) : (
+            <Text style={tw`text-center text-lg p-5`}>
+              Aucune réservation passée pour cette date.
             </Text>
           )}
         </View>

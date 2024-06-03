@@ -242,9 +242,7 @@ const RefuelForm = ({ route, navigation }) => {
       cancelled: false,
       state: "Active",
       refuelerId: selectedRefueler.id,
-      carBrand: carBrand, // Ajoutez la marque de la voiture
-      carModel: carModel, // Ajoutez le modèle de la voiture
-      vehicle: selectedVehicleId, // Enregistrer l'ID du véhicule
+      vehicle: selectedVehicleId,
     };
 
     try {

@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { doc, getDoc } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Image,
   SafeAreaView,
@@ -10,7 +10,8 @@ import {
   View,
 } from "react-native";
 import tw from "twrnc";
-import { swippLogo } from "../assets";
+import { AuthContext } from "../AuthContext";
+import { profilePic, swippLogo } from "../assets";
 import DisplayAdress from "../components/DisplayAdress";
 import NavOptions from "../components/NavOptions";
 import SuggestedList from "../components/SuggestedList";
@@ -18,26 +19,50 @@ import { auth, db } from "../firebaseConfig";
 
 const HomeScreen = () => {
   const [username, setUsername] = useState("");
+  const [profileImage, setProfileImage] = useState("");
   const navigation = useNavigation();
+  const { currentUser } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchUserData = async () => {
       const user = auth.currentUser;
       if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUsername(docSnap.data().username);
-        } else {
-          console.log("No such document!");
+        try {
+          const docRef = doc(db, "users", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setUsername(docSnap.data().username);
+            const profileImageUrl =
+              docSnap.data().profileImageUrl || profilePic;
+            setProfileImage(profileImageUrl);
+          } else {
+            console.log("Document utilisateur introuvable");
+          }
+        } catch (error) {
+          console.error(
+            "Erreur lors de la récupération des données utilisateur",
+            error
+          );
         }
       }
     };
     fetchUserData();
-  }, []);
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      setUsername(currentUser.displayName);
+    } else {
+      setUsername("");
+    }
+  }, [currentUser]);
 
   const navigateToServiceScreen = () => {
     navigation.navigate("Services");
+  };
+
+  const navigateToProfile = () => {
+    navigation.navigate("Profile");
   };
 
   return (
@@ -46,16 +71,24 @@ const HomeScreen = () => {
         {/* Logo */}
         <View style={tw`flex p-5 mt-5 justify-start items-start flex flex-row`}>
           <Image style={tw`w-25 h-15`} source={swippLogo} />
+          {/* {currentUser && (
+            <TouchableOpacity onPress={navigateToProfile} style={tw`ml-auto mr-5 mt-2`}>
+              <Image
+                  source={profileImage ? { uri: profileImage } : profilePic}
+                  style={tw`h-28 w-20 rounded-full`}
+              />
+            </TouchableOpacity>
+          )} */}
         </View>
         <Text style={tw`text-2xl font-bold m-5`}>
-          Bonjour {username || "!"}
+          Bonjour {username || "!"} 👋
         </Text>
         <View style={tw`flex`}>
           <NavOptions />
         </View>
         {/* Suggestions section */}
         <View style={tw`flex flex-row justify-between items-center p-2 mt-5`}>
-          <Text style={tw`text-2xl font-semibold`}>Suggestions</Text>
+          <Text style={tw`text-2xl font-semibold`}>Populaire</Text>
           <TouchableOpacity onPress={navigateToServiceScreen}>
             <Text style={tw`font-light`}>Tout afficher</Text>
           </TouchableOpacity>
@@ -66,7 +99,7 @@ const HomeScreen = () => {
           <Text style={tw`text-2xl font-semibold`}>
             Faites vous livrer votre plein
           </Text>
-          <DisplayAdress />
+          <DisplayAdress currentUser={currentUser} />
         </View>
       </ScrollView>
     </SafeAreaView>

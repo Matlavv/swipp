@@ -9,6 +9,8 @@ import AdressScreen from "../screens/settings/AdressScreen";
 import EditAdressScreen from "../screens/settings/EditAdressScreen";
 import EditVehicleScreen from "../screens/settings/EditVehicleScreen";
 import LegalScreen from "../screens/settings/LegalScreen";
+import AdminRefuelReservationDetailled from "../screens/settings/RefuelAdmin/AdminRefuelReservationDetailled";
+import RefuelAdmin from "../screens/settings/RefuelAdmin/RefuelAdmin";
 import UserProfileScreen from "../screens/settings/UserProfileScreen";
 import UserScreen from "../screens/settings/UserScreen";
 import VehicleScreen from "../screens/settings/VehicleScreen";
@@ -54,6 +56,11 @@ const ProfileStack = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="RefuelAdmin"
+        component={RefuelAdmin}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="LoginScreen"
         component={LoginScreen}
         options={{ headerShown: false }}
@@ -76,6 +83,11 @@ const ProfileStack = () => {
       <Stack.Screen
         name="AddBusinessScreen"
         component={AddBusinessScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AdminRefuelReservationDetailled"
+        component={AdminRefuelReservationDetailled}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

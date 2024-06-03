@@ -1,146 +1,415 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import tw from 'twrnc';
-import * as Location from 'expo-location';
-import Geocoder from 'react-native-geocoding';
-import { auth, db } from '../../firebaseConfig';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { Ionicons } from "@expo/vector-icons";
+import { useStripe } from "@stripe/stripe-react-native";
+import { addDoc, collection, getDocs } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SelectList } from "react-native-dropdown-select-list";
+import tw from "twrnc";
+import { swippLogo } from "../../assets";
+import { auth, db } from "../../firebaseConfig";
+import ChooseGarageModal from "./ChooseGarageModal";
+import DateTimePickerModal from "./DateTimePickerModal";
 
-Geocoder.init("AIzaSyC7G4Z0E2levTb0mVYJOX_1bNgSVMvlK-Y");
-
-const MaintenanceForm = () => {
-  const [maintenanceType, setMaintenanceType] = useState('');
-  const [selectedVehicle, setSelectedVehicle] = useState('');
+const MaintenanceForm = ({ navigation, route }) => {
+  const [selectedMaintenance, setSelectedMaintenance] = useState("");
+  const [selectedVehicleId, setSelectedVehicleId] = useState("");
+  const [selectedImmatriculationPlate, setSelectedImmatriculationPlate] =
+    useState("");
+  const [selectedGarage, setSelectedGarage] = useState({});
+  const [selectedDateTime, setSelectedDateTime] = useState("");
+  const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
+  const [isGarageModalVisible, setGarageModalVisible] = useState(false);
   const [vehicles, setVehicles] = useState([]);
-  const [address, setAddress] = useState('');
+  const [repairLocationType, setRepairLocationType] = useState("garage"); // 'garage' ou 'address'
+  const [address, setAddress] = useState("");
+  const [addresses, setAddresses] = useState([]);
+  const [selectedPrice, setSelectedPrice] = useState(0);
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
-  useEffect(() => {
-    const fetchVehicles = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        const vehiclesRef = db.collection('users').doc(user.uid).collection('vehicles');
-        const snapshot = await vehiclesRef.get();
-        const vehiclesData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setVehicles(vehiclesData);
+  // Options pour l'entretien
+  const maintenanceOptions = [
+    { id: "plaquette", value: "Changements des plaquettes", price: 80 },
+    { id: "filtre", value: "Remplacement des filtres", price: 60 },
+    { id: "huile", value: "Changement d'huile", price: 90 },
+    { id: "pneu", value: "Changement de pneus", price: 100 },
+    { id: "batterie", value: "Changement de batterie", price: 120 },
+  ];
+
+  const isFormValid = () => {
+    return (
+      selectedMaintenance &&
+      selectedVehicleId &&
+      selectedDateTime &&
+      ((repairLocationType === "garage" && selectedGarage) ||
+        (repairLocationType === "address" && address))
+    );
+  };
+  // Paiement avec Stripe
+  const fetchPaymentIntentClientSecret = async () => {
+    const response = await fetch(
+      "https://europe-west3-swipp-b74be.cloudfunctions.net/createPaymentIntent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount: selectedPrice * 100,
+        }),
       }
-    };
-    fetchVehicles();
-  }, []);
-
-  const handleLocatePress = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Permission to access location was denied');
-      return;
-    }
-   
-    let location = await Location.getCurrentPositionAsync({});
-    Geocoder.from(location.coords.latitude, location.coords.longitude)
-      .then(json => {
-        const addressComponent = json.results[0].formatted_address;
-        setAddress(addressComponent);
-      })
-      .catch(error => console.warn(error));
+    );
+    const { clientSecret } = await response.json();
+    return clientSecret;
   };
 
-  const handleSubmit = async () => {
-    if (!fuelType || !volume || !carNumber || !address) {
-      Alert.alert('Erreur', 'Tous les champs sont obligatoires');
-      return;
-    }
-  
-    if (Number(carNumber) >= 2) {
+  const openPaymentSheet = async () => {
+    if (!isFormValid()) {
       Alert.alert(
-        "Information",
-        "Si vous avez plus de 2 véhicules, veuillez contacter notre service client au 0123456789",
-        [{ text: "OK", onPress: () => console.log("OK Pressed") }]
+        "Erreur",
+        "Veuillez remplir tous les champs avant de procéder au paiement."
       );
       return;
     }
-  
-    const user = auth.currentUser;
-    if (user) {
-      try {
-        const bookingDate = new Date(); // Date actuelle
-        const formattedBookingDate = formatDate(bookingDate); // Formatage de la date
-        const bookingData = {
-          userId: user.uid,
-          userName: user.displayName || 'Utilisateur Inconnu',
-          fuelType,
-          volume,
-          carNumber,
-          address,
-          time: selectedTime,
-          bookingDate: formattedBookingDate,
-          created: bookingDate, 
-          isActive: true
-        };
-  
-        await addDoc(collection(db, 'RepairBookings'), bookingData);
-        Alert.alert("Rendez-vous confirmé", `Votre rendez-vous a été confirmé pour le ${selectedTime}`);
-      } catch (error) {
-        console.error('Erreur lors de l\'enregistrement du rendez-vous', error);
-        Alert.alert("Erreur", "Une erreur s'est produite lors de la confirmation du rendez-vous");
-      }
-    } else {
-      Alert.alert("Erreur", "Vous devez être connecté pour effectuer cette action");
+    const clientSecret = await fetchPaymentIntentClientSecret();
+    const { error } = await initPaymentSheet({
+      paymentIntentClientSecret: clientSecret,
+      merchantDisplayName: "Swipp",
+      style: "alwaysLight",
+    });
+    if (error) {
+      console.error(error);
+      return;
     }
-     // Logic for handling form submission
-     console.log('Form submitted');
-   };
+    const result = await presentPaymentSheet();
+    if (result.error) {
+      Alert.alert("Erreur de paiement", result.error.message);
+    } else {
+      Alert.alert(
+        "Paiement réussi",
+        "Votre paiement a été effectué avec succès."
+      );
+      await handleReservationConfirm();
+    }
+  };
+
+  useEffect(() => {
+    if (route.params?.address) {
+      setAddress(route.params.address);
+    }
+  }, [route.params?.address]);
+
+  const loadAddresses = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, "users", user.uid, "adresses")
+      );
+      const userAddresses = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setAddresses(userAddresses);
+    } catch (error) {
+      console.error("Erreur lors du chargement des adresses", error);
+      Alert.alert("Erreur", "Impossible de charger les adresses.");
+    }
+  };
+
+  useEffect(() => {
+    loadAddresses();
+  }, []);
+
+  useEffect(() => {
+    const loadVehicles = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const querySnapshot = await getDocs(
+            collection(db, "users", user.uid, "vehicles")
+          );
+          const userVehicles = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setVehicles(userVehicles);
+        } catch (error) {
+          console.error("Erreur lors du chargement des véhicules", error);
+        }
+      }
+    };
+    loadVehicles();
+  }, []);
+
+  const handleDateTimeConfirm = (dateTime) => {
+    setSelectedDateTime(dateTime);
+    setDateTimePickerVisible(false);
+  };
+
+  const handleSelectGarage = (garage) => {
+    setSelectedGarage(garage);
+    setGarageModalVisible(false);
+  };
+
+  const handleMaintenanceSelection = (selectedId) => {
+    const selectedOption = maintenanceOptions.find(
+      (option) => option.id === selectedId
+    );
+    if (selectedOption) {
+      setSelectedMaintenance(selectedOption.value);
+      setSelectedPrice(selectedOption.price);
+    }
+  };
+
+  const handleReservationConfirm = async () => {
+    const userId = auth.currentUser.uid;
+    const bookingDate = new Date(selectedDateTime);
+
+    const reservation = {
+      userId,
+      vehicleId: selectedVehicleId,
+      immatriculationPlate: selectedImmatriculationPlate,
+      locationType: repairLocationType,
+      location: repairLocationType === "garage" ? selectedGarage.name : address,
+      garageId: repairLocationType === "garage" ? selectedGarage.id : "",
+      bookingDate: bookingDate,
+      createdAt: new Date(),
+      reparationType: "Entretien",
+      reparationDetail: selectedMaintenance,
+      isActive: true,
+      cancelled: false,
+      price: selectedPrice,
+    };
+
+    try {
+      const docRef = await addDoc(
+        collection(db, "RepairBookings"),
+        reservation
+      );
+      Alert.alert(
+        "Succès",
+        "Votre rendez-vous pour l'entretien a été enregistré avec succès."
+      );
+      navigation.goBack();
+
+      await addDoc(collection(db, "purchases"), {
+        userId: auth.currentUser.uid,
+        amount: selectedPrice,
+        createdAt: new Date(),
+        dateTime: bookingDate,
+        bookingId: docRef.id,
+        type: "Entretien",
+        reparationDetail: selectedMaintenance,
+      });
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la réservation", error);
+      Alert.alert(
+        "Erreur",
+        "Un problème est survenu lors de l'enregistrement de votre réservation."
+      );
+    }
+  };
+
+  const selectedStyle = tw`bg-[#34469C] p-2 rounded-md`;
+  const selectedTextStyle = tw`text-white`;
+
+  // Styles pour le bouton non sélectionné
+  const notSelectedStyle = tw`p-2 rounded-md border border-[#34469C]`;
+  const notSelectedTextStyle = tw`text-black`;
 
   return (
-    <View style={tw`p-4`}>
-      {/* Type d'entretien */}
-      <View style={tw`mb-4`}>
-        <Text style={tw`text-lg font-bold`}>Type d'entretien</Text>
-        <Picker
-          selectedValue={maintenanceType}
-          onValueChange={(itemValue) => setMaintenanceType(itemValue)}
-        >
-          <Picker.Item label="Contrôle technique" value="contrôle technique" />
-          <Picker.Item label="Révision" value="révision" />
-        </Picker>
-      </View>
+    <SafeAreaView style={tw`flex h-full`}>
+      <ScrollView style={tw`flex-1`}>
+        {/* Header et navigation */}
+        <View style={tw`flex p-5 mt-5 justify-start items-start flex flex-row`}>
+          <Image style={tw`w-25 h-15`} source={swippLogo} />
+        </View>
+        <View style={tw`flex-row`}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={tw`mt-5 ml-3`}
+          >
+            <Ionicons name="arrow-back-circle-outline" size={30} color="gray" />
+          </TouchableOpacity>
+          <Text style={tw`text-2xl font-bold m-5`}>Entretien du véhicule</Text>
+        </View>
 
-      {/* Sélection du véhicule */}
-      <View style={tw`mb-4`}>
-        <Text style={tw`text-lg font-bold`}>Véhicule</Text>
-        <Picker
-          selectedValue={selectedVehicle}
-          onValueChange={(itemValue) => setSelectedVehicle(itemValue)}
-        >
-          {vehicles.map(vehicle => (
-            <Picker.Item key={vehicle.id} label={vehicle.label} value={vehicle.id} />
-          ))}
-        </Picker>
-      </View>
+        {/* Choose Maintenance */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
+          <Text style={tw`text-xl font-bold mb-4`}>
+            Sélectionnez votre besoin
+          </Text>
+          <SelectList
+            setSelected={handleMaintenanceSelection}
+            data={maintenanceOptions.map((option) => ({
+              key: option.id,
+              value: `${option.value} - ${option.price}€`,
+            }))}
+            placeholder="Sélectionnez votre besoin"
+            boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
+          />
+        </View>
 
-      {/* Adresse */}
-      <View style={tw`mb-4`}>
-        <Text style={tw`text-lg font-bold`}>Secteur</Text>
-        <TextInput
-          style={tw`border-b-2 border-black`}
-          value={address}
-          onChangeText={setAddress}
+        {/* Choose vehicle */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
+          <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
+          <SelectList
+            setSelected={(itemValue) => {
+              const vehicle = vehicles.find((v) => v.id === itemValue);
+              if (vehicle) {
+                setSelectedVehicleId(vehicle.id);
+                setSelectedImmatriculationPlate(vehicle.immatriculation);
+              } else {
+                console.error("Selected vehicle not found");
+                Alert.alert(
+                  "Erreur",
+                  "Le véhicule sélectionné n'est pas trouvé dans la liste."
+                );
+              }
+            }}
+            data={vehicles.map((vehicle) => ({
+              key: vehicle.id,
+              value: `${vehicle.label} - ${vehicle.immatriculation}`,
+            }))}
+            placeholder="Indiquez le véhicule"
+            boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
+          />
+        </View>
+
+        {/* Choose Garage */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
+          <Text style={tw`text-xl font-bold mb-4`}>Lieu de l'entretien</Text>
+          <View style={tw`flex-row justify-around`}>
+            <TouchableOpacity
+              onPress={() => setRepairLocationType("garage")}
+              style={
+                repairLocationType === "garage"
+                  ? selectedStyle
+                  : notSelectedStyle
+              }
+            >
+              <Text
+                style={
+                  repairLocationType === "garage"
+                    ? selectedTextStyle
+                    : notSelectedTextStyle
+                }
+              >
+                Garage
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setRepairLocationType("address")}
+              style={
+                repairLocationType === "address"
+                  ? selectedStyle
+                  : notSelectedStyle
+              }
+            >
+              <Text
+                style={
+                  repairLocationType === "address"
+                    ? selectedTextStyle
+                    : notSelectedTextStyle
+                }
+              >
+                Adresse
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {repairLocationType === "address" && (
+          <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
+            <TextInput
+              style={tw`border-b-2 mb-4 border-[#34469C] font-bold text-base`}
+              value={address}
+              onChangeText={setAddress}
+              placeholder="Adresse"
+            />
+            <Text style={tw`text-lg font-semibold mb-2`}>Mes adresses</Text>
+            <SelectList
+              setSelected={(val) => setAddress(val)}
+              placeholder="Adresse"
+              boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
+              data={addresses.map((address) => ({
+                value: `${address.adresse} - ${address.codePostal} - ${address.ville}`,
+                id: address.id,
+              }))}
+              onSelect={() => setAddress(address)}
+              save="value"
+            />
+          </View>
+        )}
+        {repairLocationType === "garage" && (
+          <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
+            <Text style={tw`text-xl font-bold mb-4`}>Choisissez un garage</Text>
+            <TouchableOpacity
+              onPress={() => setGarageModalVisible(true)}
+              style={tw`border-b-2 border-[#34469C] py-2`}
+            >
+              <Text style={tw`text-black font-bold text-base`}>
+                {selectedGarage.name || "Choisissez un garage"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Choose Date */}
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
+          <Text style={tw`text-xl font-bold mb-4`}>
+            Choisissez votre date de rendez-vous
+          </Text>
+          <TouchableOpacity
+            onPress={() => setDateTimePickerVisible(true)}
+            style={tw`border-b-2 border-[#34469C] py-2`}
+          >
+            <Text style={tw`text-black font-bold text-base`}>
+              {selectedDateTime
+                ? new Date(selectedDateTime).toLocaleString()
+                : "Choisissez une date et une heure"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Modal Components for Garage and Date selection */}
+        <ChooseGarageModal
+          isVisible={isGarageModalVisible}
+          onClose={() => setGarageModalVisible(false)}
+          onSelectGarage={handleSelectGarage}
         />
-        <TouchableOpacity onPress={handleLocatePress}>
-          <Text style={tw`text-blue-900 m-2`}>Me géolocaliser</Text>
-        </TouchableOpacity>
-      </View>
 
-      {/* Bouton de soumission */}
-      <TouchableOpacity
-        onPress={handleSubmit}
-        style={tw`bg-black p-2 rounded-md items-center`}
-      >
-        <Text style={tw`text-white`}>Soumettre</Text>
-      </TouchableOpacity>
-    </View>
+        <DateTimePickerModal
+          isVisible={isDateTimePickerVisible}
+          onClose={() => setDateTimePickerVisible(false)}
+          onConfirm={handleDateTimeConfirm}
+        />
+
+        {/* Submit button */}
+        <View style={tw`mb-4 mt-5 flex items-center`}>
+          <Text style={tw`text-lg font-bold`}>
+            Prix estimé : {selectedPrice} €
+          </Text>
+          <TouchableOpacity
+            onPress={openPaymentSheet}
+            style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center mt-3`}
+          >
+            <Text style={tw`text-white font-semibold text-base`}>
+              Valider mon rendez-vous
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

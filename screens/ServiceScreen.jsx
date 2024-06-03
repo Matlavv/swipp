@@ -1,7 +1,8 @@
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import React, { useContext } from "react";
 import {
+  Alert,
   Image,
   SafeAreaView,
   ScrollView,
@@ -10,21 +11,30 @@ import {
   View,
 } from "react-native";
 import tw from "twrnc";
+import { AuthContext } from "../AuthContext";
 import { gas, maintenance, reparation, services, swippLogo } from "../assets";
 import SuggestedRepair from "../components/Services/SuggestedRepairs";
 
 const ServiceScreen = () => {
   const navigation = useNavigation();
+  const { isAuthenticated } = useContext(AuthContext);
 
-  const navigateToRefuelForm = () => {
-    navigation.navigate("RefuelForm");
-  };
-  const navigateToMaintenanceForm = () => {
-    navigation.navigate("MaintenanceForm");
-  };
-
-  const navigateToEmergencyScreen = () => {
-    navigation.navigate("EmergencyScreen");
+  const handleNavigation = (screenName) => {
+    if (!isAuthenticated) {
+      Alert.alert(
+        "Accès Restreint",
+        "Vous devez être connecté pour accéder à cette fonctionnalité.",
+        [
+          { text: "Annuler", style: "cancel" },
+          {
+            text: "Se connecter",
+            onPress: () => navigation.navigate("LoginScreen"),
+          },
+        ]
+      );
+      return;
+    }
+    navigation.navigate(screenName);
   };
 
   return (
@@ -42,14 +52,13 @@ const ServiceScreen = () => {
             colors={["#FFFFFF", "#FFFFFF"]}
             style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
           >
-            <TouchableOpacity style={tw`justify-center items-center`}>
-              <Image
-                source={reparation}
-                resizeMode="contain"
-                style={tw`w-20 h-20`}
-              />
+            <TouchableOpacity
+              style={tw`justify-center items-center`}
+              onPress={() => handleNavigation("RefuelForm")}
+            >
+              <Image source={gas} resizeMode="contain" style={tw`w-20 h-20`} />
               <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
-                Réparation véhicules
+                Livraison carburant
               </Text>
             </TouchableOpacity>
           </LinearGradient>
@@ -59,10 +68,17 @@ const ServiceScreen = () => {
             colors={["#FFFFFF", "#FFFFFF"]}
             style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
           >
-            <TouchableOpacity style={tw`justify-center items-center`}>
-              <Image source={gas} resizeMode="contain" style={tw`w-20 h-20`} />
+            <TouchableOpacity
+              style={tw`justify-center items-center`}
+              onPress={() => handleNavigation("RepairForm")}
+            >
+              <Image
+                source={reparation}
+                resizeMode="contain"
+                style={tw`w-20 h-20`}
+              />
               <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
-                Livraison carbuant
+                Réparation véhicule
               </Text>
             </TouchableOpacity>
           </LinearGradient>
@@ -74,7 +90,10 @@ const ServiceScreen = () => {
             colors={["#FFFFFF", "#FFFFFF"]}
             style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
           >
-            <TouchableOpacity style={tw`justify-center items-center`}>
+            <TouchableOpacity
+              style={tw`justify-center items-center`}
+              onPress={() => handleNavigation("MaintenanceForm")}
+            >
               <Image
                 source={maintenance}
                 resizeMode="contain"
@@ -91,7 +110,10 @@ const ServiceScreen = () => {
             colors={["#FFFFFF", "#FFFFFF"]}
             style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
           >
-            <TouchableOpacity style={tw`justify-center items-center`}>
+            <TouchableOpacity
+              style={tw`justify-center items-center`}
+              onPress={() => handleNavigation("TechnicalControlForm")}
+            >
               <Image
                 source={services}
                 resizeMode="contain"

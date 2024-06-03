@@ -5,7 +5,12 @@ swipp@flucity.fr
 4Fqeq942jM3BNb
 
 Expo : https://expo.dev/accounts/swipp
-swipp@flucity.fr
-4Fqeq942jM3BNb
+flucity2020@gmail.com
+Flucity2022@
 
 github : https://github.com/Matlavv/swipp
+
+
+clés Stripe : 
+publique : pk_live_51Ojf5bF83Tq1HuHR5MuEnNc766XDDX8FqWgsRNZpRFnKVfSma3dXvsZJzXoMs5mMW8q9qRzeP5dgvqoVN1JnTgr700gV7ahgWV
+secrète : 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

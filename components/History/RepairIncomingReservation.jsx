@@ -106,7 +106,6 @@ const RepairIncomingReservation = () => {
             <Text style={tw`text-gray-700 text-base font-light mt--2 ml-2`}>
               {item.reparationType}
             </Text>
-
             <View style={tw`flex-row mt-2 ml-2`}>
               <Ionicons name="calendar-outline" size={24} color="gray" />
               <Text style={tw`text-base ml-1`}>

@@ -6,7 +6,6 @@ import tw from "twrnc";
 import RefuelerList from "./RefuelerList";
 
 const ChooseRefuelerModal = ({ isVisible, onClose, onSelectRefueler }) => {
-  const [address, setAddress] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearch = () => {};
@@ -38,6 +37,7 @@ const ChooseRefuelerModal = ({ isVisible, onClose, onSelectRefueler }) => {
             </View>
             <View style={tw`flex mt-15`}>
               <RefuelerList
+                searchTerm={searchTerm}
                 onSelectRefueler={(refueler) => {
                   onSelectRefueler(refueler);
                   onClose();

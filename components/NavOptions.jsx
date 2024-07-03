@@ -1,104 +1,84 @@
-import React from 'react';
-import { View, FlatList, TouchableOpacity, Image, Text } from 'react-native';
-import tw from 'twrnc';
-import { Icon } from '@rneui/themed';
-import { useNavigation } from '@react-navigation/native';
-
-// data des boutons
-const data = [
-  {
-    id: "123",
-    title: "Energies",
-    image: "https://images.hertz.com/icons/GasIcon.png",
-    screen: "energyScreen",
-  },
-  {
-    id: "456",
-    title: "Entretiens",
-    image: "https://cdn.icon-icons.com/icons2/3469/PNG/512/ev_repair_vehicle_car_electric_maintenance_icon_219812.png",
-    screen: "maintenanceScreen",
-  },
-];
-
-const data2 = [
-  {
-    id: "789",
-    title: "Services",
-    image: "https://links.papareact.com/3pn",
-    screen: "MapScreen",
-  },
-  {
-    id: "1011",
-    title: "Données",
-    image: "https://links.papareact.com/28w",
-    screen: "EatsScreen",
-  },
-];
-
+import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useContext } from "react";
+import {
+  Alert,
+  Image,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import tw from "twrnc";
+import { AuthContext } from "../AuthContext";
+import { gas, services } from "../assets/index";
 
 const NavOptions = () => {
   const navigation = useNavigation();
+  const { isAuthenticated } = useContext(AuthContext);
+
+  const handleNavigation = (screenName) => {
+    if (!isAuthenticated) {
+      Alert.alert(
+        "Accès Restreint",
+        "Vous devez être connecté pour accéder à cette fonctionnalité.",
+        [
+          { text: "Annuler", style: "cancel" },
+          {
+            text: "Se connecter",
+            onPress: () => navigation.navigate("LoginScreen"),
+          },
+        ]
+      );
+      return;
+    }
+    navigation.navigate(screenName);
+  };
+
+  const navigateToServiceScreen = () => {
+    navigation.navigate("Services");
+  };
 
   return (
-    <View>
-      <View>
-        {/* Première rangée de boutons */}
-        <FlatList
-          data={data}
-          horizontal
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => navigation.navigate(item.screen)}
-              style={tw`p-3 pl-6 pb-8 pt-4 bg-gray-200 m-3 mt-10 rounded-lg`}
-            >
-              <View>
-                <Image
-                  style={{ width: 120, height: 120, resizeMode: 'contain' }}
-                  source={{ uri: item.image }}
-                />
-                <Text style={tw`mt-2 text-lg font-semibold`}>{item.title}</Text>
-                <Icon
-                  style={tw`p-2 bg-black rounded-full w-10 mt-4`}
-                  name="arrowright"
-                  type="antdesign"
-                  color="white"
-                />
-              </View>
-            </TouchableOpacity>
-          )}
-        />
-      </View>
+    <SafeAreaView>
+      <View style={tw`flex-row justify-around items-center`}>
+        {/* Our Services Button */}
+        <LinearGradient
+          colors={["#FFFFFF", "#FFFFFF"]}
+          style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
+        >
+          <TouchableOpacity
+            style={tw`justify-center items-center`}
+            onPress={navigateToServiceScreen}
+          >
+            <Image
+              source={services}
+              resizeMode="contain"
+              style={tw`w-20 h-20`}
+            />
+            <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
+              Nos Services
+            </Text>
+          </TouchableOpacity>
+        </LinearGradient>
 
-      <View>
-        {/* Deuxième rangée de boutons */}
-        <FlatList
-          data={data2}
-          horizontal
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => navigation.navigate(item.screen)}
-              style={tw`p-3 pl-6 pb-8 pt-4 bg-gray-200 m-3 mt-4 rounded-lg`}
-            >
-              <View>
-                <Image
-                  style={{ width: 120, height: 120, resizeMode: 'contain' }}
-                  source={{ uri: item.image }}
-                />
-                <Text style={tw`mt-2 text-lg font-semibold`}>{item.title}</Text>
-                <Icon
-                  style={tw`p-2 bg-black rounded-full w-10 mt-4`}
-                  name="arrowright"
-                  type="antdesign"
-                  color="white"
-                />
-              </View>
-            </TouchableOpacity>
-          )}
-        />
+        {/* Refuel Now Button */}
+        <LinearGradient
+          colors={["#FFFFFF", "#FFFFFF"]}
+          style={tw`w-45 h-45 justify-center items-center rounded-2xl elevation-5 shadow-lg`}
+        >
+          <TouchableOpacity
+            style={tw`justify-center items-center`}
+            onPress={() => handleNavigation("RefuelForm")}
+          >
+            <Image source={gas} resizeMode="contain" style={tw`w-20 h-20`} />
+            <Text style={tw`text-lg font-bold text-[#34469C] mt-5`}>
+              Livraison carburant
+            </Text>
+          </TouchableOpacity>
+        </LinearGradient>
       </View>
-    </View>  
+    </SafeAreaView>
   );
 };
 

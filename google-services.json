@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "147022767859",
+    "project_id": "swipp-b74be",
+    "storage_bucket": "swipp-b74be.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:147022767859:android:3489d9114c30950499b986",
+        "android_client_info": {
+          "package_name": "com.flucity.swipp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-WY44GiY0nqjpfJusdho4lgwWwcmVNnQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

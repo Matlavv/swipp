@@ -1,23 +1,109 @@
-import { Text, View, SafeAreaView, Image } from 'react-native';
-import React from 'react';
-import tw from 'twrnc';
-import NavOptions from '../components/NavOptions';
-import { swippLogo } from '../assets';
+import { useNavigation } from "@react-navigation/native";
+import { doc, getDoc } from "firebase/firestore";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  Image,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import tw from "twrnc";
+import { AuthContext } from "../AuthContext";
+import { profilePic, swippLogo } from "../assets";
+import DisplayAdress from "../components/DisplayAdress";
+import NavOptions from "../components/NavOptions";
+import SuggestedList from "../components/SuggestedList";
+import { auth, db } from "../firebaseConfig";
 
 const HomeScreen = () => {
-  return (
-    <SafeAreaView style={tw`bg-white h-full`}>
-      <View style={tw`p-5`}>
-        <Image 
-        style={{
-          width: 150, height: 100, resizeMode: 'contain',
-        }}
-          source={swippLogo}
-        />
-        <NavOptions />
-      </View>
-    </SafeAreaView>
-  )
-}
+  const [username, setUsername] = useState("");
+  const [profileImage, setProfileImage] = useState("");
+  const navigation = useNavigation();
+  const { currentUser } = useContext(AuthContext);
 
-export default HomeScreen
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const docRef = doc(db, "users", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setUsername(docSnap.data().username);
+            const profileImageUrl =
+              docSnap.data().profileImageUrl || profilePic;
+            setProfileImage(profileImageUrl);
+          } else {
+            console.log("Document utilisateur introuvable");
+          }
+        } catch (error) {
+          console.error(
+            "Erreur lors de la récupération des données utilisateur",
+            error
+          );
+        }
+      }
+    };
+    fetchUserData();
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      setUsername(currentUser.displayName);
+    } else {
+      setUsername("");
+    }
+  }, [currentUser]);
+
+  const navigateToServiceScreen = () => {
+    navigation.navigate("Services");
+  };
+
+  const navigateToProfile = () => {
+    navigation.navigate("Profile");
+  };
+
+  return (
+    <SafeAreaView style={tw`flex h-full`}>
+      <ScrollView style={tw`flex-1`}>
+        {/* Logo */}
+        <View style={tw`flex p-5 mt-5 justify-start items-start flex flex-row`}>
+          <Image style={tw`w-25 h-15`} source={swippLogo} />
+          {/* {currentUser && (
+            <TouchableOpacity onPress={navigateToProfile} style={tw`ml-auto mr-5 mt-2`}>
+              <Image
+                  source={profileImage ? { uri: profileImage } : profilePic}
+                  style={tw`h-28 w-20 rounded-full`}
+              />
+            </TouchableOpacity>
+          )} */}
+        </View>
+        <Text style={tw`text-2xl font-bold m-5`}>
+          Bonjour {username || "!"} 👋
+        </Text>
+        <View style={tw`flex`}>
+          <NavOptions />
+        </View>
+        {/* Suggestions section */}
+        <View style={tw`flex flex-row justify-between items-center p-2 mt-5`}>
+          <Text style={tw`text-2xl font-semibold`}>Populaire</Text>
+          <TouchableOpacity onPress={navigateToServiceScreen}>
+            <Text style={tw`font-light`}>Tout afficher</Text>
+          </TouchableOpacity>
+        </View>
+        <SuggestedList />
+        {/* My adresses */}
+        <View style={tw`flex mt-5 p-2`}>
+          <Text style={tw`text-2xl font-semibold`}>
+            Faites vous livrer votre plein
+          </Text>
+          <DisplayAdress currentUser={currentUser} />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+export default HomeScreen;

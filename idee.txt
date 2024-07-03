@@ -1,0 +1,13 @@
+Inspiration Gaston service
+Récupérer prix du carburant via une API
+
+TO DO :
+- Ajouter agenda dans dashboard Admin
+- ajouter numéro de tél détails de la réservation admin refueler
+- Annuler commande coté garagiste et notifier le client
+- Créer une doc
+- Page d'urgence
+- Afficher le num de tél du livreur afin de pouvoir l'appeler et lui laisser la main sur que faire de la réservation
+
+V2
+- QR code avec un lien redirigeant vers son refuel de son véhicule

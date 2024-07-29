@@ -9,12 +9,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Keyboard, StatusBar, Text, View } from "react-native";
 import tw from "twrnc";
 import { AuthProvider } from "./AuthContext";
-import EmergencyStack from "./components/EmergencyStack";
-import HistoryStack from "./components/HistoryStack";
-import HomeStack from "./components/HomeStack";
-import ProfileStack from "./components/ProfileStack";
-import ServicesStack from "./components/ServicesStack";
 import { auth } from "./firebaseConfig";
+import EmergencyStack from "./Stacks/EmergencyStack";
+import HistoryStack from "./Stacks/HistoryStack";
+import HomeStack from "./Stacks/HomeStack";
+import ProfileStack from "./Stacks/ProfileStack";
+import ServicesStack from "./Stacks/ServicesStack";
 
 const Tab = createBottomTabNavigator();
 

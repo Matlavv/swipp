@@ -1,21 +1,28 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
+import ChooseGarageModal from "../components/Forms/ChooseGarageModal";
+import ChooseRepairDate from "../components/Forms/ChooseRepairDate";
+import DateTimePickerModal from "../components/Forms/DateTimePickerModal";
+import MaintenanceForm from "../components/Forms/MaintenanceForm";
 import RefuelForm from "../components/Forms/RefuelForm";
 import RepairForm from "../components/Forms/RepairForm";
-import HomeScreen from "../screens/HomeScreen";
-import ChooseGarageModal from "./Forms/ChooseGarageModal";
-import DateTimePickerModal from "./Forms/DateTimePickerModal";
-import MaintenanceForm from "./Forms/MaintenanceForm";
-import TechnicalControlForm from "./Forms/TechnicalControlForm";
+import TechnicalControlForm from "../components/Forms/TechnicalControlForm";
+import EmergencyScreen from "../screens/EmergencyScreen";
+import ServiceScreen from "../screens/ServiceScreen";
 
 const Stack = createNativeStackNavigator();
 
-const HomeStack = () => {
+const ServicesStack = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Home"
-        component={HomeScreen}
+        name="Service"
+        component={ServiceScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ChooseRepairDate"
+        component={ChooseRepairDate}
         options={{ headerShown: false }}
       />
       <Stack.Screen
@@ -33,7 +40,11 @@ const HomeStack = () => {
         component={RepairForm}
         options={{ headerShown: false }}
       />
-
+      <Stack.Screen
+        name="EmergencyScreen"
+        component={EmergencyScreen}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="MaintenanceForm"
         component={MaintenanceForm}
@@ -53,4 +64,4 @@ const HomeStack = () => {
   );
 };
 
-export default HomeStack;
+export default ServicesStack;

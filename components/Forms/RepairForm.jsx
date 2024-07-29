@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useStripe } from "@stripe/stripe-react-native";
-import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -17,7 +16,6 @@ import tw from "twrnc";
 import { swippLogo } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
 import ChooseGarageModal from "./ChooseGarageModal";
-import DateTimePickerModal from "./DateTimePickerModal";
 
 const RepairForm = ({ route, navigation }) => {
   const [selectedValue, setSelectedValue] = useState("Réparation du moteur");
@@ -27,13 +25,9 @@ const RepairForm = ({ route, navigation }) => {
     id: "",
     immatriculationPlate: "",
   });
-  const [selectedDate, setSelectedDate] = useState("");
-  const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
-  const [selectedDateTime, setSelectedDateTime] = useState("");
   const [isGarageModalVisible, setGarageModalVisible] = useState(false);
   const [selectedGarage, setSelectedGarage] = useState("");
   const [selectedPrice, setSelectedPrice] = useState(0);
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   const repairOptions = [
     { id: "moteur", value: "Réparation du moteur", price: 100 },
@@ -55,65 +49,6 @@ const RepairForm = ({ route, navigation }) => {
 
   const handleSelectGarage = (garage) => {
     setSelectedGarage(garage);
-  };
-
-  const handleDateTimeConfirm = (dateTime) => {
-    setSelectedDateTime(dateTime);
-    setDateTimePickerVisible(false);
-  };
-
-  const isFormValid = () => {
-    return (
-      selectedValue && selectedVehicleId && selectedGarage && selectedDateTime
-    );
-  };
-
-  // Paiement avec Stripe
-  const fetchPaymentIntentClientSecret = async () => {
-    const response = await fetch(
-      "https://europe-west3-swipp-b74be.cloudfunctions.net/createPaymentIntent",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: selectedPrice * 100,
-        }),
-      }
-    );
-    const { clientSecret } = await response.json();
-    return clientSecret;
-  };
-
-  const openPaymentSheet = async () => {
-    if (!isFormValid()) {
-      Alert.alert(
-        "Erreur",
-        "Veuillez remplir tous les champs avant de procéder au paiement."
-      );
-      return;
-    }
-    const clientSecret = await fetchPaymentIntentClientSecret();
-    const { error } = await initPaymentSheet({
-      paymentIntentClientSecret: clientSecret,
-      merchantDisplayName: "Swipp",
-      style: "alwaysLight",
-    });
-    if (error) {
-      console.error(error);
-      return;
-    }
-    const result = await presentPaymentSheet();
-    if (result.error) {
-      Alert.alert("Erreur de paiement", result.error.message);
-    } else {
-      Alert.alert(
-        "Paiement réussi",
-        "Votre paiement a été effectué avec succès."
-      );
-      await handleReservationConfirm();
-    }
   };
 
   const loadVehicles = async () => {
@@ -138,79 +73,20 @@ const RepairForm = ({ route, navigation }) => {
     loadVehicles();
   }, []);
 
-  const fetchUserData = async (userId) => {
-    const userDoc = doc(db, "users", userId);
-    const docSnap = await getDoc(userDoc);
-
-    if (docSnap.exists()) {
-      return docSnap.data();
-    } else {
-      console.error("Aucun document utilisateur trouvé!");
-      return null;
-    }
-  };
-
-  const handleReservationConfirm = async () => {
-    const userId = auth.currentUser.uid;
-    const bookingDate = new Date(selectedDateTime);
-    const reparationType = "Réparation";
-
-    const userData = await fetchUserData(userId);
-    if (!userData) {
-      Alert.alert(
-        "Erreur",
-        "Impossible de récupérer les informations de l'utilisateur."
-      );
+  const navigateToChooseRepairDate = () => {
+    if (!selectedValue || !selectedVehicleId.id || !selectedGarage) {
+      Alert.alert("Erreur", "Veuillez remplir tous les champs.");
       return;
     }
-    // Création de l'objet réservation
-    const reservation = {
-      userId,
-      vehicleId: selectedVehicleId.id,
-      immatriculationPlate: selectedVehicleId.immatriculationPlate,
-      isActive: true,
-      createdAt: new Date(),
-      reparationType: "Réparation",
-      reparationDetail: selectedValue,
-      bookingDate: new Date(selectedDateTime),
-      garageId: selectedGarage.id,
-      isActive: true,
-      cancelled: false,
-      price: selectedPrice,
-      location: selectedGarage.name,
-      firstName: userData.firstName || "",
-      lastName: userData.lastName || "",
-      username: userData.username,
-      state: "Active",
-    };
 
-    try {
-      // Ajout de la réservation à Firestore
-      const docRef = await addDoc(
-        collection(db, "RepairBookings"),
-        reservation
-      );
-      Alert.alert("Succès", "Votre rendez-vous a été enregistré avec succès.");
-      navigation.goBack();
-
-      // Ajout de la facture à Firestore
-      await addDoc(collection(db, "purchases"), {
-        userId: auth.currentUser.uid,
-        amount: selectedPrice,
-        createdAt: new Date(),
-        dateTime: bookingDate,
-        bookingId: docRef.id,
-        type: "Reparation",
-        reparationDetail: selectedValue,
-      });
-    } catch (error) {
-      console.error("Erreur lors de l'ajout de la réservation", error);
-      Alert.alert(
-        "Erreur",
-        "Un problème est survenu lors de l'enregistrement de votre réservation."
-      );
-    }
+    navigation.navigate("ChooseRepairDate", {
+      selectedValue,
+      selectedVehicleId,
+      selectedGarage,
+      selectedPrice,
+    });
   };
+
   return (
     <SafeAreaView style={tw`flex h-full`}>
       <ScrollView style={tw`flex-1`}>
@@ -309,41 +185,14 @@ const RepairForm = ({ route, navigation }) => {
             />
           </View>
         </View>
-        {/* Choose Date */}
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>
-            Choisissez votre date de rendez-vous
-          </Text>
-          <View style={tw`rounded-md`}>
-            <TouchableOpacity
-              style={tw`border-b-2 border-[#34469C] font-bold text-base`}
-              value={selectedDateTime}
-              onPress={() => setDateTimePickerVisible(true)}
-              editable={false}
-            >
-              <TextInput
-                style={tw`text-black font-bold text-base`}
-                placeholder="Choisissez une date et une heure"
-                value={selectedDateTime}
-                editable={false}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <DateTimePickerModal
-          isVisible={isDateTimePickerVisible}
-          onClose={() => setDateTimePickerVisible(false)}
-          onConfirm={handleDateTimeConfirm}
-        />
-        {/* Submit button */}
         <View style={tw`mb-4 mt-3 flex items-center`}>
           <Text style={tw`font-bold text-lg`}>Prix : {selectedPrice}</Text>
           <TouchableOpacity
-            onPress={openPaymentSheet}
+            onPress={navigateToChooseRepairDate}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center mt-3`}
           >
             <Text style={tw`text-white font-semibold text-base`}>
-              Valider mon rendez-vous
+              Choisir une date
             </Text>
           </TouchableOpacity>
         </View>

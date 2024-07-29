@@ -1,9 +1,11 @@
 import { Picker } from "@react-native-picker/picker";
 import { BlurView } from "expo-blur";
+import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { Alert, Modal, Text, TouchableOpacity, View } from "react-native";
 import { Calendar } from "react-native-calendars";
 import tw from "twrnc";
+import { db } from "../../firebaseConfig";
 
 const generateTimeSlots = (startHour = 10, endHour = 18) => {
   const slots = [];
@@ -17,30 +19,34 @@ const generateTimeSlots = (startHour = 10, endHour = 18) => {
   return slots;
 };
 
-const DateTimePickerModal = ({ isVisible, onClose, onConfirm }) => {
+const DateTimePickerModal = ({ isVisible, onClose, onConfirm, garageId }) => {
   const [selectedDay, setSelectedDay] = useState("");
-  const [timeSlots, setTimeSlots] = useState(generateTimeSlots());
-  const [selectedTime, setSelectedTime] = useState(timeSlots[0]);
+  const [timeSlots, setTimeSlots] = useState([]);
+  const [selectedTime, setSelectedTime] = useState("");
+  const [availableSlots, setAvailableSlots] = useState([]);
 
   useEffect(() => {
-    const currentTime = new Date();
-    const currentHour = currentTime.getHours();
-    const currentMinutes = currentTime.getMinutes();
-    let startHour = 10;
-
-    if (selectedDay.dateString === getDateString(currentTime)) {
-      // Si c'est le jour actuel, définir le début à l'heure actuelle + 1 heure
-      startHour = currentMinutes > 30 ? currentHour + 2 : currentHour + 1;
+    if (garageId && selectedDay) {
+      const fetchAvailableSlots = async () => {
+        const docRef = doc(db, "garages", garageId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const availabilities = docSnap.data().availabilities || [];
+          const selectedDateAvailability = availabilities.find(
+            (avail) => avail.date === selectedDay.dateString
+          );
+          setAvailableSlots(
+            selectedDateAvailability ? selectedDateAvailability.slots : []
+          );
+        }
+      };
+      fetchAvailableSlots();
     }
-
-    const newTimeSlots = generateTimeSlots(startHour);
-    setTimeSlots(newTimeSlots);
-    setSelectedTime(newTimeSlots[0]);
-  }, [selectedDay]);
+  }, [garageId, selectedDay]);
 
   const handleConfirm = () => {
-    if (!selectedDay) {
-      Alert.alert("Veuillez sélectionner une date");
+    if (!selectedDay || !selectedTime) {
+      Alert.alert("Veuillez sélectionner une date et une heure");
       return;
     }
     const dateTime = `${selectedDay.dateString} ${selectedTime}`;
@@ -86,7 +92,7 @@ const DateTimePickerModal = ({ isVisible, onClose, onConfirm }) => {
               selectedValue={selectedTime}
               onValueChange={(itemValue) => setSelectedTime(itemValue)}
             >
-              {timeSlots.map((time, index) => (
+              {availableSlots.map((time, index) => (
                 <Picker.Item key={index} label={time} value={time} />
               ))}
             </Picker>

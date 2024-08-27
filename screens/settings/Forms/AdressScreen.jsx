@@ -19,8 +19,8 @@ import {
   View,
 } from "react-native";
 import tw from "twrnc";
-import { swippLogo } from "../../assets";
-import { auth, db } from "../../firebaseConfig";
+import { swippLogo } from "../../../assets";
+import { auth, db } from "../../../firebaseConfig";
 
 const AdressScreen = () => {
   const [adresse, setAdresse] = useState("");

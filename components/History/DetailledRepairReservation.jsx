@@ -39,11 +39,11 @@ const DetailledRepairReservation = ({ route }) => {
         );
         const vehicleSnap = await getDoc(vehicleRef);
 
-        // if (vehicleSnap.exists()) {
-        //   setVehicle({ id: vehicleSnap.id, ...vehicleSnap.data() });
-        // } else {
-        //   Alert.alert("Erreur", "Véhicule non trouvé.");
-        // }
+        if (vehicleSnap.exists()) {
+          setVehicle({ id: vehicleSnap.id, ...vehicleSnap.data() });
+        } else {
+          Alert.alert("Erreur", "Véhicule non trouvé.");
+        }
       } else {
         Alert.alert("Erreur", "Réservation non trouvée.");
       }
@@ -54,7 +54,7 @@ const DetailledRepairReservation = ({ route }) => {
 
   const handleCancelReservation = async () => {
     const now = new Date(); // L'heure actuelle
-    const createdAt = reservation.createdAt.toDate(); // Convertit le Timestamp Firestore en objet Date JavaScript
+    const createdAt = new Date(reservation.createdAt); // Convertit la chaîne en objet Date JavaScript
     const timeDiff = now - createdAt; // Différence en millisecondes
     const minutesDiff = timeDiff / (1000 * 60); // Convertit en minutes
 
@@ -102,7 +102,9 @@ const DetailledRepairReservation = ({ route }) => {
         <View style={tw`p-4`}>
           <Text style={tw`text-lg font-semibold`}>
             A propos de votre réservation du{" "}
-            {reservation.bookingDate.toDate().toLocaleString("fr-FR", {
+            {new Date(
+              `${reservation.bookingDate} ${reservation.bookingHour}`
+            ).toLocaleString("fr-FR", {
               year: "numeric",
               month: "long",
               day: "numeric",
@@ -146,7 +148,23 @@ const DetailledRepairReservation = ({ route }) => {
           >
             <Text style={tw`text-lg`}>Lieu de l'entretien : </Text>
             <Text style={tw`text-lg font-semibold w-55`}>
+              {reservation.adress}
+            </Text>
+          </View>
+          <View
+            style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
+          >
+            <Text style={tw`text-lg`}>Garage : </Text>
+            <Text style={tw`text-lg font-semibold w-55`}>
               {reservation.location}
+            </Text>
+          </View>
+          <View
+            style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
+          >
+            <Text style={tw`text-lg`}>Numéro de téléphone : </Text>
+            <Text style={tw`text-lg font-semibold w-55`}>
+              {reservation.phoneNumber}
             </Text>
           </View>
 
@@ -157,7 +175,7 @@ const DetailledRepairReservation = ({ route }) => {
               Vous avez fait cette réservation le{" "}
             </Text>
             <Text style={tw`text-lg font-semibold`}>
-              {reservation.createdAt.toDate().toLocaleString("fr-FR", {
+              {new Date(reservation.createdAt).toLocaleString("fr-FR", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",

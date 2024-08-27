@@ -80,7 +80,8 @@ const RepairIncomingReservation = () => {
         imageSource = null;
     }
 
-    const bookingDate = new Date(item.bookingDate.toDate());
+    // Convertir bookingDate et bookingHour en objet Date
+    const bookingDate = new Date(item.bookingDate + " " + item.bookingHour);
     const formattedTime = bookingDate.toLocaleTimeString("fr-FR", {
       hour: "2-digit",
       minute: "2-digit",
@@ -109,7 +110,8 @@ const RepairIncomingReservation = () => {
             <View style={tw`flex-row mt-2 ml-2`}>
               <Ionicons name="calendar-outline" size={24} color="gray" />
               <Text style={tw`text-base ml-1`}>
-                {bookingDate.toLocaleDateString("fr-FR")} - {formattedTime}
+                {item.bookingDate} - {item.bookingHour}
+                {/* {bookingDate.toLocaleDateString("fr-FR")} - {formattedTime} */}
               </Text>
             </View>
 

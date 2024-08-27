@@ -20,9 +20,9 @@ import {
 import Geocoder from "react-native-geocoding";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
+import ChooseRefuelerModal from "../../components/Modal/ChooseRefuelerModal";
+import RefuelDateTimePickerModal from "../../components/Modal/RefuelDateTimePickerModal";
 import { auth, db } from "../../firebaseConfig";
-import ChooseRefuelerModal from "./ChooseRefuelerModal";
-import RefuelDateTimePickerModal from "./RefuelDateTimePickerModal";
 
 Geocoder.init("AIzaSyAxJi9a4Bt8lKrKtl5DH6WIsPWkbBMgbeg");
 

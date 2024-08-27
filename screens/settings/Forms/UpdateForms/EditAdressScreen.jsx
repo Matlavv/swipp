@@ -12,8 +12,8 @@ import {
   View,
 } from "react-native";
 import tw from "twrnc";
-import { swippLogo } from "../../assets";
-import { auth, db } from "../../firebaseConfig";
+import { swippLogo } from "../../../../assets";
+import { auth, db } from "../../../../firebaseConfig";
 
 const EditAdressScreen = ({ route, navigation }) => {
   const { adressId } = route.params;

@@ -15,9 +15,9 @@ import {
 import { SelectList } from "react-native-dropdown-select-list";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
+import ChooseGarageModal from "../../components/Modal/ChooseGarageModal";
+import DateTimePickerModal from "../../components/Modal/DateTimePickerModal";
 import { auth, db } from "../../firebaseConfig";
-import ChooseGarageModal from "./ChooseGarageModal";
-import DateTimePickerModal from "./DateTimePickerModal";
 
 const TechnicalControlForm = ({ navigation }) => {
   const [vehicles, setVehicles] = useState([]);

@@ -1,13 +1,13 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
-import ChooseGarageModal from "../components/Forms/ChooseGarageModal";
-import ChooseRepairDate from "../components/Forms/ChooseRepairDate";
-import DateTimePickerModal from "../components/Forms/DateTimePickerModal";
-import MaintenanceForm from "../components/Forms/MaintenanceForm";
-import RefuelForm from "../components/Forms/RefuelForm";
-import RepairForm from "../components/Forms/RepairForm";
-import TechnicalControlForm from "../components/Forms/TechnicalControlForm";
+import ChooseGarageModal from "../components/Modal/ChooseGarageModal";
+import DateTimePickerModal from "../components/Modal/DateTimePickerModal";
 import EmergencyScreen from "../screens/EmergencyScreen";
+import ChooseRepairDate from "../screens/Forms/ChooseRepairDate";
+import MaintenanceForm from "../screens/Forms/MaintenanceForm";
+import RefuelForm from "../screens/Forms/RefuelForm";
+import RepairForm from "../screens/Forms/RepairForm";
+import TechnicalControlForm from "../screens/Forms/TechnicalControlForm";
 import ServiceScreen from "../screens/ServiceScreen";
 
 const Stack = createNativeStackNavigator();

@@ -17,8 +17,8 @@ import {
   View,
 } from "react-native";
 import tw from "twrnc";
-import { swippLogo } from "../../assets";
-import { auth, db } from "../../firebaseConfig";
+import { swippLogo } from "../../../assets";
+import { auth, db } from "../../../firebaseConfig";
 
 const AddBusinessScreen = ({ navigation }) => {
   const [businessName, setBusinessName] = useState("");

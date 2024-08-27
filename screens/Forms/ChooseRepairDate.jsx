@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useStripe } from "@stripe/stripe-react-native";
-import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -102,7 +102,53 @@ const ChooseRepairDate = ({ route, navigation }) => {
 
   const handleReservationConfirm = async () => {
     const userId = auth.currentUser.uid;
-    const bookingDate = new Date(selectedDateTime);
+
+    // On extrait chaque composant de la chaîne selectedDateTime
+    const [weekday, monthName, day, year, time] = selectedDateTime.split(" ");
+
+    // Créez un objet Date en utilisant les composants extraits
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const monthIndex = months.indexOf(monthName);
+
+    if (monthIndex === -1) {
+      console.error("Invalid month:", monthName);
+      Alert.alert("Erreur", "Le mois sélectionné est invalide.");
+      return;
+    }
+
+    // Créer la date en explicitant tous les composants
+    const bookingDateHour = new Date(year, monthIndex, day, ...time.split(":"));
+
+    if (isNaN(bookingDateHour.getTime())) {
+      console.error("Invalid date or time:", selectedDateTime);
+      Alert.alert("Erreur", "La date ou l'heure sélectionnée est invalide.");
+      return;
+    }
+
+    // Extraire la date et l'heure en format correct
+    const bookingDate = bookingDateHour.toISOString().split("T")[0]; // YYYY-MM-DD format
+    const bookingHour = bookingDateHour
+      .toTimeString()
+      .split(" ")[0]
+      .slice(0, 5); // HH:MM format
+
+    console.log("selectedDateTime:", selectedDateTime);
+    console.log("bookingDate:", bookingDate);
+    console.log("bookingHour:", bookingHour);
+    console.log("bookingDateHour:", bookingDateHour);
 
     const fetchUserData = async (userId) => {
       const userDoc = doc(db, "users", userId);
@@ -123,26 +169,33 @@ const ChooseRepairDate = ({ route, navigation }) => {
       );
       return;
     }
+
     // Création de l'objet réservation
     const reservation = {
       userId,
       vehicleId: selectedVehicleId.id,
       immatriculationPlate: selectedVehicleId.immatriculationPlate,
       isActive: true,
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
       reparationType: "Réparation",
       reparationDetail: selectedValue,
       bookingDate: bookingDate,
+      bookingHour: bookingHour,
+      bookingDateHour: bookingDateHour.toISOString(),
       garageId: selectedGarage.id,
       isActive: true,
       cancelled: false,
       price: selectedPrice,
+      adress: selectedGarage.address,
+      phoneNumber: selectedGarage.phoneNumber,
       location: selectedGarage.name,
       firstName: userData.firstName || "",
       lastName: userData.lastName || "",
       username: userData.username,
       state: "Active",
     };
+
+    console.log("Creating reservation with data:", reservation);
 
     try {
       // Ajout de la réservation à Firestore
@@ -151,25 +204,6 @@ const ChooseRepairDate = ({ route, navigation }) => {
         reservation
       );
 
-      // Mise à jour des créneaux disponibles du garage
-      const garageRef = doc(db, "garages", selectedGarage.id);
-      const garageDoc = await getDoc(garageRef);
-      if (garageDoc.exists()) {
-        const availabilities = garageDoc.data().availabilities || [];
-        const updatedAvailabilities = availabilities.map((avail) => {
-          if (avail.date === selectedDateTime.split(" ")[0]) {
-            return {
-              ...avail,
-              slots: avail.slots.filter(
-                (slot) => slot !== selectedDateTime.split(" ")[1]
-              ),
-            };
-          }
-          return avail;
-        });
-        await updateDoc(garageRef, { availabilities: updatedAvailabilities });
-      }
-
       Alert.alert("Succès", "Votre rendez-vous a été enregistré avec succès.");
       navigation.goBack();
 
@@ -177,8 +211,8 @@ const ChooseRepairDate = ({ route, navigation }) => {
       await addDoc(collection(db, "purchases"), {
         userId: auth.currentUser.uid,
         amount: selectedPrice,
-        createdAt: new Date(),
-        dateTime: bookingDate,
+        createdAt: new Date().toISOString(),
+        dateTime: `${bookingDate} ${bookingHour}`,
         bookingId: docRef.id,
         type: "Reparation",
         reparationDetail: selectedValue,

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useStripe } from "@stripe/stripe-react-native";
-import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { addDoc, collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -15,57 +15,55 @@ import {
 import { SelectList } from "react-native-dropdown-select-list";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
+import ChooseGarageModal from "../../components/Modal/ChooseGarageModal";
+import DateTimePickerModal from "../../components/Modal/DateTimePickerModal";
 import { auth, db } from "../../firebaseConfig";
-import ChooseGarageModal from "./ChooseGarageModal";
-import DateTimePickerModal from "./DateTimePickerModal";
 
-const RepairForm = ({ route, navigation }) => {
-  const [selectedValue, setSelectedValue] = useState("Réparation du moteur");
-  const [address, setAddress] = useState("");
+const TechnicalControlForm = ({ navigation }) => {
   const [vehicles, setVehicles] = useState([]);
-  const [selectedVehicleId, setSelectedVehicleId] = useState({
-    id: "",
-    immatriculationPlate: "",
-  });
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedVehicleId, setSelectedVehicleId] = useState("");
+  const [selectedImmatriculationPlate, setSelectedImmatriculationPlate] =
+    useState("");
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
   const [selectedDateTime, setSelectedDateTime] = useState("");
   const [isGarageModalVisible, setGarageModalVisible] = useState(false);
-  const [selectedGarage, setSelectedGarage] = useState("");
-  const [selectedPrice, setSelectedPrice] = useState(0);
+  const [selectedGarage, setSelectedGarage] = useState({});
+  const [controlPrice, setControlPrice] = useState(100);
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
-  const repairOptions = [
-    { id: "moteur", value: "Réparation du moteur", price: 100 },
-    { id: "transmission", value: "Réparation de la transmission", price: 200 },
-    { id: "direction", value: "Réparation de la direction", price: 150 },
-    { id: "carrosserie", value: "Réparation de la carrosserie", price: 250 },
-    {
-      id: "echappement",
-      value: "Réparation du système d'échappement",
-      price: 180,
-    },
-  ];
-
   useEffect(() => {
-    if (route.params?.address) {
-      setAddress(route.params.address);
-    }
-  }, [route.params?.address]);
-
-  const handleSelectGarage = (garage) => {
-    setSelectedGarage(garage);
-  };
+    const loadVehicles = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const querySnapshot = await getDocs(
+            collection(db, "users", user.uid, "vehicles")
+          );
+          const userVehicles = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setVehicles(userVehicles);
+        } catch (error) {
+          console.error("Erreur lors du chargement des véhicules", error);
+        }
+      }
+    };
+    loadVehicles();
+  }, []);
 
   const handleDateTimeConfirm = (dateTime) => {
-    setSelectedDateTime(dateTime);
+    setSelectedDateTime(dateTime.toString());
     setDateTimePickerVisible(false);
   };
 
+  const handleSelectGarage = (garage) => {
+    setSelectedGarage(garage);
+    setGarageModalVisible(false);
+  };
+
   const isFormValid = () => {
-    return (
-      selectedValue && selectedVehicleId && selectedGarage && selectedDateTime
-    );
+    return selectedVehicleId && selectedGarage && selectedDateTime;
   };
 
   // Paiement avec Stripe
@@ -78,7 +76,7 @@ const RepairForm = ({ route, navigation }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: selectedPrice * 100,
+          amount: controlPrice * 100,
         }),
       }
     );
@@ -116,76 +114,28 @@ const RepairForm = ({ route, navigation }) => {
     }
   };
 
-  const loadVehicles = async () => {
-    const user = auth.currentUser;
-    if (user) {
-      try {
-        const querySnapshot = await getDocs(
-          collection(db, "users", user.uid, "vehicles")
-        );
-        const userVehicles = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setVehicles(userVehicles);
-      } catch (error) {
-        console.error("Erreur lors du chargement des véhicules", error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    loadVehicles();
-  }, []);
-
-  const fetchUserData = async (userId) => {
-    const userDoc = doc(db, "users", userId);
-    const docSnap = await getDoc(userDoc);
-
-    if (docSnap.exists()) {
-      return docSnap.data();
-    } else {
-      console.error("Aucun document utilisateur trouvé!");
-      return null;
-    }
-  };
-
   const handleReservationConfirm = async () => {
     const userId = auth.currentUser.uid;
     const bookingDate = new Date(selectedDateTime);
-    const reparationType = "Réparation";
+    const reparationType = "Contrôle technique";
 
-    const userData = await fetchUserData(userId);
-    if (!userData) {
-      Alert.alert(
-        "Erreur",
-        "Impossible de récupérer les informations de l'utilisateur."
-      );
-      return;
-    }
-    // Création de l'objet réservation
     const reservation = {
       userId,
-      vehicleId: selectedVehicleId.id,
-      immatriculationPlate: selectedVehicleId.immatriculationPlate,
+      vehicleId: selectedVehicleId,
+      immatriculationPlate: selectedImmatriculationPlate,
       isActive: true,
       createdAt: new Date(),
-      reparationType: "Réparation",
-      reparationDetail: selectedValue,
-      bookingDate: new Date(selectedDateTime),
       garageId: selectedGarage.id,
-      isActive: true,
-      cancelled: false,
-      price: selectedPrice,
+      reparationType: reparationType,
+      bookingDate: bookingDate,
       location: selectedGarage.name,
-      firstName: userData.firstName || "",
-      lastName: userData.lastName || "",
-      username: userData.username,
+      price: controlPrice,
+      reparationDetail: "Contrôle technique",
+      cancelled: false,
       state: "Active",
     };
 
     try {
-      // Ajout de la réservation à Firestore
       const docRef = await addDoc(
         collection(db, "RepairBookings"),
         reservation
@@ -196,12 +146,11 @@ const RepairForm = ({ route, navigation }) => {
       // Ajout de la facture à Firestore
       await addDoc(collection(db, "purchases"), {
         userId: auth.currentUser.uid,
-        amount: selectedPrice,
+        amount: controlPrice,
         createdAt: new Date(),
         dateTime: bookingDate,
         bookingId: docRef.id,
-        type: "Reparation",
-        reparationDetail: selectedValue,
+        type: "Contrôle technique",
       });
     } catch (error) {
       console.error("Erreur lors de l'ajout de la réservation", error);
@@ -211,6 +160,7 @@ const RepairForm = ({ route, navigation }) => {
       );
     }
   };
+
   return (
     <SafeAreaView style={tw`flex h-full`}>
       <ScrollView style={tw`flex-1`}>
@@ -224,58 +174,31 @@ const RepairForm = ({ route, navigation }) => {
           >
             <Ionicons name="arrow-back-circle-outline" size={30} color="gray" />
           </TouchableOpacity>
-          <Text style={tw`text-2xl font-bold m-5`}>Réparation du véhicule</Text>
-        </View>
-        {/* Choose reparation */}
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>
-            Sélectionnez votre besoin
+          <Text style={tw`text-2xl font-bold m-5`}>
+            Contrôle technique du véhicule
           </Text>
-          <View style={tw`rounded-md`}>
-            <SelectList
-              setSelected={(itemValue) => {
-                const selectedOption = repairOptions.find(
-                  (option) => option.id === itemValue
-                );
-                if (selectedOption) {
-                  setSelectedValue(selectedOption.value);
-                  setSelectedPrice(selectedOption.price);
-                }
-              }}
-              data={repairOptions.map((option) => ({
-                key: option.id,
-                value: `${option.value} - ${option.price}€`,
-              }))}
-              placeholder="Sélectionnez votre besoin"
-              boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
-            />
-          </View>
         </View>
         {/* Choose vehicle */}
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-5`}>
           <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
           <View style={tw`rounded-md`}>
             <SelectList
               setSelected={(itemValue) => {
-                const selectedVehicle = vehicles.find(
-                  (vehicle) => vehicle.id === itemValue
-                );
-                if (selectedVehicle) {
-                  setSelectedVehicleId({
-                    id: selectedVehicle.id,
-                    immatriculationPlate: selectedVehicle.immatriculation,
-                  });
+                const vehicle = vehicles.find((v) => v.id === itemValue);
+                if (vehicle) {
+                  setSelectedVehicleId(vehicle.id);
+                  setSelectedImmatriculationPlate(vehicle.immatriculation);
                 } else {
                   console.error("Selected vehicle not found");
                   Alert.alert(
-                    "Error",
-                    "The selected vehicle was not found in the list."
+                    "Erreur",
+                    "Le véhicule sélectionné n'est pas trouvé dans la liste."
                   );
                 }
               }}
               data={vehicles.map((vehicle) => ({
-                key: vehicle.id, // Use vehicle.id as the key for selection
-                value: `${vehicle.label} - ${vehicle.immatriculation}`, // Display format
+                key: vehicle.id,
+                value: `${vehicle.label} - ${vehicle.immatriculation}`,
               }))}
               placeholder="Indiquez le véhicule"
               boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
@@ -283,7 +206,7 @@ const RepairForm = ({ route, navigation }) => {
           </View>
         </View>
         {/* Choose Garage */}
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-7`}>
           <Text style={tw`text-xl font-bold mb-4`}>
             Choisissez votre garage
           </Text>
@@ -310,7 +233,7 @@ const RepairForm = ({ route, navigation }) => {
           </View>
         </View>
         {/* Choose Date */}
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-7`}>
           <Text style={tw`text-xl font-bold mb-4`}>
             Choisissez votre date de rendez-vous
           </Text>
@@ -336,8 +259,8 @@ const RepairForm = ({ route, navigation }) => {
           onConfirm={handleDateTimeConfirm}
         />
         {/* Submit button */}
-        <View style={tw`mb-4 mt-3 flex items-center`}>
-          <Text style={tw`font-bold text-lg`}>Prix : {selectedPrice}</Text>
+        <View style={tw`mb-4 mt-5 flex items-center`}>
+          <Text style={tw`font-bold text-lg`}>Prix : {controlPrice}</Text>
           <TouchableOpacity
             onPress={openPaymentSheet}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center mt-3`}
@@ -352,4 +275,4 @@ const RepairForm = ({ route, navigation }) => {
   );
 };
 
-export default RepairForm;
+export default TechnicalControlForm;

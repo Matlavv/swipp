@@ -20,11 +20,11 @@ import {
 import Geocoder from "react-native-geocoding";
 import tw from "twrnc";
 import { swippLogo } from "../../assets";
+import ChooseRefuelerModal from "../../components/Modal/ChooseRefuelerModal";
+import RefuelDateTimePickerModal from "../../components/Modal/RefuelDateTimePickerModal";
 import { auth, db } from "../../firebaseConfig";
-import ChooseRefuelerModal from "./ChooseRefuelerModal";
-import RefuelDateTimePickerModal from "./RefuelDateTimePickerModal";
 
-Geocoder.init("YOUR_GOOGLE_API_KEY");
+Geocoder.init("AIzaSyAxJi9a4Bt8lKrKtl5DH6WIsPWkbBMgbeg");
 
 const RefuelForm = ({ route, navigation }) => {
   const [selectedFuel, setSelectedFuel] = useState("SP98");
@@ -75,7 +75,6 @@ const RefuelForm = ({ route, navigation }) => {
     setSelectedRefueler(refueler);
   };
 
-  // Paiement avec Stripe
   const fetchPaymentIntentClientSecret = async () => {
     const response = await fetch(
       "https://europe-west3-swipp-b74be.cloudfunctions.net/createPaymentIntent",
@@ -163,7 +162,6 @@ const RefuelForm = ({ route, navigation }) => {
       .catch((error) => console.warn(error));
   };
 
-  // Charger les véhicules
   const loadVehicles = async () => {
     const user = auth.currentUser;
     if (user) {
@@ -253,7 +251,6 @@ const RefuelForm = ({ route, navigation }) => {
       Alert.alert("Succès", `Votre réservation a été enregistrée.`);
       navigation.goBack();
 
-      // Enregistrer l'achat dans Firestore pour déclencher la création de la facture
       await addDoc(collection(db, "purchases"), {
         userId: auth.currentUser.uid,
         amount: calculateTotalPrice(),
@@ -315,13 +312,11 @@ const RefuelForm = ({ route, navigation }) => {
             Réservez votre carburant
           </Text>
         </View>
-        {/* Location */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
           <Text style={tw`text-xl font-bold mb-4`}>
             Indiquez le point de rendez-vous
           </Text>
           <View style={tw`rounded-md`}>
-            {/* Text input pour saisir l'adresse */}
             <TextInput
               style={tw`border-b-2 mb-4 border-[#34469C] font-bold text-base`}
               value={address}
@@ -339,7 +334,6 @@ const RefuelForm = ({ route, navigation }) => {
               onSelect={() => setAddress(address)}
               save="value"
             />
-            {/* Bouton pour se géolocaliser */}
             <Text style={tw`text-lg font-semibold mb-2`}>Ou</Text>
             <TouchableOpacity
               onPress={handleLocatePress}
@@ -349,7 +343,6 @@ const RefuelForm = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
         </View>
-        {/* Choose vehicle */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
           <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
           <View style={tw`rounded-md`}>
@@ -364,7 +357,6 @@ const RefuelForm = ({ route, navigation }) => {
             />
           </View>
         </View>
-        {/* Choose litter */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
           <Text style={tw`text-xl font-bold mb-4`}>
             Indiquez le nombre de litres
@@ -379,7 +371,6 @@ const RefuelForm = ({ route, navigation }) => {
             Prix: {price.toFixed(2)}€
           </Text>
         </View>
-        {/* Choose Refueler */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
           <Text style={tw`text-xl font-bold mb-4`}>
             Choisissez votre refueler

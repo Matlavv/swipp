@@ -39,7 +39,6 @@ const RefuelDateTimePickerModal = ({ isVisible, onClose, onConfirm }) => {
       Alert.alert("Veuillez sélectionner une date");
       return;
     }
-    // Envoie un objet avec la date et la plage horaire séparées
     onConfirm({
       date: selectedDay.dateString,
       timeSlot: selectedTime,
@@ -51,7 +50,6 @@ const RefuelDateTimePickerModal = ({ isVisible, onClose, onConfirm }) => {
     onClose();
   };
 
-  // Formatte la date au format YYYY-MM-DD pour la comparaison
   const getDateString = (date) => {
     return date.toISOString().split("T")[0];
   };

@@ -1,5 +1,5 @@
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   Image,
   SafeAreaView,
@@ -13,13 +13,18 @@ import RefuelIncomingReservation from "../components/History/RefuelIncomingReser
 import RefuelPastReservation from "../components/History/RefuelPastReservation";
 import RepairIncomingReservation from "../components/History/RepairIncomingReservation";
 import RepairPastReservation from "../components/History/RepairPastReservation";
-
+import { AuthContext } from "../AuthContext";
+import NotAuth from "../components/History/NotAuth";
 const Tab = createMaterialTopTabNavigator();
 
 const HistoryScreen = () => {
   const [selected, setSelected] = useState("services");
+  const { isAuthenticated } = useContext(AuthContext);
 
   const getComponent = (tabName) => {
+if (isAuthenticated ){
+
+
     if (selected === "gas" && tabName === "A venir") {
       return RefuelIncomingReservation;
     } else if (selected === "gas" && tabName === "Passées") {
@@ -31,6 +36,7 @@ const HistoryScreen = () => {
     } else {
       return null;
     }
+  } else {return NotAuth;}
   };
 
   return (

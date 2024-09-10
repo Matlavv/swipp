@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import tw from "twrnc";
 import { auth, db } from "../../firebaseConfig";
+import NoHistory from "./NoHistory";
 
 const RefuelIncomingReservation = () => {
   const [reservations, setReservations] = useState([]);
@@ -71,6 +72,9 @@ const RefuelIncomingReservation = () => {
 
   return (
     <SafeAreaView style={tw`flex-1`}>
+        {reservations.length == 0 ? (
+        <NoHistory></NoHistory> 
+              ):(
       <FlatList
         data={reservations}
         keyExtractor={(item) => item.id}
@@ -111,7 +115,7 @@ const RefuelIncomingReservation = () => {
             </View>
           </TouchableOpacity>
         )}
-      />
+      />)}
     </SafeAreaView>
   );
 };

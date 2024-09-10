@@ -14,6 +14,7 @@ import {
 import tw from "twrnc";
 import { maintenance, oil_change, reparation } from "../../assets";
 import { auth, db } from "../../firebaseConfig";
+import NoHistory from "./NoHistory";
 
 const RepairIncomingReservation = () => {
   const [reservations, setReservations] = useState([]);
@@ -147,6 +148,9 @@ const RepairIncomingReservation = () => {
 
   return (
     <SafeAreaView style={tw`flex-1`}>
+        {reservations.length == 0 ? (
+        <NoHistory></NoHistory> 
+              ):(
       <FlatList
         data={reservations}
         renderItem={renderItem}
@@ -154,6 +158,7 @@ const RepairIncomingReservation = () => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={tw`p-2 ml-2`}
       />
+    )}
     </SafeAreaView>
   );
 };

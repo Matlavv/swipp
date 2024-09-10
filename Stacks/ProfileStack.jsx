@@ -14,17 +14,31 @@ import RefuelAdmin from "../screens/settings/RefuelAdmin/RefuelAdmin";
 import UserProfileScreen from "../screens/settings/UserProfileScreen";
 import UserScreen from "../screens/settings/UserScreen";
 import VehicleScreen from "../screens/settings/VehicleScreen";
+import { useContext } from "react";
+import { AuthContext } from "../AuthContext";
+
 
 const Stack = createNativeStackNavigator();
 
 const ProfileStack = () => {
+  const { isAuthenticated } = useContext(AuthContext);
+
   return (
     <Stack.Navigator>
+            {!isAuthenticated ? (
+        <>
       <Stack.Screen
-        name="Profile"
-        component={ProfileScreen}
+        name="LoginScreen"
+        component={LoginScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="SignUpScreen"
+        component={SignUpScreen}
+        options={{ headerShown: false }}
+      />
+</>) : (<>
+
       <Stack.Screen
         name="UserScreen"
         component={UserScreen}
@@ -60,16 +74,7 @@ const ProfileStack = () => {
         component={RefuelAdmin}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="LoginScreen"
-        component={LoginScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="SignUpScreen"
-        component={SignUpScreen}
-        options={{ headerShown: false }}
-      />
+
       <Stack.Screen
         name="EditVehicleScreen"
         component={EditVehicleScreen}
@@ -90,6 +95,7 @@ const ProfileStack = () => {
         component={AdminRefuelReservationDetailled}
         options={{ headerShown: false }}
       />
+      </> )}
     </Stack.Navigator>
   );
 };

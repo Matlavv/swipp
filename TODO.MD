@@ -1,28 +1,28 @@
-Bugs :
+Faits :
 1. **Ecran blanc si ont clique sur profil en étant non connecter**
-2. La mise à jour du mot de passe ne marche pas
-3. Tous les champs ne sont pas obligatoire dans enregistrer une adresse (ne devrais pas être possible)
-4. Problème dans les changements de page (stack ?)
-5. Connexion possible sans avoir valider l'email (ne devrais pas être possible)
-6. **Historique de résa ('uid' null)**
-7. Problème sur la gestion d'état des réservations (bouton encore afficher ou résa encore affiché alors que annuler)
-8. Affichage du prix (NaN)
-9. Ajouter entreprise (error permission) 
-10. Ajouter une entreprise manque des pop-ups d'erreur
-11. Ajouter une entreprise, le formulaire ne marche pas
-12. Il n'y à que la résa de carbu qui marche
+2. **Historique de résa ('uid' null)**
+3. **La mise à jour du profil ne marche pas**
+4. **Lorsqu'il n'y à pas d'historique de réa afficher un message (différent si l'utilisateur est connectez ou non)**
 
+Bugs : 
+- La mise à jour du mot de passe ne marche pas 
+- Tous les champs ne sont pas obligatoire dans enregistrer une adresse (ne devrais pas être possible)
+- Ajouter une entreprise, faire le formulaire ainsi que dans les formulaire ajouter le fait de choisir si la note c'est au nom de l'entreprise ou du particulier
+- Problème dans les changements de page (stack ?)
+- Connexion possible sans avoir valider l'email (ne devrais pas être possible)
+- Problème sur la gestion d'état des réservations (bouton encore afficher ou résa encore affiché alors que annuler)
+- Affichage du prix (NaN)
+- Il n'y à que la résa de carbu qui marche
 
 Parcours Utilisateurs :
-1. **Lorsqu'il n'y à pas d'historique de réa afficher un message**
-2. Modifier l'UI pour être plus fidèle au Figma
-3. Rendre les bouton entier cliquable pas que le texte
-4. Ajouter un se connectez au header 
-5. Enlever le texte en anglais
-6. Changement d'huile ne renvoie pas vers un formulaire pour le changement d'huile
-7. Mot de passe oublié à transformer en pop up
-8. Lorsque "Point de rdv" remplie ne pas afficher "mes adresse et géolocaliser"
-9. Pouvoir supprimer sa photo
+- Modifier l'UI pour être plus fidèle au Figma
+- Rendre les bouton entier cliquable pas que le texte
+- Ajouter un se connectez au header 
+- Enlever le texte en anglais
+- Changement d'huile ne renvoie pas vers un formulaire pour le changement d'huile
+- Mot de passe oublié à transformer en pop up
+- Lorsque "Point de rdv" remplie ne pas afficher "mes adresse et géolocaliser"
+- Pouvoir supprimer sa photo
 
 
 

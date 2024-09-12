@@ -25,7 +25,7 @@ const UserProfileScreen = ({ navigation }) => {
   const [isProfessional, setIsProfessional] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [showModal, setShowModal] = useState(false);
-
+  var errorform = false;
   useEffect(() => {
     const fetchUserData = async () => {
       const user = auth.currentUser;
@@ -48,6 +48,7 @@ const UserProfileScreen = ({ navigation }) => {
   }, []);
 
   const confirmUpdate = () => {
+    errorform = false;
     Alert.alert(
       "Confirmer la mise à jour",
       "Êtes-vous sûr de vouloir modifier vos informations ?",
@@ -66,42 +67,79 @@ const UserProfileScreen = ({ navigation }) => {
     try {
       const user = auth.currentUser;
       if (user) {
-        await updateDoc(doc(db, "users", user.uid), {
-          username,
-          firstName,
-          lastName,
-          email,
-          phoneNumber,
-        });
+       
+
+        if (!username || !firstName || !lastName || !email || !phoneNumber) {
+          Alert.alert(
+            "Erreur",
+            "Tous les champs doivent être remplis"
+          );         
+          errorform = true
+          
+        }
+        if (errorform == false){
 
         await updateEmail(user, email)
           .then(() => {
             Alert.alert("Profil et e-mail mis à jour avec succès !");
           })
           .catch((error) => {
-            console.error("Erreur lors de la mise à jour de l'e-mail", error);
+            // console.error("Erreur lors de la mise à jour de l'e-mail", error);
             if (error.code === "auth/email-already-in-use") {
               Alert.alert(
                 "Erreur",
                 "Impossible d'enregistrer cette adresse mail."
               );
+              errorform = true
+             }else if (error.code === "auth/invalid-email") {
+                Alert.alert(
+                  "Erreur",
+                  "Enregistrer une adresse mail correcte."
+                );
+                errorform = true
+  
+              
             } else if (error.code === "auth/requires-recent-login") {
               // Affiche une alerte demandant à l'utilisateur de se reconnecter
               Alert.alert(
                 "Reconnexion requise",
                 "Pour des raisons de sécurité, cette opération nécessite une authentification récente. Veuillez vous déconnecter puis vous reconnecter avant de réessayer.",
+                
                 [
-                  // Option pour se déconnecter (et potentiellement rediriger vers un écran de connexion)
-                  { text: "OK", onPress: () => handleReconnect() },
-                ]
-              );
+                  {
+                    text: "Annuler",
+                    onPress: () => console.log("Mise à jour annulée"),
+                    style: "cancel",
+                  },
+                                    // Option pour se déconnecter (et potentiellement rediriger vers un écran de connexion)
+
+                  { text: "Confirmer", onPress: () => handleReconnect() },
+                ],
+                
+          
+              );errorform = true
             } else {
               Alert.alert(
                 "Erreur lors de la mise à jour de l'e-mail",
                 error.message
               );
+              errorform = true
+
             }
           });
+        }
+
+          if (errorform == false){
+            await updateDoc(doc(db, "users", user.uid), {
+              username,
+              firstName,
+              lastName,
+              email,
+              phoneNumber,
+            }); 
+          }
+
+         
       }
     } catch (error) {
       console.error("Erreur lors de la mise à jour du profil", error);

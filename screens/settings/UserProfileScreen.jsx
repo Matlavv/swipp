@@ -172,27 +172,49 @@ const UserProfileScreen = ({ navigation }) => {
     }
     return true;
   };
-
   const handleUpdatePassword = async () => {
     if (!validatePassword(newPassword)) {
-      return;
+      return; // Arrête si le mot de passe n'est pas valide
     }
+  
     try {
       const user = auth.currentUser;
       if (user) {
         await updatePassword(user, newPassword);
+        
         Alert.alert("Succès", "Votre mot de passe a été mis à jour.");
         setNewPassword("");
         setShowModal(false);
       }
     } catch (error) {
-      console.error("Erreur lors de la mise à jour du mot de passe", error);
-      Alert.alert(
-        "Erreur",
-        "Une erreur est survenue lors de la mise à jour du mot de passe. Veuillez réessayer."
-      );
+      if (error.code === "auth/requires-recent-login") {
+        // Gérer le cas où une reconnexion est nécessaire
+        Alert.alert(
+          "Reconnexion requise",
+          "Pour des raisons de sécurité, cette opération nécessite une authentification récente. Veuillez vous déconnecter puis vous reconnecter avant de réessayer.",
+          [
+            {
+              text: "Annuler",
+              onPress: () => console.log("Mise à jour annulée"),
+              style: "cancel",
+            },
+            {
+              text: "Confirmer",
+              onPress: () => handleReconnect(), // Assure-toi que handleReconnect soit correctement implémentée
+            },
+          ]
+        );
+      } else {
+        // Gérer les autres erreurs
+        console.error("Erreur lors de la mise à jour du mot de passe", error);
+        Alert.alert(
+          "Erreur",
+          "Une erreur est survenue lors de la mise à jour du mot de passe. Veuillez réessayer."
+        );
+      }
     }
   };
+  
 
   const openModal = () => {
     setShowModal(true);

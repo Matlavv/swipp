@@ -63,6 +63,7 @@ const AdressScreen = () => {
     const user = auth.currentUser;
     if (user) {
       try {
+        
         await addDoc(collection(db, "users", user.uid, "adresses"), {
           adresse,
           pays,

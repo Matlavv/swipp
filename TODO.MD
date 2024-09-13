@@ -3,10 +3,12 @@ Faits :
 2. **Historique de résa ('uid' null)**
 3. **La mise à jour du profil ne marche pas**
 4. **Lorsqu'il n'y à pas d'historique de réa afficher un message (différent si l'utilisateur est connectez ou non)**
+5. **La mise à jour du mot de passe ne marche pas**
+6. Tous les champs ne sont pas obligatoire dans enregistrer une adresse (ne devrais pas être possible)
+
 
 Bugs : 
-- La mise à jour du mot de passe ne marche pas 
-- Tous les champs ne sont pas obligatoire dans enregistrer une adresse (ne devrais pas être possible)
+- Vérifier véhicule et rajouter le bouton dans les formulaire 
 - Ajouter une entreprise, faire le formulaire ainsi que dans les formulaire ajouter le fait de choisir si la note c'est au nom de l'entreprise ou du particulier
 - Problème dans les changements de page (stack ?)
 - Connexion possible sans avoir valider l'email (ne devrais pas être possible)

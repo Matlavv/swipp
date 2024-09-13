@@ -55,7 +55,6 @@ const AdressScreen = () => {
   const navigateToEditAdress = (adressId) => {
     navigation.navigate("EditAdressScreen", {
       adressId,
-      onGoBack: () => loadAdresses(),
     });
   };
 
@@ -64,6 +63,13 @@ const AdressScreen = () => {
     if (user) {
       try {
         
+        if (!adresse || !pays || !ville || !codePostal || !label) {
+          Alert.alert(
+            "Erreur",
+            "Tous les champs doivent être remplis"
+          );      
+          return;             
+        } else {
         await addDoc(collection(db, "users", user.uid, "adresses"), {
           adresse,
           pays,
@@ -71,6 +77,13 @@ const AdressScreen = () => {
           codePostal,
           label,
         });
+        setAdresse('')
+        setPays('')
+        setVille('')
+        setCodePostal('')
+        setLabel('')    
+      
+      }
         // Réinitialiser les champs ou naviguer ailleurs
       } catch (error) {
         console.error("Erreur lors de l'ajout de l'adresse", error);
@@ -119,7 +132,7 @@ const AdressScreen = () => {
                   {adresse.label}
                 </Text>
                 <Text style={tw`text-sm text-gray-500`}>
-                  {adresse.adresse}, {adresse.ville}
+                  {adresse.adresse}, {adresse.ville}, {adresse.pays}
                 </Text>
               </View>
               <TouchableOpacity onPress={() => deleteAdress(adresse.id)}>

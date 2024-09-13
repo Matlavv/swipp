@@ -47,6 +47,13 @@ const EditAdressScreen = ({ route, navigation }) => {
 
   const handleUpdateAdress = async () => {
     try {
+      if (!adresse || !pays || !ville || !codePostal || !label) {
+        Alert.alert(
+          "Erreur",
+          "Tous les champs doivent être remplis"
+        );      
+        return;             
+      } else {
       await updateDoc(
         doc(db, "users", auth.currentUser.uid, "adresses", adressId),
         {
@@ -58,7 +65,8 @@ const EditAdressScreen = ({ route, navigation }) => {
         }
       );
       Alert.alert("Adresse mise à jour !");
-      navigation.goBack(); // Retourner à la page précédente
+      navigation.goBack();
+    }
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'adresse", error);
     }

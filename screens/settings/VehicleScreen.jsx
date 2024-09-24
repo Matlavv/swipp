@@ -35,7 +35,7 @@ const VehicleScreen = () => {
   const [vehicles, setVehicles] = useState([]);
 
   const navigation = useNavigation();
-  
+
   const fuelOptions = [
     { id: "SP98", value: "SP98" },
     { id: "SP95", value: "SP95" },
@@ -54,11 +54,12 @@ const VehicleScreen = () => {
   );
 
   const navigateToEditVehicle = (vehicleId) => {
-    navigation.navigate("EditVehicleScreen", {
-      vehicleId,
+    navigation.navigate("EditVehicleScreen", { vehicleId });
+    navigation.setOptions({
       onGoBack: () => loadVehicles(),
     });
   };
+
 
   const loadVehicles = async () => {
     const user = auth.currentUser;
@@ -184,7 +185,7 @@ const VehicleScreen = () => {
         {/* <TextInput
           style={tw`border-b w-80 p-2 mb-4`}
           placeholder="Type de carburant (diesel, SP98, SP95, gasoil...)"
-          autoCapitalize="characters"
+          autoCapitalize="characters"0
           value={carburant}
           onChangeText={setCarburant}
         /> */}

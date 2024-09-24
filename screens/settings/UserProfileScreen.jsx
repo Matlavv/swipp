@@ -67,15 +67,15 @@ const UserProfileScreen = ({ navigation }) => {
     try {
       const user = auth.currentUser;
       if (user) {
-       
+
 
         if (!username || !firstName || !lastName || !email || !phoneNumber) {
           Alert.alert(
             "Erreur",
             "Tous les champs doivent être remplis"
-          );         
+          );
           errorform = true
-          
+
         }
         if (errorform == false){
 
@@ -97,14 +97,14 @@ const UserProfileScreen = ({ navigation }) => {
                   "Enregistrer une adresse mail correcte."
                 );
                 errorform = true
-  
-              
+
+
             } else if (error.code === "auth/requires-recent-login") {
               // Affiche une alerte demandant à l'utilisateur de se reconnecter
               Alert.alert(
                 "Reconnexion requise",
                 "Pour des raisons de sécurité, cette opération nécessite une authentification récente. Veuillez vous déconnecter puis vous reconnecter avant de réessayer.",
-                
+
                 [
                   {
                     text: "Annuler",
@@ -115,8 +115,8 @@ const UserProfileScreen = ({ navigation }) => {
 
                   { text: "Confirmer", onPress: () => handleReconnect() },
                 ],
-                
-          
+
+
               );errorform = true
             } else {
               Alert.alert(
@@ -136,10 +136,10 @@ const UserProfileScreen = ({ navigation }) => {
               lastName,
               email,
               phoneNumber,
-            }); 
+            });
           }
 
-         
+
       }
     } catch (error) {
       console.error("Erreur lors de la mise à jour du profil", error);
@@ -176,12 +176,12 @@ const UserProfileScreen = ({ navigation }) => {
     if (!validatePassword(newPassword)) {
       return; // Arrête si le mot de passe n'est pas valide
     }
-  
+
     try {
       const user = auth.currentUser;
       if (user) {
         await updatePassword(user, newPassword);
-        
+
         Alert.alert("Succès", "Votre mot de passe a été mis à jour.");
         setNewPassword("");
         setShowModal(false);
@@ -214,7 +214,7 @@ const UserProfileScreen = ({ navigation }) => {
       }
     }
   };
-  
+
 
   const openModal = () => {
     setShowModal(true);
@@ -285,13 +285,13 @@ const UserProfileScreen = ({ navigation }) => {
           >
             <Text style={tw`text-white text-sm`}>Mettre à jour le profil</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             title="Mon entreprise"
             onPress={navigateToAddBusiness}
             style={tw`bg-[#34469C] px-4 py-3 rounded-full flex mt-7`}
           >
             <Text style={tw`text-white text-sm`}>Ajouter mon entreprise</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             onPress={() => openModal("password")}
             style={tw`bg-[#34469C] px-5 py-3 rounded-full flex mt-7`}

@@ -4,11 +4,11 @@ Faits :
 3. **La mise à jour du profil ne marche pas**
 4. **Lorsqu'il n'y à pas d'historique de réa afficher un message (différent si l'utilisateur est connectez ou non)**
 5. **La mise à jour du mot de passe ne marche pas**
-6. Tous les champs ne sont pas obligatoire dans enregistrer une adresse (ne devrais pas être possible)
+6. **Tous les champs ne sont pas obligatoire dans enregistrer une adresse (ne devrais pas être possible)**
 
 
-Bugs : 
-- Vérifier véhicule et rajouter le bouton dans les formulaire 
+Bugs :
+- Vérifier véhicule et rajouter le bouton dans les formulaire
 - Ajouter une entreprise, faire le formulaire ainsi que dans les formulaire ajouter le fait de choisir si la note c'est au nom de l'entreprise ou du particulier
 - Problème dans les changements de page (stack ?)
 - Connexion possible sans avoir valider l'email (ne devrais pas être possible)
@@ -19,7 +19,7 @@ Bugs :
 Parcours Utilisateurs :
 - Modifier l'UI pour être plus fidèle au Figma
 - Rendre les bouton entier cliquable pas que le texte
-- Ajouter un se connectez au header 
+- Ajouter un se connectez au header
 - Enlever le texte en anglais
 - Changement d'huile ne renvoie pas vers un formulaire pour le changement d'huile
 - Mot de passe oublié à transformer en pop up

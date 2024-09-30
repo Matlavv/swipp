@@ -9,6 +9,10 @@ import RefuelForm from "../screens/Forms/RefuelForm";
 import RepairForm from "../screens/Forms/RepairForm";
 import TechnicalControlForm from "../screens/Forms/TechnicalControlForm";
 import ServiceScreen from "../screens/ServiceScreen";
+import AdressScreen from "../screens/settings/Forms/AdressScreen";
+import EditAdressScreen from "../screens/settings/Forms/UpdateForms/EditAdressScreen";
+import VehicleScreen from "../screens/settings/VehicleScreen";
+import EditVehicleScreen from "../screens/settings/Forms/UpdateForms/EditVehicleScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -20,7 +24,7 @@ const ServicesStack = () => {
         component={ServiceScreen}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name="ChooseRepairDate"
         component={ChooseRepairDate}
         options={{ headerShown: false }}
@@ -60,6 +64,26 @@ const ServicesStack = () => {
         component={ChooseGarageModal}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="AdressScreen"
+        component={AdressScreen}
+        options={{ headerShown: false }}
+      />{" "}
+      <Stack.Screen
+        name="EditAdressScreen"
+        component={EditAdressScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="EditVehicleScreen"
+        component={EditVehicleScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="VehicleScreen"
+        component={VehicleScreen}
+        options={{ headerShown: false }}
+      /> */}
     </Stack.Navigator>
   );
 };

@@ -48,6 +48,10 @@ const UserScreen = () => {
     navigation.navigate("RefuelAdmin");
   };
 
+  const navigateToRefuelInfosScreen = () => {
+    navigation.navigate("RefuelInfos");
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -189,6 +193,15 @@ const UserScreen = () => {
         </View>
         <View style={tw`w-5/6`}>
           <Text style={tw`m-4 font-bold text-xl`}>Autres</Text>
+          <View style={tw`mb-2`}>
+            {role === "refueler" && (
+              <SettingsList
+                onPress={navigateToRefuelInfosScreen}
+                iconName="person-circle-sharp"
+                text="Refueler infos"
+              />
+            )}
+          </View>
           <View style={tw`mb-2`}>
             {role === "refueler" && (
               <SettingsList

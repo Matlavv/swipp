@@ -23,11 +23,12 @@ import { swippLogo } from "../../assets";
 import ChooseRefuelerModal from "../../components/Modal/ChooseRefuelerModal";
 import RefuelDateTimePickerModal from "../../components/Modal/RefuelDateTimePickerModal";
 import { auth, db } from "../../firebaseConfig";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 Geocoder.init("AIzaSyAxJi9a4Bt8lKrKtl5DH6WIsPWkbBMgbeg");
 
-const RefuelForm = ({ route, navigation }) => {
-  const [selectedFuel, setSelectedFuel] = useState("SP98");
+const RefuelForm = ({ route }) => {
+  const [selectedFuel, setSelectedFuel] = useState("");
   const [volume, setVolume] = useState("");
   const [options, setOptions] = useState([]);
   const [address, setAddress] = useState("");
@@ -39,12 +40,13 @@ const RefuelForm = ({ route, navigation }) => {
   const [vehicles, setVehicles] = useState([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
   const [selectedOptions, setSelectedOptions] = useState([]);
-  const [carBrand, setCarBrand] = useState(""); // Nouvelle état pour la marque de la voiture
-  const [carModel, setCarModel] = useState(""); // Nouvelle état pour le modèle de la voiture
-  const [selectedVehicle, setSelectedVehicle] = useState(null); // Nouvelle état pour le véhicule
+  const [carBrand, setCarBrand] = useState("");
+  const [carModel, setCarModel] = useState("");
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [isRefuelerModalVisible, setRefuelerModalVisible] = useState(false);
   const [selectedRefueler, setSelectedRefueler] = useState(null);
+  const navigation = useNavigation();
 
   const data = [
     { key: "1", value: "adblue" },
@@ -52,6 +54,19 @@ const RefuelForm = ({ route, navigation }) => {
     { key: "3", value: "gonflage de pneus" },
     { key: "4", value: "liquide de refroidissement" },
   ];
+  const goToVehiculeScreen = () => {
+    navigation.navigate("VehicleScreen");
+  };
+  const goToAddressScreen = () => {
+    navigation.navigate("AdressScreen");
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadAddresses();
+      loadVehicles();
+    }, [])
+  );
 
   useEffect(() => {
     if (route.params?.address) {
@@ -101,25 +116,39 @@ const RefuelForm = ({ route, navigation }) => {
       );
       return;
     }
-    const clientSecret = await fetchPaymentIntentClientSecret();
-    const { error } = await initPaymentSheet({
-      paymentIntentClientSecret: clientSecret,
-      merchantDisplayName: "Swipp",
-      style: "alwaysLight",
-    });
-    if (error) {
-      console.error(error);
-      return;
-    }
-    const result = await presentPaymentSheet();
-    if (result.error) {
-      Alert.alert("Erreur de paiement", result.error.message);
-    } else {
-      Alert.alert(
-        "Paiement réussi",
-        "Votre paiement a été effectué avec succès."
+
+    try {
+      const clientSecret = await fetchPaymentIntentClientSecret();
+      const { error } = await initPaymentSheet({
+        paymentIntentClientSecret: clientSecret,
+        merchantDisplayName: "Swipp",
+        style: "alwaysLight",
+      });
+
+      if (error) {
+        console.error(
+          "Erreur d'initialisation de la feuille de paiement",
+          error
+        );
+        return;
+      }
+
+      const result = await presentPaymentSheet();
+
+      if (result.error) {
+        Alert.alert("Erreur de paiement", result.error.message);
+      } else {
+        Alert.alert(
+          "Paiement réussi",
+          "Votre paiement a été effectué avec succès."
+        );
+        await handleReservationConfirm();
+      }
+    } catch (error) {
+      console.error(
+        "Erreur lors de l'ouverture de la feuille de paiement",
+        error
       );
-      await handleReservationConfirm();
     }
   };
 
@@ -153,13 +182,16 @@ const RefuelForm = ({ route, navigation }) => {
       return;
     }
 
-    let location = await Location.getCurrentPositionAsync({});
-    Geocoder.from(location.coords.latitude, location.coords.longitude)
-      .then((json) => {
-        const addressComponent = json.results[0].formatted_address;
-        setAddress(addressComponent);
-      })
-      .catch((error) => console.warn(error));
+    try {
+      let location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+      const json = await Geocoder.from(latitude, longitude);
+      const addressComponent = json.results[0].formatted_address;
+      setAddress(addressComponent);
+    } catch (error) {
+      console.error("Erreur lors de la géolocalisation", error);
+      Alert.alert("Erreur", "Impossible de récupérer votre localisation.");
+    }
   };
 
   const loadVehicles = async () => {
@@ -195,6 +227,9 @@ const RefuelForm = ({ route, navigation }) => {
   };
 
   const calculateTotalPrice = () => {
+    if (!volume || !price) {
+      return 0;
+    }
     const totalPrice = parseFloat(volume) * price;
     return totalPrice.toFixed(2);
   };
@@ -328,8 +363,8 @@ const RefuelForm = ({ route, navigation }) => {
               placeholder="Adresse"
               boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
               data={addresses.map((address) => ({
-                value: `${address.adresse} - ${address.codePostal} - ${address.ville}`, // Ajoute l'adresse et le code postal
-                id: address.id, // Ajoute l'identifiant de l'adresse comme une autre variable
+                value: `${address.adresse} - ${address.codePostal} - ${address.ville}`,
+                id: address.id,
               }))}
               onSelect={() => setAddress(address)}
               save="value"
@@ -341,6 +376,14 @@ const RefuelForm = ({ route, navigation }) => {
             >
               <Text style={tw`text-white font-semibold`}>Me géolocaliser</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              onPress={goToAddressScreen} // Utilisation de la fonction corrigée
+              style={tw`bg-blue-900 py-2 px-4 rounded-lg justify-center items-center mt-4`}
+            >
+              <Text style={tw`text-white font-semibold`}>
+                Ajouter une adresse
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
@@ -349,13 +392,21 @@ const RefuelForm = ({ route, navigation }) => {
             <SelectList
               data={vehicles.map((vehicle) => ({
                 id: vehicle.id,
-                value: `${vehicle.label} - ${vehicle.immatriculation} - ${vehicle.carburant}`, // Utiliser l'ID du véhicule comme valeur
+                value: `${vehicle.label} - ${vehicle.immatriculation} - ${vehicle.carburant}`,
               }))}
               setSelected={handleSelectVehicle}
               placeholder="Véhicule"
               boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
             />
           </View>
+          <TouchableOpacity
+              onPress={goToVehiculeScreen} // Utilisation de la fonction corrigée
+              style={tw`bg-blue-900 py-2 px-4 rounded-lg justify-center items-center mt-4`}
+            >
+              <Text style={tw`text-white font-semibold`}>
+                Ajouter un véhicule
+              </Text>
+            </TouchableOpacity>
         </View>
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
           <Text style={tw`text-xl font-bold mb-4`}>

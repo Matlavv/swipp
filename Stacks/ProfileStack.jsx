@@ -16,7 +16,7 @@ import UserScreen from "../screens/settings/UserScreen";
 import VehicleScreen from "../screens/settings/VehicleScreen";
 import { useContext } from "react";
 import { AuthContext } from "../AuthContext";
-
+import RefuelInfos from "../screens/settings/RefuelAdmin/RefuelInfos";
 
 const Stack = createNativeStackNavigator();
 
@@ -74,7 +74,11 @@ const ProfileStack = () => {
         component={RefuelAdmin}
         options={{ headerShown: false }}
       />
-
+      <Stack.Screen
+        name="RefuelInfos"
+        component={RefuelInfos}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="EditVehicleScreen"
         component={EditVehicleScreen}

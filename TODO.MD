@@ -4,17 +4,22 @@ Faits :
 3. **La mise à jour du profil ne marche pas**
 4. **Lorsqu'il n'y à pas d'historique de réa afficher un message (différent si l'utilisateur est connectez ou non)**
 5. **La mise à jour du mot de passe ne marche pas**
-6. **Tous les champs ne sont pas obligatoire dans enregistrer une adresse (ne devrais pas être possible)**
+6. **Tous les champs ne sont pas obligatoire dans enregistrer une adresse**
+7. **Ajout d'un dropdown dans l'edit du véhicule**
+8. **Tous les champs ne sont pas obligatoire dans l'ajout de véhicule**
+9. **Vérifier véhicule et rajouter le bouton dans les formulaire**
+10. **Vérifier addresse et rajouter le bouton dans les formulaire**
+11. **affichage du prix (NaN)**
+
+
 
 
 Bugs :
-- Vérifier véhicule et rajouter le bouton dans les formulaire
+- modification du prix lorsque la résa carbu
+
 - Ajouter une entreprise, faire le formulaire ainsi que dans les formulaire ajouter le fait de choisir si la note c'est au nom de l'entreprise ou du particulier
-- Problème dans les changements de page (stack ?)
 - Connexion possible sans avoir valider l'email (ne devrais pas être possible)
 - Problème sur la gestion d'état des réservations (bouton encore afficher ou résa encore affiché alors que annuler)
-- Affichage du prix (NaN)
-- Il n'y à que la résa de carbu qui marche
 
 Parcours Utilisateurs :
 - Modifier l'UI pour être plus fidèle au Figma

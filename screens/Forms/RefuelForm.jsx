@@ -1,33 +1,37 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useStripe } from "@stripe/stripe-react-native";
-import * as Location from "expo-location";
-import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons"; // Importation des icônes Ionicons
+import { useStripe } from "@stripe/stripe-react-native"; // Utilisation de Stripe pour les paiements
+import * as Location from "expo-location"; // Librairie pour obtenir la géolocalisation
+import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore"; // Firestore pour interagir avec la base de données
+import React, { useEffect, useState } from "react"; // Utilisation de React et de ses hooks
 import {
-  Alert,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+  Alert, // Affichage d'alertes
+  Image, // Affichage d'images
+  SafeAreaView, // Zone de sécurité pour éviter le chevauchement avec les éléments natifs
+  ScrollView, // Vue défilante pour le contenu
+  Text, // Affichage de texte
+  TextInput, // Saisie de texte
+  TouchableOpacity, // Composant tactile
+  View, // Conteneur de base
+  FlatList, // Liste pour afficher plusieurs éléments
 } from "react-native";
 import {
   MultipleSelectList,
   SelectList,
-} from "react-native-dropdown-select-list";
-import Geocoder from "react-native-geocoding";
-import tw from "twrnc";
-import { swippLogo } from "../../assets";
-import ChooseRefuelerModal from "../../components/Modal/ChooseRefuelerModal";
-import RefuelDateTimePickerModal from "../../components/Modal/RefuelDateTimePickerModal";
-import { auth, db } from "../../firebaseConfig";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+} from "react-native-dropdown-select-list"; // Listes de sélection unique et multiple
+import Geocoder from "react-native-geocoding"; // Utilisation de l'API Geocoder pour obtenir une adresse à partir de coordonnées GPS
+import tw from "twrnc"; // Utilisation de Tailwind CSS pour styliser les composants
+import { swippLogo } from "../../assets"; // Importation du logo de l'application
+import ChooseRefuelerModal from "../../components/Modal/ChooseRefuelerModal"; // Modal pour choisir un refueler
+import RefuelDateTimePickerModal from "../../components/Modal/RefuelDateTimePickerModal"; // Modal pour sélectionner une date et une heure
+import { auth, db } from "../../firebaseConfig"; // Authentification et base de données Firebase
+import { useNavigation, useFocusEffect } from "@react-navigation/native"; // Utilisation de la navigation dans l'application
+import { KeyboardAvoidingView, Platform } from 'react-native'; // Gestion du clavier pour éviter qu'il ne chevauche les champs de texte
 
+// Initialisation de Geocoder avec une clé API
 Geocoder.init("AIzaSyAxJi9a4Bt8lKrKtl5DH6WIsPWkbBMgbeg");
 
 const RefuelForm = ({ route }) => {
+  // État pour chaque champ du formulaire
   const [selectedFuel, setSelectedFuel] = useState("");
   const [volume, setVolume] = useState("");
   const [options, setOptions] = useState([]);
@@ -43,37 +47,46 @@ const RefuelForm = ({ route }) => {
   const [carBrand, setCarBrand] = useState("");
   const [carModel, setCarModel] = useState("");
   const [selectedVehicle, setSelectedVehicle] = useState(null);
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const { initPaymentSheet, presentPaymentSheet } = useStripe(); // Stripe pour la gestion du paiement
   const [isRefuelerModalVisible, setRefuelerModalVisible] = useState(false);
   const [selectedRefueler, setSelectedRefueler] = useState(null);
-  const navigation = useNavigation();
-
+  const navigation = useNavigation(); // Gestion de la navigation
+  const [currentStep, setCurrentStep] = useState(1); // Gestion des étapes du formulaire
+  const [refuelers, setRefuelers] = useState([]); // Liste des refuelers
   const data = [
     { key: "1", value: "adblue" },
     { key: "2", value: "lave vitre" },
     { key: "3", value: "gonflage de pneus" },
     { key: "4", value: "liquide de refroidissement" },
-  ];
+  ]; // Liste des options supplémentaires pour le service de refuel
+
+  // Fonction pour naviguer vers l'écran des véhicules
   const goToVehiculeScreen = () => {
     navigation.navigate("VehicleScreen");
   };
+
+  // Fonction pour naviguer vers l'écran des adresses
   const goToAddressScreen = () => {
     navigation.navigate("AdressScreen");
   };
 
+  // Fonction pour charger les adresses et véhicules au focus de l'écran
   useFocusEffect(
     React.useCallback(() => {
-      loadAddresses();
-      loadVehicles();
+      loadAddresses(); // Chargement des adresses
+      loadVehicles(); // Chargement des véhicules
+      fetchRefuelers(); // Chargement des refuelers
     }, [])
   );
 
+  // Si l'adresse a été passée via les paramètres, elle est définie ici
   useEffect(() => {
     if (route.params?.address) {
       setAddress(route.params.address);
     }
   }, [route.params?.address]);
 
+  // Vérification si le formulaire est valide
   const isFormValid = () => {
     return (
       selectedFuel &&
@@ -86,10 +99,28 @@ const RefuelForm = ({ route }) => {
     );
   };
 
+  // Fonction pour récupérer la liste des refuelers depuis Firestore
+  const fetchRefuelers = async () => {
+    try {
+      const refuelersCollection = collection(db, "users");
+      const refuelersQuery = query(refuelersCollection, where("role", "==", "refueler"));
+      const querySnapshot = await getDocs(refuelersQuery);
+      const refuelersList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setRefuelers(refuelersList);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des refuelers", error);
+    }
+  };
+
+  // Sélection d'un refueler
   const handleSelectRefueler = (refueler) => {
     setSelectedRefueler(refueler);
   };
 
+  // Fonction pour gérer le paiement avec Stripe
   const fetchPaymentIntentClientSecret = async () => {
     const response = await fetch(
       "https://europe-west3-swipp-b74be.cloudfunctions.net/createPaymentIntent",
@@ -99,7 +130,7 @@ const RefuelForm = ({ route }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: calculateTotalPrice() * 100, // Convertir en centimes pour Stripe
+          amount: calculateTotalPrice() * 100, // Montant en centimes pour Stripe
         }),
       }
     );
@@ -108,6 +139,7 @@ const RefuelForm = ({ route }) => {
     return clientSecret;
   };
 
+  // Ouverture de la feuille de paiement
   const openPaymentSheet = async () => {
     if (!isFormValid()) {
       Alert.alert(
@@ -121,8 +153,8 @@ const RefuelForm = ({ route }) => {
       const clientSecret = await fetchPaymentIntentClientSecret();
       const { error } = await initPaymentSheet({
         paymentIntentClientSecret: clientSecret,
-        merchantDisplayName: "Swipp",
-        style: "alwaysLight",
+        merchantDisplayName: "Swipp", // Nom de l'entreprise pour Stripe
+        style: "alwaysLight", // Style de la feuille de paiement
       });
 
       if (error) {
@@ -133,7 +165,7 @@ const RefuelForm = ({ route }) => {
         return;
       }
 
-      const result = await presentPaymentSheet();
+      const result = await presentPaymentSheet(); // Présentation de la feuille de paiement
 
       if (result.error) {
         Alert.alert("Erreur de paiement", result.error.message);
@@ -142,7 +174,7 @@ const RefuelForm = ({ route }) => {
           "Paiement réussi",
           "Votre paiement a été effectué avec succès."
         );
-        await handleReservationConfirm();
+        await handleReservationConfirm(); // Confirmation de la réservation après paiement
       }
     } catch (error) {
       console.error(
@@ -152,6 +184,7 @@ const RefuelForm = ({ route }) => {
     }
   };
 
+  // Chargement des adresses de l'utilisateur depuis Firestore
   const loadAddresses = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -172,9 +205,10 @@ const RefuelForm = ({ route }) => {
   };
 
   useEffect(() => {
-    loadAddresses();
+    loadAddresses(); // Chargement des adresses lors du montage du composant
   }, []);
 
+  // Fonction pour récupérer la localisation de l'utilisateur
   const handleLocatePress = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -194,6 +228,7 @@ const RefuelForm = ({ route }) => {
     }
   };
 
+  // Chargement des véhicules de l'utilisateur depuis Firestore
   const loadVehicles = async () => {
     const user = auth.currentUser;
     if (user) {
@@ -213,19 +248,22 @@ const RefuelForm = ({ route }) => {
   };
 
   useEffect(() => {
-    loadVehicles();
+    loadVehicles(); // Chargement des véhicules lors du montage du composant
   }, []);
 
+  // Confirmation de la sélection de la date et de l'heure
   const handleDateTimeConfirm = (dateTimeObj) => {
     setSelectedDate(dateTimeObj.date);
     setSelectedTime(dateTimeObj.timeSlot);
     setDateTimePickerVisible(false);
   };
 
+  // Affichage du sélecteur de date et heure
   const showDateTimePicker = () => {
     setDateTimePickerVisible(true);
   };
 
+  // Calcul du prix total en fonction du volume sélectionné et du prix unitaire
   const calculateTotalPrice = () => {
     if (!volume || !price) {
       return 0;
@@ -234,6 +272,7 @@ const RefuelForm = ({ route }) => {
     return totalPrice.toFixed(2);
   };
 
+  // Sélection d'un véhicule
   const handleSelectVehicle = async (vehicleId) => {
     setSelectedVehicleId(vehicleId);
     const user = auth.currentUser;
@@ -244,12 +283,12 @@ const RefuelForm = ({ route }) => {
         );
         if (vehicleDoc.exists()) {
           const vehicleData = vehicleDoc.data();
-          setCarBrand(vehicleData.marque);
-          setCarModel(vehicleData.modele);
-          setSelectedVehicle(vehicleData); // Enregistre les informations du véhicule
+          setCarBrand(vehicleData.marque); // Enregistrement de la marque
+          setCarModel(vehicleData.modele); // Enregistrement du modèle
+          setSelectedVehicle(vehicleData); // Enregistrement des informations du véhicule
           const parts = vehicleId.split("-");
           const lastPart = parts[parts.length - 1].trim();
-          setSelectedFuel(lastPart); // Utiliser la partie après le dernier "-" comme carburant sélectionné
+          setSelectedFuel(lastPart); // Extraction du carburant sélectionné
         }
       } catch (error) {
         console.error(
@@ -260,6 +299,7 @@ const RefuelForm = ({ route }) => {
     }
   };
 
+  // Confirmation de la réservation et enregistrement dans Firestore
   const handleReservationConfirm = async () => {
     const reservation = {
       address,
@@ -305,6 +345,7 @@ const RefuelForm = ({ route }) => {
     }
   };
 
+  // Calcul du prix en fonction du carburant sélectionné
   const calculatePrice = (selectedFuel, currentAddress) => {
     let basePrice;
     switch (selectedFuel) {
@@ -326,37 +367,51 @@ const RefuelForm = ({ route }) => {
     setPrice(basePrice);
   };
 
+  // Recalcul du prix lorsque le carburant ou l'adresse changent
   useEffect(() => {
     calculatePrice(selectedFuel, address);
   }, [selectedFuel, address]);
 
-  return (
-    <SafeAreaView style={tw`flex h-full`}>
-      <ScrollView style={tw`flex-1`}>
-        <View style={tw`flex p-5 mt-5 justify-start items-start flex flex-row`}>
-          <Image style={tw`w-25 h-15`} source={swippLogo} />
+  // Navigation vers l'étape suivante
+  const handleNextStep = () => {
+    if (currentStep < 4) {
+      setCurrentStep(currentStep + 1);
+      calculatePrice(selectedFuel);
+    }
+  };
+
+  // Navigation vers l'étape précédente
+  const handlePreviousStep = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+    calculatePrice(selectedFuel);
+  };
+
+  // Effacer l'adresse sélectionnée
+  const clearAddress = () => {
+    setAddress("");
+  };
+
+  // Définition des différentes étapes du formulaire
+  const Step1 = () => (
+    <View>
+      {/* Choix du point de rendez-vous */}
+      <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+        <Text style={tw`text-xl font-bold mb-4`}>Indiquez le point de rendez-vous</Text>
+        <View style={tw`rounded-md flex-row items-center`}>
+          <TextInput
+            style={tw`border-b-2 mb-4 border-[#34469C] font-bold text-base flex-1`}
+            value={address}
+            onChangeText={setAddress}
+          />
+          {address !== "" && (
+            <TouchableOpacity onPress={clearAddress} style={tw`ml-2`}>
+              <Ionicons name="close-circle" size={24} color="gray" />
+            </TouchableOpacity>
+          )}
         </View>
-        <View style={tw`flex-row`}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={tw`mt-5 ml-3`}
-          >
-            <Ionicons name="arrow-back-circle-outline" size={30} color="gray" />
-          </TouchableOpacity>
-          <Text style={tw`text-2xl font-bold m-5`}>
-            Réservez votre carburant
-          </Text>
-        </View>
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>
-            Indiquez le point de rendez-vous
-          </Text>
-          <View style={tw`rounded-md`}>
-            <TextInput
-              style={tw`border-b-2 mb-4 border-[#34469C] font-bold text-base`}
-              value={address}
-              onChangeText={setAddress}
-            />
+
+        {address === "" && (
+          <>
             <Text style={tw`text-lg font-semibold mb-2`}>Mes adresses</Text>
             <SelectList
               setSelected={(val) => setAddress(val)}
@@ -377,140 +432,208 @@ const RefuelForm = ({ route }) => {
               <Text style={tw`text-white font-semibold`}>Me géolocaliser</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={goToAddressScreen} // Utilisation de la fonction corrigée
+              onPress={goToAddressScreen}
               style={tw`bg-blue-900 py-2 px-4 rounded-lg justify-center items-center mt-4`}
             >
-              <Text style={tw`text-white font-semibold`}>
-                Ajouter une adresse
-              </Text>
+              <Text style={tw`text-white font-semibold`}>Ajouter une adresse</Text>
             </TouchableOpacity>
-          </View>
-        </View>
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
-          <View style={tw`rounded-md`}>
-            <SelectList
-              data={vehicles.map((vehicle) => ({
-                id: vehicle.id,
-                value: `${vehicle.label} - ${vehicle.immatriculation} - ${vehicle.carburant}`,
-              }))}
-              setSelected={handleSelectVehicle}
-              placeholder="Véhicule"
-              boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
-            />
-          </View>
-          <TouchableOpacity
-              onPress={goToVehiculeScreen} // Utilisation de la fonction corrigée
-              style={tw`bg-blue-900 py-2 px-4 rounded-lg justify-center items-center mt-4`}
-            >
-              <Text style={tw`text-white font-semibold`}>
-                Ajouter un véhicule
-              </Text>
-            </TouchableOpacity>
-        </View>
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>
-            Indiquez le nombre de litres
-          </Text>
-          <TextInput
-            style={tw`border-b-2 border-[#34469C] font-bold text-base`}
-            keyboardType="numeric"
-            value={volume}
-            onChangeText={setVolume}
+          </>
+        )}
+      </View>
+
+      {/* Choix du véhicule */}
+      <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+        <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
+        <View style={tw`rounded-md`}>
+          <SelectList
+            data={vehicles.map((vehicle) => ({
+              id: vehicle.id,
+              value: `${vehicle.label} - ${vehicle.immatriculation} - ${vehicle.carburant}`,
+            }))}
+            setSelected={handleSelectVehicle}
+            placeholder="Véhicule"
+            boxStyles={{ borderColor: "#34469C", backgroundColor: "white" }}
           />
-          <Text style={tw`text-lg font-semibold mt-4`}>
-            Prix: {price.toFixed(2)}€
+        </View>
+        <TouchableOpacity
+          onPress={goToVehiculeScreen} // Utilisation de la fonction corrigée
+          style={tw`bg-blue-900 py-2 px-4 rounded-lg justify-center items-center mt-4`}
+        >
+          <Text style={tw`text-white font-semibold`}>
+            Ajouter un véhicule
           </Text>
-        </View>
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>
-            Choisissez votre refueler
-          </Text>
-          <View style={tw`rounded-md`}>
-            <TouchableOpacity
-              onPress={() => setRefuelerModalVisible(true)}
-              style={tw`border-b-2 border-[#34469C] font-bold text-base`}
-              value={selectedRefueler}
-              editable={false}
-            >
-              <TextInput
-                style={tw`text-black font-bold text-base`}
-                placeholder="Sélectionnez un refueler"
-                value={selectedRefueler ? selectedRefueler.firstName : ""}
-                editable={false}
-              />
-            </TouchableOpacity>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
-            <ChooseRefuelerModal
-              isVisible={isRefuelerModalVisible}
-              onClose={() => setRefuelerModalVisible(false)}
-              onSelectRefueler={handleSelectRefueler}
-            />
-          </View>
-        </View>
-
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 my-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>Ajouter des options</Text>
-          <View style={tw`bg-gray-200`}>
-            <MultipleSelectList
-              setSelected={(val) => setSelectedOptions(val)}
-              data={data}
-              save="value"
-              placeholder="Options"
-              search={false}
-              label="Options"
-              boxStyles={{
-                backgroundColor: "white",
-                borderColor: "#34469C",
-                borderRadius: 10,
-              }}
-              dropdownStyles={{ backgroundColor: "white" }}
-            />
-          </View>
-        </View>
-
-        <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
-          <Text style={tw`text-xl font-bold mb-4`}>
-            Choisissez votre date de rendez-vous
-          </Text>
-          <View style={tw`rounded-md`}>
-            <TouchableOpacity
-              style={tw`border-b-2 border-[#34469C] font-bold text-base`}
-              value={selectedDate ? `${selectedDate} ${selectedTime}` : ""}
-              onPress={() => setDateTimePickerVisible(true)}
-              editable={false}
-            >
-              <TextInput
-                style={tw`text-black font-bold text-base`}
-                placeholder="Choisissez une date et une heure"
-                value={selectedDate ? `${selectedDate} ${selectedTime}` : ""}
-                onFocus={showDateTimePicker}
-                editable={false}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <RefuelDateTimePickerModal
-          isVisible={isDateTimePickerVisible}
-          onClose={() => setDateTimePickerVisible(false)}
-          onConfirm={handleDateTimeConfirm}
+  // Étape 2 : Choix du volume de carburant et des options
+  const Step2 = () => (
+    <View>
+      {/* Indication du volume de carburant */}
+      <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+        <Text style={tw`text-xl font-bold mb-4`}>
+          Indiquez le nombre de litres
+        </Text>
+        <TextInput
+          style={tw`border-b-2 border-[#34469C] font-bold text-base`}
+          keyboardType="numeric"
+          value={volume}
+          onChangeText={setVolume}
         />
+      </View>
 
-        <View style={tw`mb-4 mt-3 flex items-center`}>
-          <Text style={tw`text-lg font-semibold`}>
-            Prix total : {calculateTotalPrice()} €
-          </Text>
+      {/* Choix des options supplémentaires */}
+      <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 my-3`}>
+        <Text style={tw`text-xl font-bold mb-4`}>Ajouter des options</Text>
+        <View style={tw`bg-gray-200`}>
+          <MultipleSelectList
+            setSelected={(val) => setSelectedOptions(val)}
+            data={data}
+            save="value"
+            placeholder="Options"
+            search={false}
+            label="Options"
+            boxStyles={{
+              backgroundColor: "white",
+              borderColor: "#34469C",
+              borderRadius: 10,
+            }}
+            dropdownStyles={{ backgroundColor: "white" }}
+          />
+        </View>
+      </View>
+    </View>
+  );
+
+  // Étape 3 : Choix du refueler
+  const Step3 = () => (
+    <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+      <Text style={tw`text-xl font-bold mb-4`}>Choisissez votre refueler</Text>
+      <FlatList
+        data={refuelers}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => handleSelectRefueler(item)}>
+            <View style={tw`flex-row justify-between items-center p-4 border-b`}>
+              <Image
+                source={{ uri: item.profileImageUrl || 'URL_DE_L_IMAGE_PAR_DÉFAUT' }}
+                style={tw`w-12 h-12 rounded-full`}
+              />
+              <Text style={tw`text-lg font-semibold`}>
+                {item.firstName} - {item.phoneNumber}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
+  );
+
+  // Étape 4 : Choix de la date et validation du paiement
+  const Step4 = () => (
+    <View>
+      {/* Sélection de la date et de l'heure */}
+      <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-3`}>
+        <Text style={tw`text-xl font-bold mb-4`}>
+          Choisissez votre date de rendez-vous
+        </Text>
+        <View style={tw`rounded-md`}>
           <TouchableOpacity
-            onPress={openPaymentSheet}
-            style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
+            style={tw`border-b-2 border-[#34469C] font-bold text-base`}
+            value={selectedDate ? `${selectedDate} ${selectedTime}` : ""}
+            onPress={() => setDateTimePickerVisible(true)}
+            editable={false}
           >
-            <Text style={tw`text-white font-semibold text-base`}>
-              Payer maintenant
-            </Text>
+            <TextInput
+              style={tw`text-black font-bold text-base`}
+              placeholder="Choisissez une date et une heure"
+              value={selectedDate ? `${selectedDate} ${selectedTime}` : ""}
+              onFocus={showDateTimePicker}
+              editable={false}
+            />
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </View>
+
+      <RefuelDateTimePickerModal
+        isVisible={isDateTimePickerVisible}
+        onClose={() => setDateTimePickerVisible(false)}
+        onConfirm={handleDateTimeConfirm}
+      />
+
+      {/* Validation du paiement */}
+      <View style={tw`mb-4 mt-3 flex items-center`}>
+        <Text style={tw`text-lg font-semibold`}>
+          Prix total : {calculateTotalPrice()} €
+        </Text>
+        <TouchableOpacity
+          onPress={openPaymentSheet}
+          style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center`}
+        >
+          <Text style={tw`text-white font-semibold text-base`}>
+            Payer maintenant
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  // Interface utilisateur principale avec gestion des étapes
+  return (
+    <SafeAreaView style={tw`flex-1`}>
+      <KeyboardAvoidingView
+        style={tw`flex-1`}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        {/* Affichage du logo et des étapes */}
+        <View style={tw`flex-row justify-center my-4`}>
+          {[1, 2, 3, 4].map((step) => (
+            <View key={step} style={tw`flex-row items-center`}>
+              <View
+                style={tw`w-8 h-8 rounded-full ${
+                  currentStep === step ? 'bg-blue-900' : 'bg-gray-300'
+                } flex items-center justify-center`}
+              >
+                <Text style={tw`text-white font-bold`}>{step}</Text>
+              </View>
+              {step < 4 && (
+                <View
+                  style={tw`w-8 h-1 ${currentStep > step ? 'bg-blue-900' : 'bg-gray-300'}`}
+                />
+              )}
+            </View>
+          ))}
+        </View>
+
+        <ScrollView contentContainerStyle={tw`flex-grow p-4`}>
+          {/* Affichage des étapes en fonction de la progression */}
+          {currentStep === 1 && <Step1 />}
+          {currentStep === 2 && <Step2 />}
+          {currentStep === 3 && <Step3 />}
+          {currentStep === 4 && <Step4 />}
+        </ScrollView>
+
+        {/* Boutons de navigation entre les étapes */}
+        <View style={tw`flex-row justify-between p-4 bg-white`}>
+          {currentStep > 1 && (
+            <TouchableOpacity
+              onPress={handlePreviousStep}
+              style={tw`bg-gray-400 px-5 py-3 rounded-full`}
+            >
+              <Text style={tw`text-white`}>Précédent</Text>
+            </TouchableOpacity>
+          )}
+          {currentStep < 4 && (
+            <TouchableOpacity
+              onPress={handleNextStep}
+              style={tw`bg-blue-900 px-5 py-3 rounded-full`}
+            >
+              <Text style={tw`text-white`}>Suivant</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

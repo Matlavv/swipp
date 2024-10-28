@@ -1,29 +1,30 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useStripe } from "@stripe/stripe-react-native";
-import { addDoc, collection, getDocs } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import { Ionicons } from "@expo/vector-icons"; // Importation des icônes Ionicons pour les boutons
+import { useStripe } from "@stripe/stripe-react-native"; // Hook Stripe pour les paiements
+import { addDoc, collection, getDocs } from "firebase/firestore"; // Importation de Firestore pour ajouter des documents et récupérer des données
+import React, { useEffect, useState } from "react"; // Importation de React et des hooks useState et useEffect
 import {
-  Alert,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+  Alert, // Pour afficher des alertes natives
+  Image, // Composant pour afficher des images
+  SafeAreaView, // Composant pour délimiter une zone de contenu sécurisée
+  ScrollView, // Permet de scroller le contenu plus grand que l'écran
+  Text, // Composant pour afficher du texte
+  TextInput, // Composant pour saisir du texte
+  TouchableOpacity, // Composant pour rendre des éléments cliquables
+  View, // Conteneur de base pour structurer les éléments
 } from "react-native";
-import { SelectList } from "react-native-dropdown-select-list";
-import tw from "twrnc";
-import { swippLogo } from "../../assets";
-import ChooseGarageModal from "../../components/Modal/ChooseGarageModal";
-import DateTimePickerModal from "../../components/Modal/DateTimePickerModal";
-import { auth, db } from "../../firebaseConfig";
+import { SelectList } from "react-native-dropdown-select-list"; // Bibliothèque pour des listes déroulantes
+import tw from "twrnc"; // Utilisation de la bibliothèque Tailwind CSS pour styliser les composants
+import { swippLogo } from "../../assets"; // Importation du logo de l'application
+import ChooseGarageModal from "../../components/Modal/ChooseGarageModal"; // Modal pour choisir un garage
+import DateTimePickerModal from "../../components/Modal/DateTimePickerModal"; // Modal pour choisir une date et heure
+import { auth, db } from "../../firebaseConfig"; // Importation de Firebase Authentication et Firestore
 
+// Composant principal pour le formulaire d'entretien
 const MaintenanceForm = ({ navigation, route }) => {
+  // États pour stocker les choix de l'utilisateur (entretien, véhicule, garage, etc.)
   const [selectedMaintenance, setSelectedMaintenance] = useState("");
   const [selectedVehicleId, setSelectedVehicleId] = useState("");
-  const [selectedImmatriculationPlate, setSelectedImmatriculationPlate] =
-    useState("");
+  const [selectedImmatriculationPlate, setSelectedImmatriculationPlate] = useState("");
   const [selectedGarage, setSelectedGarage] = useState({});
   const [selectedDateTime, setSelectedDateTime] = useState("");
   const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
@@ -33,7 +34,7 @@ const MaintenanceForm = ({ navigation, route }) => {
   const [address, setAddress] = useState("");
   const [addresses, setAddresses] = useState([]);
   const [selectedPrice, setSelectedPrice] = useState(0);
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const { initPaymentSheet, presentPaymentSheet } = useStripe(); // Hooks de Stripe pour les paiements
 
   // Options pour l'entretien
   const maintenanceOptions = [
@@ -44,6 +45,7 @@ const MaintenanceForm = ({ navigation, route }) => {
     { id: "batterie", value: "Changement de batterie", price: 120 },
   ];
 
+  // Vérification si tous les champs obligatoires sont remplis
   const isFormValid = () => {
     return (
       selectedMaintenance &&
@@ -53,6 +55,7 @@ const MaintenanceForm = ({ navigation, route }) => {
         (repairLocationType === "address" && address))
     );
   };
+
   // Paiement avec Stripe
   const fetchPaymentIntentClientSecret = async () => {
     const response = await fetch(
@@ -63,7 +66,7 @@ const MaintenanceForm = ({ navigation, route }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: selectedPrice * 100,
+          amount: selectedPrice * 100, // Montant en centimes pour Stripe
         }),
       }
     );
@@ -82,14 +85,14 @@ const MaintenanceForm = ({ navigation, route }) => {
     const clientSecret = await fetchPaymentIntentClientSecret();
     const { error } = await initPaymentSheet({
       paymentIntentClientSecret: clientSecret,
-      merchantDisplayName: "Swipp",
-      style: "alwaysLight",
+      merchantDisplayName: "Swipp", // Nom de l'entreprise affiché dans la feuille de paiement
+      style: "alwaysLight", // Style de la feuille de paiement
     });
     if (error) {
-      console.error(error);
+      console.error(error); // Gestion des erreurs d'initialisation
       return;
     }
-    const result = await presentPaymentSheet();
+    const result = await presentPaymentSheet(); // Présente la feuille de paiement à l'utilisateur
     if (result.error) {
       Alert.alert("Erreur de paiement", result.error.message);
     } else {
@@ -97,13 +100,14 @@ const MaintenanceForm = ({ navigation, route }) => {
         "Paiement réussi",
         "Votre paiement a été effectué avec succès."
       );
-      await handleReservationConfirm();
+      await handleReservationConfirm(); // Confirmation de la réservation après paiement
     }
   };
 
+  // Charger les adresses de l'utilisateur depuis Firestore
   useEffect(() => {
     if (route.params?.address) {
-      setAddress(route.params.address);
+      setAddress(route.params.address); // Si une adresse est passée via les paramètres de navigation
     }
   }, [route.params?.address]);
 
@@ -126,6 +130,7 @@ const MaintenanceForm = ({ navigation, route }) => {
     }
   };
 
+  // Charger les véhicules de l'utilisateur depuis Firestore
   useEffect(() => {
     loadAddresses();
   }, []);
@@ -151,26 +156,30 @@ const MaintenanceForm = ({ navigation, route }) => {
     loadVehicles();
   }, []);
 
+  // Fonction pour gérer la sélection d'une date et heure
   const handleDateTimeConfirm = (dateTime) => {
     setSelectedDateTime(dateTime);
     setDateTimePickerVisible(false);
   };
 
+  // Fonction pour gérer la sélection d'un garage
   const handleSelectGarage = (garage) => {
     setSelectedGarage(garage);
     setGarageModalVisible(false);
   };
 
+  // Fonction pour gérer la sélection d'une option d'entretien
   const handleMaintenanceSelection = (selectedId) => {
     const selectedOption = maintenanceOptions.find(
       (option) => option.id === selectedId
     );
     if (selectedOption) {
       setSelectedMaintenance(selectedOption.value);
-      setSelectedPrice(selectedOption.price);
+      setSelectedPrice(selectedOption.price); // Mise à jour du prix sélectionné
     }
   };
 
+  // Confirmation de la réservation après le paiement
   const handleReservationConfirm = async () => {
     const userId = auth.currentUser.uid;
     const bookingDate = new Date(selectedDateTime);
@@ -220,10 +229,10 @@ const MaintenanceForm = ({ navigation, route }) => {
     }
   };
 
+  // Styles pour les boutons de sélection
   const selectedStyle = tw`bg-[#34469C] p-2 rounded-md`;
   const selectedTextStyle = tw`text-white`;
 
-  // Styles pour le bouton non sélectionné
   const notSelectedStyle = tw`p-2 rounded-md border border-[#34469C]`;
   const notSelectedTextStyle = tw`text-black`;
 
@@ -244,7 +253,7 @@ const MaintenanceForm = ({ navigation, route }) => {
           <Text style={tw`text-2xl font-bold m-5`}>Entretien du véhicule</Text>
         </View>
 
-        {/* Choose Maintenance */}
+        {/* Sélection de l'entretien */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
           <Text style={tw`text-xl font-bold mb-4`}>
             Sélectionnez votre besoin
@@ -260,7 +269,7 @@ const MaintenanceForm = ({ navigation, route }) => {
           />
         </View>
 
-        {/* Choose vehicle */}
+        {/* Sélection du véhicule */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
           <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
           <SelectList
@@ -286,7 +295,7 @@ const MaintenanceForm = ({ navigation, route }) => {
           />
         </View>
 
-        {/* Choose Garage */}
+        {/* Sélection du lieu de l'entretien */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
           <Text style={tw`text-xl font-bold mb-4`}>Lieu de l'entretien</Text>
           <View style={tw`flex-row justify-around`}>
@@ -328,6 +337,8 @@ const MaintenanceForm = ({ navigation, route }) => {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Si "adresse" est sélectionnée, affichage de l'adresse */}
         {repairLocationType === "address" && (
           <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
             <TextInput
@@ -350,6 +361,8 @@ const MaintenanceForm = ({ navigation, route }) => {
             />
           </View>
         )}
+
+        {/* Si "garage" est sélectionné, affichage du garage */}
         {repairLocationType === "garage" && (
           <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
             <Text style={tw`text-xl font-bold mb-4`}>Choisissez un garage</Text>
@@ -364,7 +377,7 @@ const MaintenanceForm = ({ navigation, route }) => {
           </View>
         )}
 
-        {/* Choose Date */}
+        {/* Sélection de la date */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-4`}>
           <Text style={tw`text-xl font-bold mb-4`}>
             Choisissez votre date de rendez-vous
@@ -381,7 +394,7 @@ const MaintenanceForm = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Modal Components for Garage and Date selection */}
+        {/* Composants modaux pour choisir un garage et une date */}
         <ChooseGarageModal
           isVisible={isGarageModalVisible}
           onClose={() => setGarageModalVisible(false)}
@@ -394,11 +407,9 @@ const MaintenanceForm = ({ navigation, route }) => {
           onConfirm={handleDateTimeConfirm}
         />
 
-        {/* Submit button */}
+        {/* Bouton pour valider la réservation */}
         <View style={tw`mb-4 mt-5 flex items-center`}>
-          <Text style={tw`text-lg font-bold`}>
-            Prix estimé : {selectedPrice} €
-          </Text>
+          <Text style={tw`text-lg font-bold`}>Prix estimé : {selectedPrice} €</Text>
           <TouchableOpacity
             onPress={openPaymentSheet}
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center mt-3`}
@@ -413,4 +424,4 @@ const MaintenanceForm = ({ navigation, route }) => {
   );
 };
 
-export default MaintenanceForm;
+export default MaintenanceForm; // Export du composant pour l'utiliser dans l'application

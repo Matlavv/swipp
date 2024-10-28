@@ -1,7 +1,7 @@
 import React from "react";
 import { SafeAreaView, ScrollView, Text } from "react-native";
 import tw from "twrnc";
-
+ 
 const LegalMentionsPage = () => {
   return (
     <SafeAreaView style={tw`flex-1 p-4 mt-2`}>

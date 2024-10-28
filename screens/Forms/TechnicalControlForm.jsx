@@ -1,36 +1,40 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useStripe } from "@stripe/stripe-react-native";
-import { addDoc, collection, getDocs } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+// Importation des dépendances nécessaires
+import { Ionicons } from "@expo/vector-icons"; // Icônes Ionicons
+import { useStripe } from "@stripe/stripe-react-native"; // Intégration de Stripe pour les paiements
+import { addDoc, collection, getDocs } from "firebase/firestore"; // Fonctionnalités Firestore pour gérer les données
+import React, { useEffect, useState } from "react"; // Hooks React pour la gestion des états et des effets
 import {
-  Alert,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { SelectList } from "react-native-dropdown-select-list";
-import tw from "twrnc";
-import { swippLogo } from "../../assets";
-import ChooseGarageModal from "../../components/Modal/ChooseGarageModal";
-import DateTimePickerModal from "../../components/Modal/DateTimePickerModal";
-import { auth, db } from "../../firebaseConfig";
+  Alert, // Affichage des alertes
+  Image, // Affichage des images
+  SafeAreaView, // Composant pour respecter les zones sûres sur les appareils
+  ScrollView, // Vue défilable
+  Text, // Composant texte
+  TextInput, // Entrée de texte
+  TouchableOpacity, // Boutons cliquables
+  View, // Conteneur de vues
+} from "react-native"; // Composants React Native
+import { SelectList } from "react-native-dropdown-select-list"; // Liste déroulante pour sélectionner des éléments
+import tw from "twrnc"; // Utilisation de Tailwind CSS pour le style
+import { swippLogo } from "../../assets"; // Logo de l'application
+import ChooseGarageModal from "../../components/Modal/ChooseGarageModal"; // Modal pour choisir un garage
+import DateTimePickerModal from "../../components/Modal/DateTimePickerModal"; // Modal pour choisir une date/heure
+import { auth, db } from "../../firebaseConfig"; // Configuration Firebase pour l'authentification et Firestore
 
+// Définition du composant principal pour le formulaire de contrôle technique
 const TechnicalControlForm = ({ navigation }) => {
-  const [vehicles, setVehicles] = useState([]);
-  const [selectedVehicleId, setSelectedVehicleId] = useState("");
+  // Déclaration des états locaux
+  const [vehicles, setVehicles] = useState([]); // Liste des véhicules de l'utilisateur
+  const [selectedVehicleId, setSelectedVehicleId] = useState(""); // ID du véhicule sélectionné
   const [selectedImmatriculationPlate, setSelectedImmatriculationPlate] =
-    useState("");
-  const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
-  const [selectedDateTime, setSelectedDateTime] = useState("");
-  const [isGarageModalVisible, setGarageModalVisible] = useState(false);
-  const [selectedGarage, setSelectedGarage] = useState({});
-  const [controlPrice, setControlPrice] = useState(100);
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+    useState(""); // Plaque d'immatriculation du véhicule sélectionné
+  const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false); // Visibilité du sélecteur de date
+  const [selectedDateTime, setSelectedDateTime] = useState(""); // Date et heure sélectionnées
+  const [isGarageModalVisible, setGarageModalVisible] = useState(false); // Visibilité du modal pour choisir un garage
+  const [selectedGarage, setSelectedGarage] = useState({}); // Garage sélectionné
+  const [controlPrice, setControlPrice] = useState(100); // Prix du contrôle technique
+  const { initPaymentSheet, presentPaymentSheet } = useStripe(); // Utilisation de Stripe pour le paiement
 
+  // Chargement des véhicules de l'utilisateur depuis Firestore
   useEffect(() => {
     const loadVehicles = async () => {
       const user = auth.currentUser;
@@ -43,7 +47,7 @@ const TechnicalControlForm = ({ navigation }) => {
             id: doc.id,
             ...doc.data(),
           }));
-          setVehicles(userVehicles);
+          setVehicles(userVehicles); // Mise à jour de la liste des véhicules
         } catch (error) {
           console.error("Erreur lors du chargement des véhicules", error);
         }
@@ -52,21 +56,24 @@ const TechnicalControlForm = ({ navigation }) => {
     loadVehicles();
   }, []);
 
+  // Fonction pour confirmer la sélection de la date
   const handleDateTimeConfirm = (dateTime) => {
-    setSelectedDateTime(dateTime.toString());
-    setDateTimePickerVisible(false);
+    setSelectedDateTime(dateTime.toString()); // Conversion de la date/heure en chaîne de caractères
+    setDateTimePickerVisible(false); // Masquer le modal de sélection de date
   };
 
+  // Fonction pour sélectionner un garage
   const handleSelectGarage = (garage) => {
-    setSelectedGarage(garage);
-    setGarageModalVisible(false);
+    setSelectedGarage(garage); // Mise à jour du garage sélectionné
+    setGarageModalVisible(false); // Masquer le modal de sélection de garage
   };
 
+  // Vérification si le formulaire est valide (tous les champs sont remplis)
   const isFormValid = () => {
     return selectedVehicleId && selectedGarage && selectedDateTime;
   };
 
-  // Paiement avec Stripe
+  // Fonction pour obtenir un client secret pour le paiement via Stripe
   const fetchPaymentIntentClientSecret = async () => {
     const response = await fetch(
       "https://europe-west3-swipp-b74be.cloudfunctions.net/createPaymentIntent",
@@ -76,7 +83,7 @@ const TechnicalControlForm = ({ navigation }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: controlPrice * 100,
+          amount: controlPrice * 100, // Conversion du prix en centimes pour Stripe
         }),
       }
     );
@@ -84,6 +91,7 @@ const TechnicalControlForm = ({ navigation }) => {
     return clientSecret;
   };
 
+  // Fonction pour ouvrir la feuille de paiement avec Stripe
   const openPaymentSheet = async () => {
     if (!isFormValid()) {
       Alert.alert(
@@ -114,11 +122,13 @@ const TechnicalControlForm = ({ navigation }) => {
     }
   };
 
+  // Fonction pour confirmer la réservation
   const handleReservationConfirm = async () => {
-    const userId = auth.currentUser.uid;
-    const bookingDate = new Date(selectedDateTime);
-    const reparationType = "Contrôle technique";
+    const userId = auth.currentUser.uid; // Récupération de l'ID de l'utilisateur
+    const bookingDate = new Date(selectedDateTime); // Conversion de la date sélectionnée
+    const reparationType = "Contrôle technique"; // Type de réparation
 
+    // Création de l'objet réservation
     const reservation = {
       userId,
       vehicleId: selectedVehicleId,
@@ -136,12 +146,13 @@ const TechnicalControlForm = ({ navigation }) => {
     };
 
     try {
+      // Ajout de la réservation à Firestore
       const docRef = await addDoc(
         collection(db, "RepairBookings"),
         reservation
       );
       Alert.alert("Succès", "Votre rendez-vous a été enregistré avec succès.");
-      navigation.goBack();
+      navigation.goBack(); // Retour à l'écran précédent
 
       // Ajout de la facture à Firestore
       await addDoc(collection(db, "purchases"), {
@@ -164,12 +175,13 @@ const TechnicalControlForm = ({ navigation }) => {
   return (
     <SafeAreaView style={tw`flex h-full`}>
       <ScrollView style={tw`flex-1`}>
+        {/* Affichage du logo et du titre */}
         <View style={tw`flex p-5 mt-5 justify-start items-start flex flex-row`}>
           <Image style={tw`w-25 h-15`} source={swippLogo} />
         </View>
         <View style={tw`flex-row`}>
           <TouchableOpacity
-            onPress={() => navigation.goBack()}
+            onPress={() => navigation.goBack()} // Retour à l'écran précédent
             style={tw`mt-5 ml-3`}
           >
             <Ionicons name="arrow-back-circle-outline" size={30} color="gray" />
@@ -178,7 +190,8 @@ const TechnicalControlForm = ({ navigation }) => {
             Contrôle technique du véhicule
           </Text>
         </View>
-        {/* Choose vehicle */}
+
+        {/* Choix du véhicule */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-5`}>
           <Text style={tw`text-xl font-bold mb-4`}>Indiquez le véhicule</Text>
           <View style={tw`rounded-md`}>
@@ -186,8 +199,8 @@ const TechnicalControlForm = ({ navigation }) => {
               setSelected={(itemValue) => {
                 const vehicle = vehicles.find((v) => v.id === itemValue);
                 if (vehicle) {
-                  setSelectedVehicleId(vehicle.id);
-                  setSelectedImmatriculationPlate(vehicle.immatriculation);
+                  setSelectedVehicleId(vehicle.id); // Mise à jour de l'ID du véhicule sélectionné
+                  setSelectedImmatriculationPlate(vehicle.immatriculation); // Mise à jour de la plaque d'immatriculation
                 } else {
                   console.error("Selected vehicle not found");
                   Alert.alert(
@@ -205,14 +218,13 @@ const TechnicalControlForm = ({ navigation }) => {
             />
           </View>
         </View>
-        {/* Choose Garage */}
+
+        {/* Choix du garage */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-7`}>
-          <Text style={tw`text-xl font-bold mb-4`}>
-            Choisissez votre garage
-          </Text>
+          <Text style={tw`text-xl font-bold mb-4`}>Choisissez votre garage</Text>
           <View style={tw`rounded-md`}>
             <TouchableOpacity
-              onPress={() => setGarageModalVisible(true)}
+              onPress={() => setGarageModalVisible(true)} // Affichage du modal pour choisir un garage
               style={tw`border-b-2 border-[#34469C] font-bold text-base`}
               value={selectedGarage}
               editable={false}
@@ -221,18 +233,20 @@ const TechnicalControlForm = ({ navigation }) => {
                 style={tw`text-black font-bold text-base`}
                 placeholder="Sélectionnez un garage"
                 value={selectedGarage.name}
-                editable={false}
+                editable={false} // Non modifiable manuellement
               />
             </TouchableOpacity>
 
+            {/* Modal pour choisir un garage */}
             <ChooseGarageModal
               isVisible={isGarageModalVisible}
-              onClose={() => setGarageModalVisible(false)}
-              onSelectGarage={handleSelectGarage}
+              onClose={() => setGarageModalVisible(false)} // Fermeture du modal
+              onSelectGarage={handleSelectGarage} // Sélection d'un garage
             />
           </View>
         </View>
-        {/* Choose Date */}
+
+        {/* Choix de la date de rendez-vous */}
         <View style={tw`p-3 bg-gray-200 rounded-xl mx-3 mt-7`}>
           <Text style={tw`text-xl font-bold mb-4`}>
             Choisissez votre date de rendez-vous
@@ -241,28 +255,31 @@ const TechnicalControlForm = ({ navigation }) => {
             <TouchableOpacity
               style={tw`border-b-2 border-[#34469C] font-bold text-base`}
               value={selectedDateTime}
-              onPress={() => setDateTimePickerVisible(true)}
+              onPress={() => setDateTimePickerVisible(true)} // Affichage du sélecteur de date
               editable={false}
             >
               <TextInput
                 style={tw`text-black font-bold text-base`}
                 placeholder="Choisissez une date et une heure"
                 value={selectedDateTime}
-                editable={false}
+                editable={false} // Non modifiable manuellement
               />
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Modal pour choisir une date */}
         <DateTimePickerModal
           isVisible={isDateTimePickerVisible}
-          onClose={() => setDateTimePickerVisible(false)}
-          onConfirm={handleDateTimeConfirm}
+          onClose={() => setDateTimePickerVisible(false)} // Fermeture du modal
+          onConfirm={handleDateTimeConfirm} // Confirmation de la date
         />
-        {/* Submit button */}
+
+        {/* Bouton de validation du rendez-vous */}
         <View style={tw`mb-4 mt-5 flex items-center`}>
           <Text style={tw`font-bold text-lg`}>Prix : {controlPrice}</Text>
           <TouchableOpacity
-            onPress={openPaymentSheet}
+            onPress={openPaymentSheet} // Ouverture du paiement
             style={tw`bg-[#34469C] p-4 rounded-md w-5/6 items-center mt-3`}
           >
             <Text style={tw`text-white font-semibold text-base`}>
@@ -275,4 +292,5 @@ const TechnicalControlForm = ({ navigation }) => {
   );
 };
 
+// Export du composant
 export default TechnicalControlForm;

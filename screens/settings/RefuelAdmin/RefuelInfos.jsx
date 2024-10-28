@@ -1,28 +1,32 @@
-import React, { useEffect, useState } from "react";
+// Importation des dépendances nécessaires
+import React, { useEffect, useState } from "react"; // Hooks React pour la gestion des états et des effets
 import {
-  Alert,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import RNPickerSelect from "react-native-picker-select";
-import tw from "twrnc";
-import { Ionicons } from "@expo/vector-icons";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { auth, db } from "../../../firebaseConfig";
+  Alert, // Pour afficher des alertes
+  ScrollView, // Pour créer une zone défilante
+  Text, // Pour afficher du texte
+  TextInput, // Pour les champs de saisie
+  TouchableOpacity, // Pour les boutons cliquables
+  View, // Conteneur de vues
+} from "react-native"; // Composants React Native
+import RNPickerSelect from "react-native-picker-select"; // Composant pour le sélecteur
+import tw from "twrnc"; // Utilisation de Tailwind CSS pour le style
+import { Ionicons } from "@expo/vector-icons"; // Icônes Ionicons
+import { doc, getDoc, updateDoc } from "firebase/firestore"; // Fonctions Firestore pour récupérer et mettre à jour les documents
+import { auth, db } from "../../../firebaseConfig"; // Configuration Firestore et authentification Firebase
 
+// Composant RefuelInfos pour gérer les informations d'un refueler
 const RefuelInfos = ({ navigation }) => {
+  // États pour les informations du refueler
   const [refuelerPhone, setRefuelerPhone] = useState("");
   const [refuelerAddress, setRefuelerAddress] = useState("");
-  const [fuelTypes, setFuelTypes] = useState([]);
-  const [selectedFuelType, setSelectedFuelType] = useState(null);
-  const [newFuelPrice, setNewFuelPrice] = useState("");
+  const [fuelTypes, setFuelTypes] = useState([]); // Liste des types de carburant
+  const [selectedFuelType, setSelectedFuelType] = useState(null); // Type de carburant sélectionné
+  const [newFuelPrice, setNewFuelPrice] = useState(""); // Prix du nouveau type de carburant
   const [options, setOptions] = useState([]); // Liste des options avec prix
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [optionPrice, setOptionPrice] = useState("");
+  const [selectedOption, setSelectedOption] = useState(null); // Option sélectionnée
+  const [optionPrice, setOptionPrice] = useState(""); // Prix de la nouvelle option
 
+  // Liste des types de carburant disponibles
   const fuelOptions = [
     { label: 'SP98', value: 'SP98' },
     { label: 'SP95', value: 'SP95' },
@@ -30,6 +34,7 @@ const RefuelInfos = ({ navigation }) => {
     { label: 'E85', value: 'E85' },
   ];
 
+  // Liste des options disponibles
   const availableOptions = [
     { label: 'AdBlue', value: 'adblue' },
     { label: 'Lave vitre', value: 'lave_vitre' },
@@ -37,25 +42,27 @@ const RefuelInfos = ({ navigation }) => {
     { label: 'Liquide de refroidissement', value: 'liquide_refroidissement' },
   ];
 
+  // Effet pour récupérer les données du refueler depuis Firestore à l'ouverture du composant
   useEffect(() => {
     const fetchRefuelerData = async () => {
-      const user = auth.currentUser;
+      const user = auth.currentUser; // Récupération de l'utilisateur connecté
       if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
+        const docRef = doc(db, "users", user.uid); // Référence au document utilisateur dans Firestore
+        const docSnap = await getDoc(docRef); // Récupération du document utilisateur
         if (docSnap.exists()) {
-          const data = docSnap.data();
-          setRefuelerPhone(data.refueler_phone || "");
-          setRefuelerAddress(data.refueler_address || "");
-          setFuelTypes(data.fuelTypes || []);
-          setOptions(data.options || []); // Charger les options existantes
+          const data = docSnap.data(); // Extraction des données
+          setRefuelerPhone(data.refueler_phone || ""); // Mise à jour du numéro de téléphone
+          setRefuelerAddress(data.refueler_address || ""); // Mise à jour de l'adresse
+          setFuelTypes(data.fuelTypes || []); // Mise à jour des types de carburant
+          setOptions(data.options || []); // Mise à jour des options
         }
       }
     };
 
-    fetchRefuelerData();
+    fetchRefuelerData(); // Appel de la fonction pour récupérer les données
   }, []);
 
+  // Fonction pour ajouter ou mettre à jour un type de carburant
   const handleAddFuelType = () => {
     if (!selectedFuelType || !newFuelPrice) {
       Alert.alert("Erreur", "Veuillez sélectionner un type d'essence et entrer un prix.");
@@ -64,6 +71,7 @@ const RefuelInfos = ({ navigation }) => {
 
     const existingFuelIndex = fuelTypes.findIndex(fuel => fuel.type === selectedFuelType);
 
+    // Si le type de carburant existe déjà, on met à jour son prix, sinon on l'ajoute
     if (existingFuelIndex !== -1) {
       const updatedFuelTypes = [...fuelTypes];
       updatedFuelTypes[existingFuelIndex].price = newFuelPrice;
@@ -72,11 +80,12 @@ const RefuelInfos = ({ navigation }) => {
       setFuelTypes([...fuelTypes, { type: selectedFuelType, price: newFuelPrice }]);
     }
 
-    // Réinitialiser la sélection du type d'essence et du prix
+    // Réinitialisation de la sélection et du prix
     setSelectedFuelType(null);
     setNewFuelPrice("");
   };
 
+  // Fonction pour ajouter ou mettre à jour une option
   const handleAddOption = () => {
     if (!selectedOption || !optionPrice) {
       Alert.alert("Erreur", "Veuillez sélectionner une option et entrer un prix.");
@@ -85,6 +94,7 @@ const RefuelInfos = ({ navigation }) => {
 
     const existingOptionIndex = options.findIndex(option => option.type === selectedOption);
 
+    // Si l'option existe déjà, on met à jour son prix, sinon on l'ajoute
     if (existingOptionIndex !== -1) {
       const updatedOptions = [...options];
       updatedOptions[existingOptionIndex].price = optionPrice;
@@ -93,28 +103,31 @@ const RefuelInfos = ({ navigation }) => {
       setOptions([...options, { type: selectedOption, price: optionPrice }]);
     }
 
-    // Réinitialiser la sélection de l'option et du prix
+    // Réinitialisation de la sélection et du prix
     setSelectedOption(null);
     setOptionPrice("");
   };
 
+  // Fonction pour supprimer un type de carburant
   const handleRemoveFuelType = (index) => {
     const updatedFuelTypes = [...fuelTypes];
     updatedFuelTypes.splice(index, 1);
     setFuelTypes(updatedFuelTypes);
   };
 
+  // Fonction pour supprimer une option
   const handleRemoveOption = (index) => {
     const updatedOptions = [...options];
     updatedOptions.splice(index, 1);
     setOptions(updatedOptions);
   };
 
+  // Fonction pour mettre à jour les informations du refueler dans Firestore
   const handleUpdateRefuelerInfo = async () => {
     try {
         const user = auth.currentUser;
         if (user) {
-            // Vérification de la longueur du numéro de téléphone
+            // Vérification du format du numéro de téléphone
             if (!refuelerPhone || refuelerPhone.length !== 10) {
                 Alert.alert("Erreur", "Le numéro de téléphone doit contenir exactement 10 chiffres.");
                 return;
@@ -125,11 +138,12 @@ const RefuelInfos = ({ navigation }) => {
                 return;
             }
 
+            // Mise à jour du document utilisateur dans Firestore avec les nouvelles informations
             await updateDoc(doc(db, "users", user.uid), {
                 refueler_phone: refuelerPhone,
                 refueler_address: refuelerAddress,
                 fuelTypes: fuelTypes,
-                options: options, // Mettre à jour les options
+                options: options, // Mise à jour des options
             });
 
             Alert.alert("Succès", "Les informations ont été mises à jour !");
@@ -141,11 +155,11 @@ const RefuelInfos = ({ navigation }) => {
             "Une erreur est survenue lors de la mise à jour des informations. Veuillez réessayer."
         );
     }
-};
-
+  };
 
   return (
     <ScrollView style={tw`flex-1 mt-5`}>
+      {/* En-tête avec l'icône de retour et le titre */}
       <View style={tw`p-5 mt-5 items-center justify-center flex-row`}>
         <Ionicons name="car-outline" size={50} color="gray" />
       </View>
@@ -158,6 +172,8 @@ const RefuelInfos = ({ navigation }) => {
         </TouchableOpacity>
         <Text style={tw`text-2xl font-bold m-5`}>Modifier Refueler Info</Text>
       </View>
+
+      {/* Formulaire pour la saisie des informations */}
       <View style={tw`p-4 flex-1 justify-center items-center`}>
         <TextInput
           style={tw`border-b w-80 p-2 mb-4`}
@@ -174,7 +190,7 @@ const RefuelInfos = ({ navigation }) => {
           onChangeText={setRefuelerAddress}
         />
 
-        {/* Gestion des types d'essence */}
+        {/* Section pour gérer les types de carburant */}
         <View style={tw`w-80 mb-4`}>
           <Text style={tw`text-xl font-bold mb-2`}>Types d'essence</Text>
           {fuelTypes.map((fuel, index) => (
@@ -187,6 +203,7 @@ const RefuelInfos = ({ navigation }) => {
           ))}
         </View>
 
+        {/* Sélection du type de carburant */}
         <RNPickerSelect
           onValueChange={(value) => setSelectedFuelType(value)}
           items={fuelOptions}
@@ -212,7 +229,7 @@ const RefuelInfos = ({ navigation }) => {
           <Text style={tw`text-white text-sm`}>Ajouter le type d'essence</Text>
         </TouchableOpacity>
 
-        {/* Gestion des options */}
+        {/* Section pour gérer les options */}
         <View style={tw`w-80 mb-4`}>
           <Text style={tw`text-xl font-bold mb-2`}>Options</Text>
           {options.map((option, index) => (
@@ -225,6 +242,7 @@ const RefuelInfos = ({ navigation }) => {
           ))}
         </View>
 
+        {/* Sélection de l'option */}
         <RNPickerSelect
           onValueChange={(value) => setSelectedOption(value)}
           items={availableOptions}
@@ -250,6 +268,7 @@ const RefuelInfos = ({ navigation }) => {
           <Text style={tw`text-white text-sm`}>Ajouter l'option</Text>
         </TouchableOpacity>
 
+        {/* Bouton pour mettre à jour les informations du refueler */}
         <TouchableOpacity
           onPress={handleUpdateRefuelerInfo}
           style={tw`bg-[#34469C] px-5 py-3 rounded-full flex mt-7`}

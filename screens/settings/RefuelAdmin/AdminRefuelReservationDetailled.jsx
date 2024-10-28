@@ -1,115 +1,127 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+// Importation des dépendances nécessaires
+import { Ionicons } from "@expo/vector-icons"; // Icônes Ionicons
+import { useNavigation } from "@react-navigation/native"; // Hook de navigation
+import { doc, getDoc, updateDoc } from "firebase/firestore"; // Fonctions Firestore pour récupérer et mettre à jour des documents
+import React, { useEffect, useState } from "react"; // Hooks React pour la gestion des états et des effets
 import {
-  Alert,
-  Image,
-  Linking,
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import tw from "twrnc";
-import { swippLogo } from "../../../assets";
-import { db } from "../../../firebaseConfig";
+  Alert, // Affichage des alertes
+  Image, // Composant pour afficher des images
+  Linking, // Composant pour ouvrir des liens
+  SafeAreaView, // Composant pour gérer les zones sûres sur les appareils
+  Text, // Composant texte
+  TouchableOpacity, // Composant pour les boutons cliquables
+  View, // Conteneur de vues
+} from "react-native"; // Composants React Native
+import tw from "twrnc"; // Utilisation de Tailwind CSS pour le style
+import { swippLogo } from "../../../assets"; // Logo de l'application
+import { db } from "../../../firebaseConfig"; // Configuration Firestore
 
+// Composant AdminRefuelReservationDetailled pour afficher et gérer les détails d'une réservation de ravitaillement
 const AdminRefuelReservationDetailled = ({ route }) => {
+  // Récupération de l'ID de la réservation passée en paramètre via la navigation
   const { reservationId } = route.params;
+  // Déclaration des états locaux pour gérer les informations de la réservation et de l'utilisateur
   const [reservation, setReservation] = useState(null);
   const [user, setUser] = useState(null);
-  const navigation = useNavigation();
+  const navigation = useNavigation(); // Hook pour la navigation
 
+  // Chargement des données de la réservation à partir de Firestore à l'ouverture de l'écran
   useEffect(() => {
     const fetchReservation = async () => {
-      const docRef = doc(db, "RefuelBookings", reservationId);
-      const docSnap = await getDoc(docRef);
+      const docRef = doc(db, "RefuelBookings", reservationId); // Récupération de la réservation à partir de son ID
+      const docSnap = await getDoc(docRef); // Récupération du document
 
       if (docSnap.exists()) {
-        const reservationData = docSnap.data();
-        setReservation({ id: docSnap.id, ...reservationData });
-        const userSnap = await getDoc(doc(db, "users", reservationData.userId));
+        const reservationData = docSnap.data(); // Récupération des données de la réservation
+        setReservation({ id: docSnap.id, ...reservationData }); // Mise à jour de l'état avec les données de la réservation
+        const userSnap = await getDoc(doc(db, "users", reservationData.userId)); // Récupération des informations de l'utilisateur lié à la réservation
         if (userSnap.exists()) {
-          setUser(userSnap.data());
+          setUser(userSnap.data()); // Mise à jour de l'état avec les données de l'utilisateur
         }
       } else {
-        Alert.alert("Erreur", "Réservation non trouvée.");
+        Alert.alert("Erreur", "Réservation non trouvée."); // Affichage d'une alerte si la réservation n'existe pas
       }
     };
 
-    fetchReservation();
-  }, [reservationId]);
+    fetchReservation(); // Appel de la fonction pour charger les données de la réservation
+  }, [reservationId]); // Exécution de l'effet à chaque changement de l'ID de la réservation
 
+  // Fonction pour marquer la réservation comme effectuée
   const handleMarkAsCompleted = async () => {
-    const reservationRef = doc(db, "RefuelBookings", reservationId);
+    const reservationRef = doc(db, "RefuelBookings", reservationId); // Récupération de la référence de la réservation
     await updateDoc(reservationRef, {
-      isActive: false,
+      isActive: false, // Mise à jour de l'état de la réservation comme inactive (effectuée)
     });
-    Alert.alert("Succès", "La réservation a été marquée comme effectuée.");
-    navigation.goBack();
+    Alert.alert("Succès", "La réservation a été marquée comme effectuée."); // Affichage d'une alerte de succès
+    navigation.goBack(); // Retour à l'écran précédent
   };
 
+  // Fonction pour annuler la réservation
   const handleCancelReservation = async () => {
     Alert.alert(
-      "Confirmation",
-      "Êtes-vous sûr de vouloir annuler cette réservation ?",
+      "Confirmation", // Titre de l'alerte
+      "Êtes-vous sûr de vouloir annuler cette réservation ?", // Message de confirmation
       [
         {
-          text: "Annuler",
+          text: "Annuler", // Option pour annuler
           style: "cancel",
         },
         {
-          text: "Oui",
+          text: "Oui", // Option pour confirmer l'annulation
           onPress: async () => {
-            const reservationRef = doc(db, "RefuelBookings", reservationId);
+            const reservationRef = doc(db, "RefuelBookings", reservationId); // Récupération de la référence de la réservation
             await updateDoc(reservationRef, {
-              cancelled: true,
+              cancelled: true, // Mise à jour de l'état de la réservation comme annulée
             });
-            Alert.alert("Succès", "La réservation a été annulée.");
-            navigation.goBack();
+            Alert.alert("Succès", "La réservation a été annulée."); // Affichage d'une alerte de succès
+            navigation.goBack(); // Retour à l'écran précédent
           },
         },
       ]
     );
   };
 
+  // Fonction pour ouvrir l'adresse dans Google Maps
   const openInMaps = (address) => {
     const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
       address
-    )}`;
+    )}`; // Construction de l'URL pour Google Maps
     Linking.openURL(url).catch((err) =>
-      Alert.alert("Erreur", "Impossible d'ouvrir Google Maps.")
+      Alert.alert("Erreur", "Impossible d'ouvrir Google Maps.") // Gestion des erreurs lors de l'ouverture de l'URL
     );
   };
 
+  // Fonction pour extraire le type de carburant à partir de l'ID du véhicule
   const getFuelTypeFromVehicleId = (vehicleId) => {
     const parts = vehicleId.split(" - ");
-    return parts[parts.length - 1];
+    return parts[parts.length - 1]; // Retourne la dernière partie de l'ID (type de carburant)
   };
 
+  // Fonction pour extraire les informations du véhicule à partir de l'ID du véhicule
   const getVehiculeInformation = (vehicleId) => {
     const parts = vehicleId.split(" - ");
-    return parts[parts.length - 2];
+    return parts[parts.length - 2]; // Retourne l'avant-dernière partie de l'ID (informations sur le véhicule)
   };
 
+  // Rendu du composant
   return (
     <SafeAreaView style={tw`flex h-full`}>
       <View style={tw`flex p-5 mt-5 justify-start items-start flex flex-row`}>
-        <Image style={tw`w-25 h-15`} source={swippLogo} />
+        <Image style={tw`w-25 h-15`} source={swippLogo} /> {/* Logo de l'application */}
       </View>
       <View style={tw`flex-row`}>
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.goBack()} // Retour à l'écran précédent
           style={tw`mt-5 ml-3`}
         >
           <Ionicons name="arrow-back-circle-outline" size={30} color="gray" />
         </TouchableOpacity>
         <Text style={tw`text-xl font-bold m-5`}>
           Réservation de {user?.firstName}
-          {user?.lastName}
+          {user?.lastName} {/* Affichage du nom de l'utilisateur */}
         </Text>
       </View>
+      {/* Affichage des informations de la réservation */}
       {reservation && (
         <View style={tw`p-4`}>
           <Text style={tw`text-lg font-semibold`}>
@@ -122,7 +134,7 @@ const AdminRefuelReservationDetailled = ({ route }) => {
             <Text style={tw`text-lg`}>Véhicule :</Text>
             <Text style={tw`text-lg font-semibold`}>
               {" "}
-              {getVehiculeInformation(reservation.vehicleId)}
+              {getVehiculeInformation(reservation.vehicleId)} {/* Informations sur le véhicule */}
             </Text>
           </View>
           <View
@@ -131,7 +143,7 @@ const AdminRefuelReservationDetailled = ({ route }) => {
             <Text style={tw`text-lg`}>Carburant choisi :</Text>
             <Text style={tw`text-lg font-semibold`}>
               {" "}
-              {getFuelTypeFromVehicleId(reservation.vehicleId)}
+              {getFuelTypeFromVehicleId(reservation.vehicleId)} {/* Type de carburant */}
             </Text>
           </View>
           <View
@@ -140,10 +152,11 @@ const AdminRefuelReservationDetailled = ({ route }) => {
             <Text style={tw`text-lg`}>Volume :</Text>
             <View style={tw`flex-1 ml-2`}>
               <Text style={tw`text-lg font-semibold`}>
-                {reservation.volume} Litres
+                {reservation.volume} Litres {/* Volume de carburant */}
               </Text>
             </View>
           </View>
+          {/* Bouton pour ouvrir l'adresse dans Google Maps */}
           <TouchableOpacity
             onPress={() => openInMaps(reservation.address)}
             style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
@@ -151,7 +164,7 @@ const AdminRefuelReservationDetailled = ({ route }) => {
             <Text style={tw`text-lg`}>Adresse :</Text>
             <View style={tw`flex-1 ml-2`}>
               <Text style={tw`text-lg font-semibold text-[#34469C]`}>
-                {reservation.address}
+                {reservation.address} {/* Adresse de la réservation */}
               </Text>
             </View>
           </TouchableOpacity>
@@ -166,9 +179,10 @@ const AdminRefuelReservationDetailled = ({ route }) => {
                 day: "numeric",
                 hour: "2-digit",
                 minute: "2-digit",
-              })}
+              })} {/* Date de création de la réservation */}
             </Text>
           </View>
+          {/* Bouton pour marquer la réservation comme effectuée */}
           <TouchableOpacity
             style={tw`bg-green-500 mt-8 p-2 rounded-lg shadow-xl`}
             onPress={handleMarkAsCompleted}
@@ -177,6 +191,7 @@ const AdminRefuelReservationDetailled = ({ route }) => {
               Marquer comme effectuée
             </Text>
           </TouchableOpacity>
+          {/* Bouton pour annuler la réservation */}
           <TouchableOpacity
             style={tw`bg-red-500 mt-2 p-2 rounded-lg shadow-xl`}
             onPress={handleCancelReservation}
@@ -191,4 +206,5 @@ const AdminRefuelReservationDetailled = ({ route }) => {
   );
 };
 
+// Export du composant
 export default AdminRefuelReservationDetailled;

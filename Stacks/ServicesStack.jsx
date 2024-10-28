@@ -19,12 +19,15 @@ const Stack = createNativeStackNavigator();
 const ServicesStack = () => {
   return (
     <Stack.Navigator>
+      {/* Accueil des services */}
       <Stack.Screen
         name="Service"
         component={ServiceScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false }} // Masquer l'en-tête
       />
-      {/* <Stack.Screen
+      {/* Les écrans commentés car bugs */}
+      {/*
+      <Stack.Screen
         name="ChooseRepairDate"
         component={ChooseRepairDate}
         options={{ headerShown: false }}
@@ -68,7 +71,7 @@ const ServicesStack = () => {
         name="AdressScreen"
         component={AdressScreen}
         options={{ headerShown: false }}
-      />{" "}
+      />
       <Stack.Screen
         name="EditAdressScreen"
         component={EditAdressScreen}
@@ -83,7 +86,8 @@ const ServicesStack = () => {
         name="VehicleScreen"
         component={VehicleScreen}
         options={{ headerShown: false }}
-      /> */}
+      />
+      */}
     </Stack.Navigator>
   );
 };

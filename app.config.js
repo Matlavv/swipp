@@ -2,28 +2,34 @@ import "dotenv/config";
 
 export default {
   expo: {
-    name: "swipp",
+    name: "Swipp",
     slug: "swipp",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/swipp_1.png",
+    icon: "./assets/swipp_1.png",  // Assurez-vous que cette image est carrée
     userInterfaceStyle: "light",
     splash: {
-      image: "./assets/swipp_1.png",
+      image: "./assets/swipp_1.png",  // Assurez-vous que cette image est carrée
       resizeMode: "contain",
       backgroundColor: "#ffffff",
     },
     assetBundlePatterns: ["**/*"],
     ios: {
       supportsTablet: true,
+      bundleIdentifier: "com.monapp.ios",  // Ajout du bundleIdentifier
+      buildNumber: "1.0.0",  // Ajout du buildNumber
     },
     android: {
-      package: "com.flucity.swipp",
+      package: "com.flucity.swipp",  // Assurez-vous que c'est le bon package
+      versionCode: 1,  // Ajout du versionCode
       adaptiveIcon: {
-        foregroundImage: "./assets/swipp_1.png",
+        foregroundImage: "./assets/swipp_1.png",  // Assurez-vous que cette image est carrée
         backgroundColor: "#ffffff",
       },
-      googleServicesFile: "./google-services.json",
+      googleServicesFile: "./google-services.json",  // Fichier Google pour Firebase
+      permissions: [  // Permissions Android
+        "ACCESS_FINE_LOCATION"
+      ],
     },
     web: {
       favicon: "./assets/swipp_1.png",

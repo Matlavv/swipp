@@ -21,85 +21,90 @@ import RefuelInfos from "../screens/settings/RefuelAdmin/RefuelInfos";
 const Stack = createNativeStackNavigator();
 
 const ProfileStack = () => {
+  // Contexte d'authentification pour vérifier si l'utilisateur est connecté
   const { isAuthenticated } = useContext(AuthContext);
 
   return (
     <Stack.Navigator>
-            {!isAuthenticated ? (
+      {/* Si l'utilisateur n'est pas authentifié, afficher les écrans de connexion et d'inscription */}
+      {!isAuthenticated ? (
         <>
-      <Stack.Screen
-        name="LoginScreen"
-        component={LoginScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="SignUpScreen"
-        component={SignUpScreen}
-        options={{ headerShown: false }}
-      />
-</>) : (<>
-
-      <Stack.Screen
-        name="UserScreen"
-        component={UserScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="UserProfileScreen"
-        component={UserProfileScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="AdressScreen"
-        component={AdressScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="VehicleScreen"
-        component={VehicleScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="LegalScreen"
-        component={LegalScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="AboutScreen"
-        component={AboutScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="RefuelAdmin"
-        component={RefuelAdmin}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="RefuelInfos"
-        component={RefuelInfos}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="EditVehicleScreen"
-        component={EditVehicleScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="EditAdressScreen"
-        component={EditAdressScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="AddBusinessScreen"
-        component={AddBusinessScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="AdminRefuelReservationDetailled"
-        component={AdminRefuelReservationDetailled}
-        options={{ headerShown: false }}
-      />
-      </> )}
+          <Stack.Screen
+            name="LoginScreen"
+            component={LoginScreen}
+            options={{ headerShown: false }} // Masquer l'en-tête
+          />
+          <Stack.Screen
+            name="SignUpScreen"
+            component={SignUpScreen}
+            options={{ headerShown: false }} // Masquer l'en-tête
+          />
+        </>
+      ) : (
+        <>
+          {/* Si l'utilisateur est authentifié, afficher les différents écrans de profil et de gestion */}
+          <Stack.Screen
+            name="UserScreen"
+            component={UserScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="UserProfileScreen"
+            component={UserProfileScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="AdressScreen"
+            component={AdressScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="VehicleScreen"
+            component={VehicleScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="LegalScreen"
+            component={LegalScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="AboutScreen"
+            component={AboutScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="RefuelAdmin"
+            component={RefuelAdmin}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="RefuelInfos"
+            component={RefuelInfos}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="EditVehicleScreen"
+            component={EditVehicleScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="EditAdressScreen"
+            component={EditAdressScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="AddBusinessScreen"
+            component={AddBusinessScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="AdminRefuelReservationDetailled"
+            component={AdminRefuelReservationDetailled}
+            options={{ headerShown: false }}
+          />
+        </>
+      )}
     </Stack.Navigator>
   );
 };

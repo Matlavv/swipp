@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { useNavigation } from "@react-navigation/native"; // Permet de gérer la navigation entre les écrans
+import { doc, getDoc, updateDoc } from "firebase/firestore"; // Fonctions pour interagir avec Firestore
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -10,26 +10,28 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import tw from "twrnc";
-import { swippLogo } from "../../assets";
-import { auth, db } from "../../firebaseConfig";
+import tw from "twrnc"; // Bibliothèque Tailwind pour styliser les composants React Native
+import { swippLogo } from "../../assets"; // Importation du logo de l'application
+import { auth, db } from "../../firebaseConfig"; // Importation de la configuration Firebase
 
+// Composant principal pour afficher les détails d'une réservation de réparation
 const DetailledRepairReservation = ({ route }) => {
-  const { reservationId } = route.params;
-  const [vehicle, setVehicle] = useState(null);
-  const [reservation, setReservation] = useState(null);
-  const navigation = useNavigation();
+  const { reservationId } = route.params; // Récupération de l'ID de la réservation à partir des paramètres de la route
+  const [vehicle, setVehicle] = useState(null); // État local pour stocker les informations du véhicule
+  const [reservation, setReservation] = useState(null); // État local pour stocker les informations de la réservation
+  const navigation = useNavigation(); // Hook pour la navigation
 
+  // Fonction pour charger les données de la réservation et du véhicule associé
   useEffect(() => {
     const fetchReservation = async () => {
-      const docRef = doc(db, "RepairBookings", reservationId);
-      const docSnap = await getDoc(docRef);
+      const docRef = doc(db, "RepairBookings", reservationId); // Référence au document de la réservation dans Firestore
+      const docSnap = await getDoc(docRef); // Récupère les données de la réservation
 
       if (docSnap.exists()) {
-        const reservationData = { id: docSnap.id, ...docSnap.data() };
+        const reservationData = { id: docSnap.id, ...docSnap.data() }; // Sauvegarde les données de la réservation
         setReservation(reservationData);
 
-        // Charger les détails du véhicule
+        // Charger les détails du véhicule associé à la réservation
         const vehicleRef = doc(
           db,
           "users",
@@ -40,43 +42,44 @@ const DetailledRepairReservation = ({ route }) => {
         const vehicleSnap = await getDoc(vehicleRef);
 
         if (vehicleSnap.exists()) {
-          setVehicle({ id: vehicleSnap.id, ...vehicleSnap.data() });
+          setVehicle({ id: vehicleSnap.id, ...vehicleSnap.data() }); // Sauvegarde les informations du véhicule
         } else {
-          Alert.alert("Erreur", "Véhicule non trouvé.");
+          Alert.alert("Erreur", "Véhicule non trouvé."); // Alerte si le véhicule n'est pas trouvé
         }
       } else {
-        Alert.alert("Erreur", "Réservation non trouvée.");
+        Alert.alert("Erreur", "Réservation non trouvée."); // Alerte si la réservation n'est pas trouvée
       }
     };
 
     fetchReservation();
-  }, [reservationId]);
+  }, [reservationId]); // Dépendance sur `reservationId` pour réexécuter lorsque cette valeur change
 
+  // Fonction pour annuler la réservation
   const handleCancelReservation = async () => {
     const now = new Date(); // L'heure actuelle
-    const createdAt = new Date(reservation.createdAt); // Convertit la chaîne en objet Date JavaScript
-    const timeDiff = now - createdAt; // Différence en millisecondes
-    const minutesDiff = timeDiff / (1000 * 60); // Convertit en minutes
+    const createdAt = new Date(reservation.createdAt); // Convertit la date de création de la réservation en objet Date
+    const timeDiff = now - createdAt; // Calcul de la différence de temps entre la création et maintenant
+    const minutesDiff = timeDiff / (1000 * 60); // Convertit la différence en minutes
 
+    // Si la réservation est active et faite il y a moins de 60 minutes
     if (reservation.isActive && minutesDiff <= 60) {
-      const reservationRef = doc(db, "RepairBookings", reservationId);
+      const reservationRef = doc(db, "RepairBookings", reservationId); // Référence à la réservation
 
       await updateDoc(reservationRef, {
-        cancelled: true,
+        cancelled: true, // Met à jour le statut de la réservation comme annulée
       });
 
       Alert.alert(
         "Réservation annulée",
         "Votre réservation a été annulée avec succès."
       );
-      navigation.goBack();
+      navigation.goBack(); // Retour à l'écran précédent
     } else if (!reservation.isActive) {
       Alert.alert(
         "Annulation impossible",
         "Cette réservation a déjà été honorée et ne peut plus être annulée."
       );
     } else {
-      // Si la réservation a été faite il y a plus de 60 minutes
       Alert.alert(
         "Annulation impossible",
         "Le délai d'annulation d'une heure est dépassé. Veuillez contacter le garage pour toute demande d'annulation."
@@ -86,9 +89,12 @@ const DetailledRepairReservation = ({ route }) => {
 
   return (
     <SafeAreaView style={tw`flex h-full`}>
+      {/* Affichage du logo en haut de la page */}
       <View style={tw`flex p-5 mt-5 justify-start items-start flex flex-row`}>
         <Image style={tw`w-25 h-15`} source={swippLogo} />
       </View>
+
+      {/* Bouton de retour */}
       <View style={tw`flex-row`}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -98,6 +104,8 @@ const DetailledRepairReservation = ({ route }) => {
         </TouchableOpacity>
         <Text style={tw`text-2xl font-bold m-5`}>Votre réservation</Text>
       </View>
+
+      {/* Si la réservation est chargée, afficher ses détails */}
       {reservation && (
         <View style={tw`p-4`}>
           <Text style={tw`text-lg font-semibold`}>
@@ -113,6 +121,7 @@ const DetailledRepairReservation = ({ route }) => {
             })}
           </Text>
 
+          {/* Affichage des détails du véhicule */}
           {vehicle && (
             <View
               style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
@@ -124,6 +133,8 @@ const DetailledRepairReservation = ({ route }) => {
               </Text>
             </View>
           )}
+
+          {/* Détails de la réparation */}
           <View
             style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
           >
@@ -133,6 +144,8 @@ const DetailledRepairReservation = ({ route }) => {
               {reservation.reparationType}
             </Text>
           </View>
+
+          {/* Détails supplémentaires */}
           <View
             style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
           >
@@ -143,6 +156,8 @@ const DetailledRepairReservation = ({ route }) => {
               </Text>
             </View>
           </View>
+
+          {/* Lieu de l'entretien */}
           <View
             style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
           >
@@ -151,6 +166,8 @@ const DetailledRepairReservation = ({ route }) => {
               {reservation.adress}
             </Text>
           </View>
+
+          {/* Garage responsable */}
           <View
             style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
           >
@@ -159,6 +176,8 @@ const DetailledRepairReservation = ({ route }) => {
               {reservation.location}
             </Text>
           </View>
+
+          {/* Numéro de téléphone */}
           <View
             style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
           >
@@ -168,6 +187,7 @@ const DetailledRepairReservation = ({ route }) => {
             </Text>
           </View>
 
+          {/* Détails sur la création de la réservation */}
           <View
             style={tw`mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
           >
@@ -184,12 +204,16 @@ const DetailledRepairReservation = ({ route }) => {
               })}
             </Text>
           </View>
+
+          {/* Affichage du montant total */}
           <View
             style={tw`flex-row mt-3 border border-gray-300 rounded-2xl p-2 bg-white`}
           >
             <Text style={tw`text-lg`}>Montant total :</Text>
             <Text style={tw`text-lg font-semibold`}> {reservation.price}</Text>
           </View>
+
+          {/* Bouton pour annuler la réservation */}
           <TouchableOpacity
             style={tw`bg-red-500 mt-8 p-2 rounded-lg shadow-xl`}
             onPress={handleCancelReservation}
